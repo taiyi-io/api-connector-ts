@@ -1,6 +1,7 @@
 /**
- * 适用于Nextjs的封装，利用cookie安全存储TaiyiConnector
- * 自动生成一致的设备id
+ * 适用于Nextjs的封装，安全存储TaiyiConnector
+ * 已内部封装localstorage和cookie，自动分配设备标识和多connector支持并保持一致，无需手动干预
+ * getNextConnector() 基于后端服务地址获取稳定的connector
  */
 import { TaiyiConnector } from "./connector";
 /**

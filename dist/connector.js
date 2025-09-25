@@ -96,12 +96,15 @@ class TaiyiConnector {
      * @param {string} receiver 接受者标识
      * @param {SetTokenHandler} setter 令牌更新回调
      * @param {GetTokenHandler} getter 令牌获取回调
+     * @param {StateChangeHandler} stateChange 状态变更回调
      */
     bindCallback(receiver, setter, getter, stateChange) {
         this._callbackReceiver = receiver;
         this._setTokens = setter;
         this._getTokens = getter;
-        this._stateChange = stateChange;
+        if (stateChange) {
+            this._stateChange = stateChange;
+        }
     }
     /**
      * 绑定认证过期事件

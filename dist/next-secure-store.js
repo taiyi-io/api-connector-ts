@@ -1,6 +1,9 @@
 "use strict";
 /**
- * 适配Nextjs的封装，使用cookie安全存储TaiyiConnector（**仅限服务端组件使用**）
+ * 适配Nextjs的封装，安全存储TaiyiConnector，防止CSRF攻击（**仅限服务端组件使用**）
+ * 内部使用localstorage和cookie存储数据，自动分配设备标识和多connector支持并保持一致，无需手动干预
+ * isStoreAuthenticated() 检查存储是否已认证，在middleware、route和服务端组件中使用
+ * getNextStore() 直接访问存储数据
  * 提供数据读写更新辅助方法
  */
 "use server";

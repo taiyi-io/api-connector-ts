@@ -71,8 +71,9 @@ export declare class TaiyiConnector {
      * @param {string} receiver 接受者标识
      * @param {SetTokenHandler} setter 令牌更新回调
      * @param {GetTokenHandler} getter 令牌获取回调
+     * @param {StateChangeHandler} stateChange 状态变更回调
      */
-    bindCallback(receiver: string, setter: SetTokenHandler, getter: GetTokenHandler, stateChange: StateChangeHandler): void;
+    bindCallback(receiver: string, setter: SetTokenHandler, getter: GetTokenHandler, stateChange?: StateChangeHandler): void;
     /**
      * 绑定认证过期事件
      * @param {AuthExpiredEvent} callback 认证过期事件回调

@@ -1,5 +1,5 @@
 {
-  "name": "api-connector-ts",
+  "name": "@taiyi-io/api-connector-ts",
   "version": "0.10.0",
   "description": "Typescript connector to Taiyi control API",
   "keywords": [
@@ -27,12 +27,12 @@
     "test": "vitest",
     "prepublishOnly": "yarn run build"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "packageManager": "yarn@4.10.3",
   "devDependencies": {
     "@types/node": "^24.5.2",
-    "dotenv": "^17.2.2",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19",
     "eslint": "^9.36.0",
-    "react": "^19.1.1",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   },
@@ -41,6 +41,9 @@
     "@paralleldrive/cuid2": "^2.2.2",
     "@sindresorhus/fnv1a": "^3.1.0",
     "copy-to-clipboard": "^3.3.3",
-    "next": "^15.5.4"
+    "dotenv": "^17.2.2",
+    "next": "^15.5.4",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   }
 }

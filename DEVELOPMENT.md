@@ -25,18 +25,22 @@ yarn test
 ## 发布
 
 ```
-yarn publish
+npm publish
 ```
 
 ## 文档编译
+
+编译文档
+
+```
+$ ./gendoc.sh
+```
 
 测试
 
 ```
 $ cd docs
 $ yarn dlx serve
-```
-
-```
-npx typedoc
+or
+$ yarn dlx serve -p 5001
 ```

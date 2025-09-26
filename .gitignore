@@ -5,6 +5,7 @@
 /.pnp
 .pnp.*
 .yarn/*
+.yarn
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
@@ -50,3 +51,4 @@ certificates
 
 # generated docs
 docs
+*.tar.gz

@@ -656,7 +656,7 @@ export interface ControlQueryGuestsParams {
 /**
  * 获取云主机详情请求参数
  * @interface
- * @property {string} id - 云主机ID
+ * @property id - 云主机ID
  */
 export interface ControlGetGuestParams {
     id: string;
@@ -664,7 +664,7 @@ export interface ControlGetGuestParams {
 /**
  * 获取文件请求参数
  * @interface
- * @property {string} id - 云主机ID
+ * @property id - 文件ID
  */
 export interface ControlGetFileParams {
     id: string;

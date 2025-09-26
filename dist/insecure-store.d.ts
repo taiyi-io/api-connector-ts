@@ -23,10 +23,23 @@ export declare const insecureGetTokens: GetTokenHandler;
  */
 export declare const clearInsecureTokens: (connectorID: string) => void;
 /**
- * 获取使用内存存储的TaiyiConnector实例
+ * 获取使用内存存储的TaiyiConnector实例，非安全存储，仅限测试
  * @param deviceID - 设备标识
  * @param backendHost - 后端主机名
  * @param backendPort - 后端端口号，默认值为5851
  * @returns Promise<TaiyiConnector>
+ * @example
+ * ...
+ * const deviceID = "test-device";
+ * const connector = await newInsecureConnector(
+ *     deviceID,
+ *     process.env.ACCESS_STRING!,
+ *  process.env.BACKEND_HOST!,
+ * Number(process.env.BACKEND_PORT)
+ * );
+ * //令牌校验
+ * await connector.authenticateByPassword(username, password);
+ * //获取云主机信息
+ * await connector.getGuest(guestID)
  */
 export declare function getInsecureConnector(deviceID: string, backendHost: string, backendPort?: number): Promise<TaiyiConnector>;

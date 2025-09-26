@@ -24,16 +24,45 @@ var AuthMethod;
 })(AuthMethod || (AuthMethod = {}));
 const API_VERSION = "v1";
 /**
- * 连接处理，提供了与Taiyi Control服务进行交互的方法，包括认证、发送命令、查询访问记录等。
- * 系统状态查询与初始化接口可以直接调用，其他接口需要先认证才能调用。
+ * 提供与Taiyi Control服务进行交互的方法，包括认证、发送命令、查询访问记录等,系统状态查询与初始化接口可以直接调用，其他接口需要先认证才能调用。
+ * 调用者需要实现 SetTokenHandler 和 GetTokenHandler，为 TaiyiConnector 提供令牌的存取能力。如果需要在校验信息失效时，进行特殊处理，可以通过可选的 bindAuthExpiredEvent 方法注册回调。
  * @class TaiyiConnector
+ * @example
+ * ...
+ * //构建 TaiyiConnector 实例
+ * const connector = new TaiyiConnector(backendHost, backendPort, deviceID);
+ * //绑定令牌存取回调
+ * connector.bindCallback(store.id, storeAllocatedTokens, retrieveAllocatedTokens, handleStoreStatusChanged);
+ * //可选：绑定校验过期回调
+ * connector.bindAuthExpiredEvent(handleAuthExpired);
+ * const authResult = await connector.authenticateByToken(token);
+ * if (authResult.unauthenticated) {
+ *   throw new Error("校验失败");
+ * } else if (authResult.error) {
+ *   //其他错误
+ *   throw new Error(authResult.error);
+ * }
+ * const tokens = authResult.data;
+ * console.log("令牌校验成功,当前用户 %s, 角色 %s", tokens.user, tokens.roles);
+ * //从第13个记录开始，查询10条记录
+ * const result = await connector.queryGuests(13, 10);
+ * if (result.error) {
+ *   throw new Error(result.error);
+ * }
+ * //PaginationResult
+ * const data = result.data;
+ * console.log(
+ *   "返回结果 %s, 总记录数 %d",
+ *   JSON.stringify(data.records),
+ *   data.total
+ * );
  */
 class TaiyiConnector {
     /**
      * 构造函数
-     * @param {string} backendHost 后端Control服务地址
-     * @param {number} backendPort 后端Control服务端口
-     * @param {string} device 设备标识
+     * @param backendHost - 后端Control服务地址
+     * @param backendPort - 后端Control服务端口，默认值为5851
+     * @param device - 设备标识
      */
     constructor(backendHost, backendPort = 5851, device) {
         this._authMethod = AuthMethod.Secret;
@@ -64,38 +93,38 @@ class TaiyiConnector {
     }
     /**
      * 获取连接标识
-     * @returns {string} 连接标识
+     * @returns 连接标识
      */
     get id() {
         return this._id;
     }
     /**
      * 获取认证状态
-     * @returns {boolean} 认证状态
+     * @returns 认证状态
      */
     get authenticated() {
         return this._authenticated;
     }
     /**
      * 获取用户标识
-     * @returns {string} 用户标识
+     * @returns 用户标识
      */
     get user() {
         return this._user;
     }
     /**
      * 获取用户角色
-     * @returns {UserRole[]} 用户角色
+     * @returns 用户角色
      */
     get roles() {
         return this._roles;
     }
     /**
      * 绑定令牌更新回调
-     * @param {string} receiver 接受者标识
-     * @param {SetTokenHandler} setter 令牌更新回调
-     * @param {GetTokenHandler} getter 令牌获取回调
-     * @param {StateChangeHandler} stateChange 状态变更回调
+     * @param receiver - 接受者标识
+     * @param setter - 令牌更新回调
+     * @param getter - 令牌获取回调
+     * @param stateChange - 状态变更回调
      */
     bindCallback(receiver, setter, getter, stateChange) {
         this._callbackReceiver = receiver;
@@ -107,24 +136,24 @@ class TaiyiConnector {
     }
     /**
      * 绑定认证过期事件
-     * @param {AuthExpiredEvent} callback 认证过期事件回调
+     * @param callback - 认证过期事件回调
      */
     bindAuthExpiredEvent(callback) {
         this._onAuthExpired = callback;
     }
     /**
      * 检查用户是否具有指定角色
-     * @param {UserRole} role 角色
-     * @returns {boolean} 是否具有角色
+     * @param role - 角色
+     * @returns 是否具有角色
      */
     hasRole(role) {
         return this._roles.includes(role);
     }
     /**
      * 密码认证
-     * @param {string} user 用户标识
-     * @param {string} password 密码
-     * @returns {Promise<BackendResult<AllocatedTokens>>} 已认证令牌
+     * @param user - 用户标识
+     * @param password - 密码
+     * @returns 已认证令牌
      */
     authenticateByPassword(user, password) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -160,8 +189,8 @@ class TaiyiConnector {
     }
     /**
      * 使用秘钥字符串校验
-     * @param {string} token 秘钥字符串
-     * @returns {Promise<BackendResult<AllocatedTokens>>} 已认证令牌
+     * @param token - 秘钥字符串
+     * @returns 已认证令牌
      */
     authenticateByToken(token) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -212,8 +241,8 @@ class TaiyiConnector {
     }
     /**
      * 令牌更新回调
-     * @param {AllocatedTokens} tokens 已分配令牌
-     * @returns {Promise<void>} 无返回值
+     * @param tokens - 已分配令牌
+     * @returns 无返回值
      */
     onTokenUpdated(tokens) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -224,7 +253,7 @@ class TaiyiConnector {
     }
     /**
      * 刷新令牌
-     * @returns {Promise<BackendResult>} 刷新结果
+     * @returns 刷新结果
      */
     refreshToken() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -265,8 +294,8 @@ class TaiyiConnector {
     }
     /**
      * 直接加载令牌，初始化校验状态
-     * @param {AllocatedTokens} tokens 令牌
-     * @returns {BackendResult} 加载结果
+     * @param tokens - 令牌
+     * @returns 加载结果
      */
     loadTokens(tokens) {
         const error = this.validateTokens(tokens);
@@ -352,8 +381,8 @@ class TaiyiConnector {
     }
     /**
      * 校验令牌
-     * @param {AllocatedTokens} tokens 分配到的领导
-     * @returns {string} 非空则为错误信息
+     * @param tokens - 分配到的令牌
+     * @returns 非空则为错误信息
      */
     validateTokens(tokens) {
         const now = Date.now();
@@ -393,8 +422,8 @@ class TaiyiConnector {
     }
     /**
      * 发送控制命令，获取响应内容
-     * @param {ControlCommandRequest} cmd 控制命令请求
-     * @returns {Promise<BackendResult<ControlCommandResponse>>} 控制命令响应
+     * @param cmd - 控制命令请求
+     * @returns 控制命令响应
      */
     requestCommandResponse(cmd) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -426,8 +455,8 @@ class TaiyiConnector {
     }
     /**
      * 重发指令
-     * @param {ControlCommandRequest} cmd 请求指令
-     * @returns {Promise<BackendResult<ControlCommandResponse>>} 请求响应
+     * @param cmd - 请求指令
+     * @returns 请求响应
      */
     resendCommand(cmd) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -451,7 +480,7 @@ class TaiyiConnector {
     }
     /**
      * 同步令牌。从存储中获取令牌，更新本地令牌
-     * @returns {Promise<boolean>} 是否令牌已更新
+     * @returns 是否令牌已更新
      */
     syncTokens() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -471,8 +500,8 @@ class TaiyiConnector {
     }
     /**
      * 发送控制命令
-     * @param {ControlCommandRequest} cmd 控制命令请求
-     * @returns {Promise<BackendResult>} 控制命令响应
+     * @param cmd - 控制命令请求
+     * @returns 控制命令响应
      */
     sendCommand(cmd) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -491,8 +520,8 @@ class TaiyiConnector {
     }
     /**
      * 启动任务，发送控制命令，返回任务ID
-     * @param {ControlCommandRequest} cmd 控制命令请求
-     * @returns {Promise<BackendResult<string>>} 任务ID
+     * @param cmd - 控制命令请求
+     * @returns 任务ID
      */
     startTask(cmd) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -514,10 +543,10 @@ class TaiyiConnector {
     }
     /**
      * 执行任务，发送控制命令，等待任务完成
-     * @param {ControlCommandRequest} cmd 控制命令请求
-     * @param {number} timeoutSeconds 超时时间（秒），默认5分钟
-     * @param {number} intervalSeconds 检查间隔（秒），默认1秒
-     * @returns {Promise<TaskData>} 任务数据
+     * @param cmd - 控制命令请求
+     * @param timeoutSeconds - 超时时间（秒），默认5分钟
+     * @param intervalSeconds - 检查间隔（秒），默认1秒
+     * @returns 任务数据
      */
     executeTask(cmd_1) {
         return __awaiter(this, arguments, void 0, function* (cmd, timeoutSeconds = 300, intervalSeconds = 1) {
@@ -532,8 +561,8 @@ class TaiyiConnector {
     }
     /**
      * 获取任务详情
-     * @param {string} taskID 任务ID
-     * @returns {Promise<BackendResult<TaskData>>} 任务数据
+     * @param taskID - 任务ID
+     * @returns 任务数据
      */
     getTask(taskID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -561,10 +590,10 @@ class TaiyiConnector {
     }
     /**
      * 等待任务完成
-     * @param taskID 任务ID
-     * @param timeoutSeconds 超时时间（秒）
-     * @param intervalSeconds 检查间隔（秒）
-     * @returns {Promise<BackendResult<TaskData>>} 任务数据
+     * @param taskID - 任务ID
+     * @param timeoutSeconds - 超时时间（秒）
+     * @param intervalSeconds - 检查间隔（秒）
+     * @returns 任务数据
      */
     waitTask(taskID_1) {
         return __awaiter(this, arguments, void 0, function* (taskID, timeoutSeconds = 300, intervalSeconds = 1) {
@@ -594,7 +623,7 @@ class TaiyiConnector {
     }
     /**
      * 获取系统状态
-     * @returns {Promise<BackendResult<SystemStatus>>} 系统状态
+     * @returns 系统状态
      */
     getSystemStatus() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -618,8 +647,9 @@ class TaiyiConnector {
     }
     /**
      * 初始化系统
-     * @param {string} user 用户标识
-     * @param {string} password 密码
+     * @param user - 用户标识
+     * @param password - 密码
+     * @returns 初始化结果
      */
     initializeSystem(user, password) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -634,10 +664,10 @@ class TaiyiConnector {
     }
     /**
      * 生成用户令牌
-     * @param {string} user 用户标识
-     * @param {string} description 描述
-     * @param {number} expireInMonths 过期时间（月）
-     * @returns {Promise<BackendResult<string>>} 用户令牌
+     * @param user - 用户标识
+     * @param description - 描述
+     * @param expireInMonths - 过期时间（月）
+     * @returns 用户令牌
      */
     generateUserToken(user, description, expireInMonths) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -672,10 +702,10 @@ class TaiyiConnector {
     // 以下为对外功能接口
     /**
      * 尝试创建云主机，成功返回任务ID
-     * @param {string} poolID 计算资源池
-     * @param {string} system 目标系统
-     * @param {GuestConfig} config 云主机配置
-     * @returns {Promise<BackendResult<string>>} 任务id
+     * @param poolID - 计算资源池
+     * @param system - 目标系统
+     * @param config - 云主机配置
+     * @returns 任务id
      */
     tryCreateGuest(poolID, system, config) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -701,11 +731,11 @@ class TaiyiConnector {
     }
     /**
      * 创建云主机，成功返回云主机ID
-     * @param {string} poolID 计算资源池
-     * @param {string}system 目标系统
-     * @param {GuestConfig} config 云主机配置
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult<string>>} 云主机ID
+     * @param poolID - 计算资源池
+     * @param system - 目标系统
+     * @param config - 云主机配置
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 云主机ID
      */
     createGuest(poolID_1, system_1, config_1) {
         return __awaiter(this, arguments, void 0, function* (poolID, system, config, timeoutSeconds = 300) {
@@ -731,8 +761,8 @@ class TaiyiConnector {
     }
     /**
      * 尝试删除云主机，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @returns {Promise<BackendResult<string>>} 任务id
+     * @param guestID - 云主机ID
+     * @returns 任务id
      */
     tryDeleteGuest(guestID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -760,9 +790,9 @@ class TaiyiConnector {
     }
     /**
      * 删除云主机
-     * @param {string} guestID 云主机ID
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 删除结果
+     * @param guestID - 云主机ID
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 删除结果
      */
     deleteGuest(guestID_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, timeoutSeconds = 300) {
@@ -783,8 +813,8 @@ class TaiyiConnector {
     }
     /**
      * 获取云主机详情
-     * @param {string} guestID 云主机ID
-     * @returns {Promise<BackendResult<GuestView>>} 云主机详情
+     * @param guestID - 云主机ID
+     * @returns 云主机详情
      */
     getGuest(guestID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -807,9 +837,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试启动云主机，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {string} [media] ISO镜像ID（可选）
-     * @returns {Promise<BackendResult<string>>} 任务id
+     * @param guestID - 云主机ID
+     * @param media - ISO镜像ID（可选）
+     * @returns 任务id
      */
     tryStartGuest(guestID, media) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -833,10 +863,10 @@ class TaiyiConnector {
     }
     /**
      * 启动云主机
-     * @param {string} guestID 云主机ID
-     * @param {string?} media ISO镜像ID（可选）
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 启动结果
+     * @param guestID - 云主机ID
+     * @param media - ISO镜像ID（可选）
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 启动结果
      */
     startGuest(guestID_1, media_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, media, timeoutSeconds = 300) {
@@ -857,10 +887,10 @@ class TaiyiConnector {
     }
     /**
      * 尝试停止云主机，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {boolean} reboot 是否重启云主机
-     * @param {boolean} force 是否强制执行
-     * @returns {Promise<BackendResult<string>>} 任务id
+     * @param guestID - 云主机ID
+     * @param reboot - 是否重启云主机
+     * @param force - 是否强制执行
+     * @returns 任务id
      */
     tryStopGuest(guestID, reboot, force) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -890,11 +920,11 @@ class TaiyiConnector {
     }
     /**
      * 停止云主机
-     * @param {string} guestID 云主机ID
-     * @param {boolean} reboot 是否重启云主机
-     * @param {boolean} force 是否强制执行
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 停止结果
+     * @param guestID - 云主机ID
+     * @param reboot - 是否重启云主机
+     * @param force - 是否强制执行
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 停止结果
      */
     stopGuest(guestID_1, reboot_1, force_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, reboot, force, timeoutSeconds = 300) {
@@ -915,9 +945,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试添加卷，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {VolumeSpec} volume 磁盘卷配置
-     * @returns {Promise<BackendResult<string>>} 任务id
+     * @param guestID - 云主机ID
+     * @param volume - 磁盘卷配置
+     * @returns 任务id
      */
     tryAddVolume(guestID, volume) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -946,10 +976,10 @@ class TaiyiConnector {
     }
     /**
      * 添加卷
-     * @param {string} guestID 云主机ID
-     * @param {VolumeSpec} volume 磁盘卷配置
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 添加结果
+     * @param guestID - 云主机ID
+     * @param volume - 磁盘卷配置
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 添加结果
      */
     addVolume(guestID_1, volume_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, volume, timeoutSeconds = 300) {
@@ -970,9 +1000,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试删除卷，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {string} tag 卷标签
-     * @returns {Promise<BackendResult<string>>} 任务id
+     * @param guestID - 云主机ID
+     * @param tag - 卷标签
+     * @returns 任务id
      */
     tryDeleteVolume(guestID, tag) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1001,10 +1031,10 @@ class TaiyiConnector {
     }
     /**
      * 删除卷
-     * @param {string} guestID 云主机ID
-     * @param {string} tag 卷标签
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 删除结果
+     * @param guestID - 云主机ID
+     * @param tag - 卷标签
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 删除结果
      */
     deleteVolume(guestID_1, tag_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, tag, timeoutSeconds = 300) {
@@ -1025,9 +1055,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试修改云主机CPU，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {number} cores CPU核心数
-     * @returns {Promise<BackendResult<string>>} 任务id
+     * @param guestID - 云主机ID
+     * @param cores - CPU核心数
+     * @returns 任务id
      */
     tryModifyGuestCPU(guestID, cores) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1056,10 +1086,10 @@ class TaiyiConnector {
     }
     /**
      * 修改云主机CPU
-     * @param {string} guestID 云主机ID
-     * @param {number} cores CPU核心数
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 修改结果
+     * @param guestID - 云主机ID
+     * @param cores - CPU核心数
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 修改结果
      */
     modifyGuestCPU(guestID_1, cores_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, cores, timeoutSeconds = 300) {
@@ -1080,10 +1110,10 @@ class TaiyiConnector {
     }
     /**
      * 查询云主机
-     * @param start 起始位置
-     * @param limit 限制数量
-     * @param filter 过滤条件
-     * @returns {Promise<BackendResult<PaginationResult<GuestView>>>} 云主机列表
+     * @param start - 起始位置
+     * @param limit - 限制数量
+     * @param filter - 过滤条件
+     * @returns 云主机列表
      */
     queryGuests(start, limit, filter) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1116,9 +1146,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试修改云主机内存，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {number} memoryMB 内存大小(MB)
-     * @returns {Promise<BackendResult<string>>} 任务id
+     * @param guestID - 云主机ID
+     * @param memoryMB - 内存大小(MB)
+     * @returns 任务id
      */
     tryModifyGuestMemory(guestID, memoryMB) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1147,10 +1177,10 @@ class TaiyiConnector {
     }
     /**
      * 修改云主机内存
-     * @param {string} guestID 云主机ID
-     * @param {number} memoryMB 内存大小(MB)
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 修改结果
+     * @param guestID - 云主机ID
+     * @param memoryMB - 内存大小(MB)
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 修改结果
      */
     modifyGuestMemory(guestID_1, memoryMB_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, memoryMB, timeoutSeconds = 300) {
@@ -1171,9 +1201,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试修改云主机主机名，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {string} hostname 主机名
-     * @returns {Promise<BackendResult<string>>} 包含任务id的结果
+     * @param guestID - 云主机ID
+     * @param hostname - 主机名
+     * @returns 包含任务id的结果
      */
     tryModifyGuestHostname(guestID, hostname) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1202,10 +1232,10 @@ class TaiyiConnector {
     }
     /**
      * 修改云主机主机名
-     * @param {string} guestID 云主机ID
-     * @param {string} hostname 主机名
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 修改结果
+     * @param guestID - 云主机ID
+     * @param hostname - 主机名
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 修改结果
      */
     modifyGuestHostname(guestID_1, hostname_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, hostname, timeoutSeconds = 300) {
@@ -1226,10 +1256,10 @@ class TaiyiConnector {
     }
     /**
      * 尝试修改密码，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {string} user 用户名
-     * @param {string} password 新密码
-     * @returns {Promise<BackendResult<string>>} 包含任务id的结果
+     * @param guestID - 云主机ID
+     * @param user - 用户名
+     * @param password - 新密码
+     * @returns 包含任务id的结果
      */
     tryModifyPassword(guestID, user, password) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1259,11 +1289,11 @@ class TaiyiConnector {
     }
     /**
      * 修改密码
-     * @param {string} guestID 云主机ID
-     * @param {string} user 用户名
-     * @param {string} password 新密码
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 修改结果
+     * @param guestID - 云主机ID
+     * @param user - 用户名
+     * @param password - 新密码
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 修改结果
      */
     modifyPassword(guestID_1, user_1, password_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, user, password, timeoutSeconds = 300) {
@@ -1284,9 +1314,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试修改自动启动，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {boolean} enable 是否启用自动启动
-     * @returns {Promise<BackendResult<string>>} 包含任务id的结果
+     * @param guestID - 云主机ID
+     * @param enable - 是否启用自动启动
+     * @returns 包含任务id的结果
      */
     tryModifyAutoStart(guestID, enable) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1315,10 +1345,10 @@ class TaiyiConnector {
     }
     /**
      * 修改自动启动
-     * @param {string} guestID 云主机ID
-     * @param {boolean} enable 是否启用自动启动
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 修改结果
+     * @param guestID - 云主机ID
+     * @param enable - 是否启用自动启动
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 修改结果
      */
     modifyAutoStart(guestID_1, enable_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, enable, timeoutSeconds = 300) {
@@ -1339,9 +1369,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试添加外部接口，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {string} macAddress MAC地址
-     * @returns {Promise<BackendResult<string>>} 包含任务id的结果
+     * @param guestID - 云主机ID
+     * @param macAddress - MAC地址
+     * @returns 包含任务id的结果
      */
     tryAddExternalInterface(guestID, macAddress) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1370,10 +1400,10 @@ class TaiyiConnector {
     }
     /**
      * 添加外部接口
-     * @param {string} guestID 云主机ID
-     * @param {string} macAddress MAC地址
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 添加结果
+     * @param guestID - 云主机ID
+     * @param macAddress - MAC地址
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 添加结果
      */
     addExternalInterface(guestID_1, macAddress_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, macAddress, timeoutSeconds = 300) {
@@ -1394,9 +1424,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试移除外部接口，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {string} macAddress MAC地址
-     * @returns {Promise<BackendResult<string>>} 包含任务id的结果
+     * @param guestID - 云主机ID
+     * @param macAddress - MAC地址
+     * @returns 包含任务id的结果
      */
     tryRemoveExternalInterface(guestID, macAddress) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1425,10 +1455,10 @@ class TaiyiConnector {
     }
     /**
      * 移除外部接口
-     * @param {string} guestID 云主机ID
-     * @param {string} macAddress MAC地址
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 移除结果
+     * @param guestID - 云主机ID
+     * @param macAddress - MAC地址
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 移除结果
      */
     removeExternalInterface(guestID_1, macAddress_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, macAddress, timeoutSeconds = 300) {
@@ -1449,9 +1479,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试添加内部接口，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {string} macAddress MAC地址
-     * @returns {Promise<BackendResult<string>>} 包含任务id的结果
+     * @param guestID - 云主机ID
+     * @param macAddress - MAC地址
+     * @returns 包含任务id的结果
      */
     tryAddInternalInterface(guestID, macAddress) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1480,10 +1510,10 @@ class TaiyiConnector {
     }
     /**
      * 添加内部接口
-     * @param {string} guestID 云主机ID
-     * @param {string} macAddress MAC地址
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 添加结果
+     * @param guestID - 云主机ID
+     * @param macAddress - MAC地址
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 添加结果
      */
     addInternalInterface(guestID_1, macAddress_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, macAddress, timeoutSeconds = 300) {
@@ -1504,9 +1534,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试移除内部接口，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {string} macAddress MAC地址
-     * @returns {Promise<BackendResult<string>>} 包含任务id的结果
+     * @param guestID - 云主机ID
+     * @param macAddress - MAC地址
+     * @returns 包含任务id的结果
      */
     tryRemoveInternalInterface(guestID, macAddress) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1535,10 +1565,10 @@ class TaiyiConnector {
     }
     /**
      * 移除内部接口
-     * @param {string} guestID 云主机ID
-     * @param {string} macAddress MAC地址
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 移除结果
+     * @param guestID - 云主机ID
+     * @param macAddress - MAC地址
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 移除结果
      */
     removeInternalInterface(guestID_1, macAddress_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, macAddress, timeoutSeconds = 300) {
@@ -1559,8 +1589,8 @@ class TaiyiConnector {
     }
     /**
      * 尝试重置监控，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @returns {Promise<BackendResult<string>>} 包含任务id的结果
+     * @param guestID - 云主机ID
+     * @returns 包含任务id的结果
      */
     tryResetMonitor(guestID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1588,9 +1618,9 @@ class TaiyiConnector {
     }
     /**
      * 重置监控
-     * @param {string} guestID 云主机ID
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 重置结果
+     * @param guestID - 云主机ID
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 重置结果
      */
     resetMonitor(guestID_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, timeoutSeconds = 300) {
@@ -1611,9 +1641,9 @@ class TaiyiConnector {
     }
     /**
      * 查询任务
-     * @param {number} offset 偏移量
-     * @param {number} pageSize 每页大小
-     * @returns {Promise<BackendResult<PaginationResult<TaskData>>>} 包含任务分页结果的结果
+     * @param offset - 偏移量
+     * @param pageSize - 每页大小
+     * @returns 包含任务分页结果的结果
      */
     queryTasks(offset, pageSize) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1645,8 +1675,8 @@ class TaiyiConnector {
     }
     /**
      * 添加节点
-     * @param {ClusterNode} config 节点配置
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param config - 节点配置
+     * @returns 操作结果
      */
     addNode(config) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1659,8 +1689,8 @@ class TaiyiConnector {
     }
     /**
      * 移除节点
-     * @param {string} nodeID 节点ID
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param nodeID - 节点ID
+     * @returns 操作结果
      */
     removeNode(nodeID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1673,7 +1703,7 @@ class TaiyiConnector {
     }
     /**
      * 查询节点列表
-     * @returns {Promise<BackendResult<ClusterNodeData[]>>} 节点数据列表
+     * @returns 节点数据列表
      */
     queryNodes() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1692,8 +1722,8 @@ class TaiyiConnector {
     }
     /**
      * 获取节点详情
-     * @param {string} nodeID 节点ID
-     * @returns {Promise<BackendResult<ClusterNodeData>>} 节点数据
+     * @param nodeID - 节点ID
+     * @returns 节点数据
      */
     getNode(nodeID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1713,8 +1743,8 @@ class TaiyiConnector {
     }
     /**
      * 启用节点
-     * @param {string} nodeID 节点ID
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param nodeID - 节点ID
+     * @returns 操作结果
      */
     enableNode(nodeID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1727,8 +1757,8 @@ class TaiyiConnector {
     }
     /**
      * 禁用节点
-     * @param {string} nodeID 节点ID
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param nodeID - 节点ID
+     * @returns 操作结果
      */
     disableNode(nodeID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1741,7 +1771,7 @@ class TaiyiConnector {
     }
     /**
      * 查询计算资源池
-     * @returns {Promise<BackendResult<ComputePoolStatus[]>>} 计算资源池状态列表
+     * @returns 计算资源池状态列表
      */
     queryComputePools() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1760,8 +1790,8 @@ class TaiyiConnector {
     }
     /**
      * 获取计算资源池详情
-     * @param {string} poolID 资源池ID
-     * @returns {Promise<BackendResult<ComputePoolStatus>>} 计算资源池状态
+     * @param poolID - 资源池ID
+     * @returns 计算资源池状态
      */
     getComputePool(poolID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1781,8 +1811,8 @@ class TaiyiConnector {
     }
     /**
      * 添加计算资源池
-     * @param {ComputePoolConfig} config 计算资源池配置
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param config - 计算资源池配置
+     * @returns 操作结果
      */
     addComputePool(config) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1795,8 +1825,8 @@ class TaiyiConnector {
     }
     /**
      * 修改计算资源池
-     * @param {ComputePoolConfig} config 计算资源池配置
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param config - 计算资源池配置
+     * @returns 操作结果
      */
     modifyComputePool(config) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1809,8 +1839,8 @@ class TaiyiConnector {
     }
     /**
      * 删除计算资源池
-     * @param {string} poolID 资源池ID
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param poolID - 资源池ID
+     * @returns 操作结果
      */
     deleteComputePool(poolID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1823,9 +1853,9 @@ class TaiyiConnector {
     }
     /**
      * 添加计算节点到资源池
-     * @param {string} poolID 资源池ID
-     * @param {string} nodeID 节点ID
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param poolID - 资源池ID
+     * @param nodeID - 节点ID
+     * @returns 操作结果
      */
     addComputeNode(poolID, nodeID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1838,9 +1868,9 @@ class TaiyiConnector {
     }
     /**
      * 从资源池移除计算节点
-     * @param {string} poolID 资源池ID
-     * @param {string} nodeID 节点ID
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param poolID - 资源池ID
+     * @param nodeID - 节点ID
+     * @returns 操作结果
      */
     removeComputeNode(poolID, nodeID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1853,9 +1883,9 @@ class TaiyiConnector {
     }
     /**
      * 修改计算资源池策略
-     * @param {string} poolID 资源池ID
-     * @param {ComputePoolStrategy} strategy 资源池策略
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param poolID - 资源池ID
+     * @param strategy - 资源池策略
+     * @returns 操作结果
      */
     changeComputePoolStrategy(poolID, strategy) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1872,7 +1902,7 @@ class TaiyiConnector {
     // Storage Pool Management Methods
     /**
      * 查询存储池列表
-     * @returns {Promise<BackendResult<StoragePoolListRecord[]>>} 存储池列表
+     * @returns 存储池列表
      */
     queryStoragePools() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1891,8 +1921,8 @@ class TaiyiConnector {
     }
     /**
      * 获取存储池详情
-     * @param {string} poolID 存储池ID
-     * @returns {Promise<BackendResult<StoragePool>>} 存储池详情
+     * @param poolID - 存储池ID
+     * @returns 存储池详情
      */
     getStoragePool(poolID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1912,8 +1942,8 @@ class TaiyiConnector {
     }
     /**
      * 添加存储池
-     * @param {StoragePoolConfig} config 存储池配置
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param config - 存储池配置
+     * @returns 操作结果
      */
     addStoragePool(config) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1926,8 +1956,8 @@ class TaiyiConnector {
     }
     /**
      * 删除存储池
-     * @param {string} poolID 存储池ID
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param poolID - 存储池ID
+     * @returns 操作结果
      */
     removeStoragePool(poolID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1940,9 +1970,9 @@ class TaiyiConnector {
     }
     /**
      * 修改远程存储策略
-     * @param {string} poolID 存储池ID
-     * @param {VolumeContainerStrategy} strategy 存储策略
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param poolID - 存储池ID
+     * @param strategy - 存储策略
+     * @returns 操作结果
      */
     modifyRemoteStorageStrategy(poolID, strategy) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1958,10 +1988,10 @@ class TaiyiConnector {
     }
     /**
      * 改变远程容器标志
-     * @param {string} poolID 存储池ID
-     * @param {number} index 容器索引
-     * @param {boolean} enabled 是否启用
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param poolID - 存储池ID
+     * @param index - 容器索引
+     * @param enabled - 是否启用
+     * @returns 操作结果
      */
     changeRemoteContainerFlag(poolID, index, enabled) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1978,9 +2008,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试添加远程容器，成功返回任务ID
-     * @param {string} poolID 存储池ID
-     * @param {VolumeContainer} container 容器配置
-     * @returns {Promise<BackendResult<string>>} 任务ID
+     * @param poolID - 存储池ID
+     * @param container - 容器配置
+     * @returns 任务ID
      */
     tryAddRemoteContainer(poolID, container) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2003,10 +2033,10 @@ class TaiyiConnector {
     }
     /**
      * 添加远程容器
-     * @param {string} poolID 存储池ID
-     * @param {VolumeContainer} container 容器配置
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param poolID - 存储池ID
+     * @param container - 容器配置
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 操作结果
      */
     addRemoteContainer(poolID_1, container_1) {
         return __awaiter(this, arguments, void 0, function* (poolID, container, timeoutSeconds = 300) {
@@ -2023,10 +2053,10 @@ class TaiyiConnector {
     }
     /**
      * 尝试修改远程容器，成功返回任务ID
-     * @param {string} poolID 存储池ID
-     * @param {number} index 容器索引
-     * @param {VolumeContainer} container 容器配置
-     * @returns {Promise<BackendResult<string>>} 任务ID
+     * @param poolID - 存储池ID
+     * @param index - 容器索引
+     * @param container - 容器配置
+     * @returns 任务ID
      */
     tryModifyRemoteContainer(poolID, index, container) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2050,11 +2080,11 @@ class TaiyiConnector {
     }
     /**
      * 修改远程容器
-     * @param {string} poolID 存储池ID
-     * @param {number} index 容器索引
-     * @param {VolumeContainer} container 容器配置
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param poolID - 存储池ID
+     * @param index - 容器索引
+     * @param container - 容器配置
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 操作结果
      */
     modifyRemoteContainer(poolID_1, index_1, container_1) {
         return __awaiter(this, arguments, void 0, function* (poolID, index, container, timeoutSeconds = 300) {
@@ -2071,9 +2101,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试删除远程容器，成功返回任务ID
-     * @param {string} poolID 存储池ID
-     * @param {number} index 容器索引
-     * @returns {Promise<BackendResult<string>>} 任务ID
+     * @param poolID - 存储池ID
+     * @param index - 容器索引
+     * @returns 任务ID
      */
     tryRemoveRemoteContainer(poolID, index) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2096,10 +2126,10 @@ class TaiyiConnector {
     }
     /**
      * 删除远程容器
-     * @param {string} poolID 存储池ID
-     * @param {number} index 容器索引
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param poolID - 存储池ID
+     * @param index - 容器索引
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 操作结果
      */
     removeRemoteContainer(poolID_1, index_1) {
         return __awaiter(this, arguments, void 0, function* (poolID, index, timeoutSeconds = 300) {
@@ -2117,9 +2147,9 @@ class TaiyiConnector {
     // Address Pool Management Methods
     /**
      * 查询地址池列表
-     * @param {number} offset 起始位置
-     * @param {number} limit 限制数量
-     * @returns {Promise<BackendResult<PaginationResult<AddressPoolRecord>>>} 地址池列表
+     * @param offset - 起始位置
+     * @param limit - 限制数量
+     * @returns 地址池列表
      * @deprecated 地址池相关接口全部会重新设计
      */
     queryAddressPools(offset, limit) {
@@ -2150,8 +2180,8 @@ class TaiyiConnector {
     }
     /**
      * 获取地址池详情
-     * @param {string} poolID 地址池ID
-     * @returns {Promise<BackendResult<AddressPool>>} 地址池详情
+     * @param poolID - 地址池ID
+     * @returns 地址池详情
      * @deprecated 地址池相关接口全部会重新设计
      */
     getAddressPool(poolID) {
@@ -2172,11 +2202,11 @@ class TaiyiConnector {
     }
     /**
      * 添加地址池
-     * @param {string} id 地址池ID
-     * @param {InterfaceMode} mode 接口模式
-     * @param {boolean} isV6 是否为IPv6
-     * @param {string} [description] 描述
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param id - 地址池ID
+     * @param mode - 接口模式
+     * @param isV6 - 是否为IPv6
+     * @param description - 描述
+     * @returns 操作结果
      * @deprecated 地址池相关接口全部会重新设计
      */
     addAddressPool(id, mode, isV6, description) {
@@ -2195,10 +2225,10 @@ class TaiyiConnector {
     }
     /**
      * 修改地址池
-     * @param {string} id 地址池ID
-     * @param {InterfaceMode} mode 接口模式
-     * @param {string} [description] 描述
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param id - 地址池ID
+     * @param mode - 接口模式
+     * @param description - 描述
+     * @returns 操作结果
      * @deprecated 地址池相关接口全部会重新设计
      */
     modifyAddressPool(id, mode, description) {
@@ -2216,8 +2246,8 @@ class TaiyiConnector {
     }
     /**
      * 删除地址池
-     * @param {string} poolID 地址池ID
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param poolID - 地址池ID
+     * @returns 操作结果
      * @deprecated 地址池相关接口全部会重新设计
      */
     removeAddressPool(poolID) {
@@ -2231,10 +2261,10 @@ class TaiyiConnector {
     }
     /**
      * 添加外部地址范围
-     * @param {string} poolID 地址池ID
-     * @param {string} beginAddress 起始地址
-     * @param {string} endAddress 结束地址
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param poolID - 地址池ID
+     * @param beginAddress - 起始地址
+     * @param endAddress - 结束地址
+     * @returns 操作结果
      * @deprecated 地址池相关接口全部会重新设计
      */
     addExternalAddressRange(poolID, beginAddress, endAddress) {
@@ -2252,10 +2282,10 @@ class TaiyiConnector {
     }
     /**
      * 添加内部地址范围
-     * @param {string} poolID 地址池ID
-     * @param {string} beginAddress 起始地址
-     * @param {string} endAddress 结束地址
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param poolID - 地址池ID
+     * @param beginAddress - 起始地址
+     * @param endAddress - 结束地址
+     * @returns 操作结果
      * @deprecated 地址池相关接口全部会重新设计
      */
     addInternalAddressRange(poolID, beginAddress, endAddress) {
@@ -2273,10 +2303,10 @@ class TaiyiConnector {
     }
     /**
      * 删除外部地址范围
-     * @param {string} poolID 地址池ID
-     * @param {string} beginAddress 起始地址
-     * @param {string} endAddress 结束地址
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param poolID - 地址池ID
+     * @param beginAddress - 起始地址
+     * @param endAddress - 结束地址
+     * @returns 操作结果
      * @deprecated 地址池相关接口全部会重新设计
      */
     removeExternalAddressRange(poolID, beginAddress, endAddress) {
@@ -2294,10 +2324,10 @@ class TaiyiConnector {
     }
     /**
      * 删除内部地址范围
-     * @param {string} poolID 地址池ID
-     * @param {string} beginAddress 起始地址
-     * @param {string} endAddress 结束地址
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param poolID - 地址池ID
+     * @param beginAddress - 起始地址
+     * @param endAddress - 结束地址
+     * @returns 操作结果
      * @deprecated 地址池相关接口全部会重新设计
      */
     removeInternalAddressRange(poolID, beginAddress, endAddress) {
@@ -2316,9 +2346,9 @@ class TaiyiConnector {
     // ISO File Management Methods
     /**
      * 创建ISO文件
-     * @param {FileSpec} spec 文件规格
-     * @param {ResourceAccessLevel} access_level 资源访问级别
-     * @returns {Promise<BackendResult<string>>} 文件ID
+     * @param spec - 文件规格
+     * @param access_level - 资源访问级别
+     * @returns 文件ID
      */
     createISOFile(spec, access_level) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2341,8 +2371,8 @@ class TaiyiConnector {
     }
     /**
      * 删除ISO文件
-     * @param {string} fileID 文件ID
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param fileID - 文件ID
+     * @returns 操作结果
      */
     deleteISOFile(fileID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2355,9 +2385,9 @@ class TaiyiConnector {
     }
     /**
      * 修改ISO文件
-     * @param {string} fileID 文件ID
-     * @param {FileSpec} spec 文件规格
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param fileID - 文件ID
+     * @param spec - 文件规格
+     * @returns 操作结果
      */
     modifyISOFile(fileID, spec) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2373,8 +2403,8 @@ class TaiyiConnector {
     }
     /**
      * 获取ISO文件详情
-     * @param {string} fileID 文件ID
-     * @returns {Promise<BackendResult<FileStatus>>} 文件状态
+     * @param fileID - 文件ID
+     * @returns 文件状态
      */
     getISOFile(fileID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2394,10 +2424,10 @@ class TaiyiConnector {
     }
     /**
      * 查询ISO文件列表
-     * @param {number} offset 起始位置
-     * @param {number} limit 限制数量
-     * @param {boolean} onlySelf 是否只查询当前用户的ISO文件
-     * @returns {Promise<BackendResult<PaginationResult<FileView>>>} ISO文件列表
+     * @param offset - 起始位置
+     * @param limit - 限制数量
+     * @param onlySelf - 是否只查询当前用户的ISO文件
+     * @returns ISO文件列表
      */
     queryISOFiles(offset_1, limit_1) {
         return __awaiter(this, arguments, void 0, function* (offset, limit, onlySelf = false) {
@@ -2427,9 +2457,9 @@ class TaiyiConnector {
     // Disk File Management Methods
     /**
      * 创建磁盘文件
-     * @param {FileSpec} spec 文件规格
-     * @param {ResourceAccessLevel} access_level 资源访问级别
-     * @returns {Promise<BackendResult<string>>} 文件ID
+     * @param spec - 文件规格
+     * @param access_level - 资源访问级别
+     * @returns 文件ID
      */
     createDiskFile(spec, access_level) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2452,8 +2482,8 @@ class TaiyiConnector {
     }
     /**
      * 删除磁盘文件
-     * @param {string} fileID 文件ID
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param fileID - 文件ID
+     * @returns 操作结果
      */
     deleteDiskFile(fileID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2466,9 +2496,9 @@ class TaiyiConnector {
     }
     /**
      * 修改磁盘文件
-     * @param {string} fileID 文件ID
-     * @param {FileSpec} spec 文件规格
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param fileID - 文件ID
+     * @param spec - 文件规格
+     * @returns 操作结果
      */
     modifyDiskFile(fileID, spec) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2484,8 +2514,8 @@ class TaiyiConnector {
     }
     /**
      * 获取磁盘文件详情
-     * @param {string} fileID 文件ID
-     * @returns {Promise<BackendResult<FileStatus>>} 文件状态
+     * @param fileID - 文件ID
+     * @returns 文件状态
      */
     getDiskFile(fileID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2505,10 +2535,10 @@ class TaiyiConnector {
     }
     /**
      * 查询磁盘文件列表
-     * @param {number} offset 起始位置
-     * @param {number} limit 限制数量
-     * @param {boolean} onlySelf 是否只查询当前用户的磁盘文件
-     * @returns {Promise<BackendResult<PaginationResult<FileView>>>} 磁盘文件列表
+     * @param offset - 起始位置
+     * @param limit - 限制数量
+     * @param onlySelf - 是否只查询当前用户的磁盘文件
+     * @returns 磁盘文件列表
      */
     queryDiskFiles(offset_1, limit_1) {
         return __awaiter(this, arguments, void 0, function* (offset, limit, onlySelf = false) {
@@ -2537,24 +2567,24 @@ class TaiyiConnector {
     }
     /**
      * 获取ISO文件URL
-     * @param {string} fileID 文件ID
-     * @returns {string} 文件URL
+     * @param fileID - 文件ID
+     * @returns 文件URL
      */
     getISOFileURL(fileID) {
         return `${this._backendURL}files/isos/${fileID}`;
     }
     /**
      * 获取磁盘文件URL
-     * @param {string} fileID 文件ID
-     * @returns {string} 文件URL
+     * @param fileID - 文件ID
+     * @returns 文件URL
      */
     getDiskFileURL(fileID) {
         return `${this._backendURL}files/disks/${fileID}`;
     }
     /**
      * 打开监控通道
-     * @param {string} guestID 云主机ID
-     * @returns {Promise<BackendResult<MonitorResponse>>} 监控响应
+     * @param guestID - 云主机ID
+     * @returns 监控响应，用于打开监控通道
      */
     openMonitorChannel(guestID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2570,9 +2600,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试插入介质，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {string} mediaId 介质ID
-     * @returns {Promise<BackendResult<string>>} 任务ID
+     * @param guestID - 云主机ID
+     * @param mediaId - 光盘ISO文件ID
+     * @returns 任务ID
      */
     tryInsertMedia(guestID, mediaId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2595,10 +2625,10 @@ class TaiyiConnector {
     }
     /**
      * 插入介质
-     * @param {string} guestID 云主机ID
-     * @param {string} mediaId 介质ID
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 操作结果
+     * @param guestID - 云主机ID
+     * @param mediaId - 光盘ISO文件ID
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 操作结果
      */
     insertMedia(guestID_1, mediaId_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, mediaId, timeoutSeconds = 300) {
@@ -2615,8 +2645,8 @@ class TaiyiConnector {
     }
     /**
      * 尝试弹出介质，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @returns {Promise<BackendResult<string>>} 任务ID
+     * @param guestID - 云主机ID
+     * @returns 任务ID
      */
     tryEjectMedia(guestID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2638,9 +2668,9 @@ class TaiyiConnector {
     }
     /**
      * 弹出介质
-     * @param {string} guestID 云主机ID
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 无返回值
+     * @param guestID - 云主机ID
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 操作结果
      */
     ejectMedia(guestID_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, timeoutSeconds = 300) {
@@ -2657,10 +2687,10 @@ class TaiyiConnector {
     }
     /**
      * 尝试调整磁盘大小，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {string} volumeTag 卷标签
-     * @param {number} sizeInMB 大小（MB）
-     * @returns {Promise<BackendResult<string>>} 任务ID
+     * @param guestID - 云主机ID
+     * @param volumeTag - 卷标签
+     * @param sizeInMB - 大小（MB）
+     * @returns 任务ID
      */
     tryResizeDisk(guestID, volumeTag, sizeInMB) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2684,9 +2714,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试收缩磁盘，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {string} volumeTag 卷标签
-     * @returns {Promise<BackendResult<string>>} 任务ID
+     * @param guestID - 云主机ID
+     * @param volumeTag - 卷标签
+     * @returns 任务ID
      */
     tryShrinkDisk(guestID, volumeTag) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2709,10 +2739,10 @@ class TaiyiConnector {
     }
     /**
      * 尝试安装磁盘镜像，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {string} volumeTag 卷标签
-     * @param {string} fileID 文件ID
-     * @returns {Promise<BackendResult<string>>} 任务ID
+     * @param guestID - 云主机ID
+     * @param volumeTag - 卷标签
+     * @param fileID - 文件ID
+     * @returns 任务ID
      */
     tryInstallDiskImage(guestID, volumeTag, fileID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2736,11 +2766,11 @@ class TaiyiConnector {
     }
     /**
      * 尝试创建磁盘镜像，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {string} volumeTag 卷标签
-     * @param {FileSpec} spec 文件规格
-     * @param {ResourceAccessLevel} access_level 资源访问级别
-     * @returns {Promise<BackendResult<string>>} 任务ID
+     * @param guestID - 云主机ID
+     * @param volumeTag - 卷标签
+     * @param spec - 文件规格
+     * @param access_level - 资源访问级别
+     * @returns 任务ID
      */
     tryCreateDiskImage(guestID, volumeTag, spec, access_level) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2765,8 +2795,7 @@ class TaiyiConnector {
     }
     /**
      * 尝试同步ISO文件，成功返回任务ID
-     * @returns {Promise<BackendResult<string>>} 任务ID
-     * @throws 尝试同步ISO文件失败
+     * @returns 任务ID
      */
     trySyncISOFiles() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2785,8 +2814,7 @@ class TaiyiConnector {
     }
     /**
      * 尝试同步磁盘文件，成功返回任务ID
-     * @returns {Promise<BackendResult<string>>} 任务ID
-     * @throws 尝试同步磁盘文件失败
+     * @returns 任务ID
      */
     trySyncDiskFiles() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2804,9 +2832,9 @@ class TaiyiConnector {
         });
     }
     /**
-     * 查询资源池
-     * @param {string} nodeID 节点ID
-     * @returns {Promise<BackendResult<DataStore[]>>} 资源池列表
+     * 查询节点本地存储池列表
+     * @param nodeID - 节点ID
+     * @returns 节点存储池列表
      */
     queryResourcePools(nodeID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2827,11 +2855,11 @@ class TaiyiConnector {
         });
     }
     /**
-     * 修改资源存储策略
-     * @param {string} nodeID 节点ID
-     * @param {string} poolID 池ID
-     * @param {VolumeContainerStrategy} strategy 存储策略
-     * @returns {Promise<BackendResult>} 修改结果
+     * 修改节点本地存储池策略
+     * @param nodeID - 节点ID
+     * @param poolID - 池ID
+     * @param strategy - 存储策略
+     * @returns 修改结果
      */
     modifyResourceStorageStrategy(nodeID, poolID, strategy) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2847,11 +2875,11 @@ class TaiyiConnector {
         });
     }
     /**
-     * 添加资源容器
-     * @param {string} nodeID 节点ID
-     * @param {string} poolID 池ID
-     * @param {VolumeContainer} container 容器配置
-     * @returns {Promise<BackendResult>} 添加结果
+     * 添加节点本地存储池容器
+     * @param nodeID - 节点ID
+     * @param poolID - 池ID
+     * @param container - 容器配置
+     * @returns 添加结果
      */
     addResourceContainer(nodeID, poolID, container) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2867,12 +2895,12 @@ class TaiyiConnector {
         });
     }
     /**
-     * 修改资源容器
-     * @param {string} nodeID 节点ID
-     * @param {string} poolID 池ID
-     * @param {number} index 容器索引
-     * @param {VolumeContainer} container 容器配置
-     * @returns {Promise<BackendResult>} 修改结果
+     * 修改节点本地存储池容器
+     * @param nodeID - 节点ID
+     * @param poolID - 池ID
+     * @param index - 容器索引
+     * @param container - 容器配置
+     * @returns 修改结果
      */
     modifyResourceContainer(nodeID, poolID, index, container) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2889,11 +2917,11 @@ class TaiyiConnector {
         });
     }
     /**
-     * 删除资源容器
-     * @param {string} nodeID 节点ID
-     * @param {string} poolID 池ID
-     * @param {number} index 容器索引
-     * @returns {Promise<BackendResult>} 删除结果
+     * 删除节点本地存储池容器
+     * @param nodeID - 节点ID
+     * @param poolID - 池ID
+     * @param index - 容器索引
+     * @returns 删除结果
      */
     removeResourceContainer(nodeID, poolID, index) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2909,12 +2937,12 @@ class TaiyiConnector {
         });
     }
     /**
-     * 更改资源容器标志
-     * @param {string} nodeID 节点ID
-     * @param {string} poolID 池ID
-     * @param {number} index 容器索引
-     * @param {boolean} enabled 是否启用
-     * @returns {Promise<BackendResult>} 更改结果
+     * 更改节点本地存储池容器标志，用于启用和禁用容器
+     * @param nodeID - 节点ID
+     * @param poolID - 池ID
+     * @param index - 容器索引
+     * @param enabled - 是否启用
+     * @returns 更改结果
      */
     changeResourceContainerFlag(nodeID, poolID, index, enabled) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2932,8 +2960,8 @@ class TaiyiConnector {
     }
     /**
      * 查询快照
-     * @param {string} guestID 云主机ID
-     * @returns {Promise<BackendResult<SnapshotTreeNode[]>>} 快照树节点列表
+     * @param guestID - 云主机ID
+     * @returns 快照树节点列表
      */
     querySnapshots(guestID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2955,9 +2983,9 @@ class TaiyiConnector {
     }
     /**
      * 获取快照
-     * @param {string} guestID 云主机ID
-     * @param {string} snapshotID 快照ID
-     * @returns {Promise<BackendResult<SnapshotRecord>>} 快照记录
+     * @param guestID - 云主机ID
+     * @param snapshotID - 快照ID
+     * @returns 快照记录
      */
     getSnapshot(guestID, snapshotID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2980,10 +3008,10 @@ class TaiyiConnector {
     }
     /**
      * 尝试创建快照，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {string} label 标签
-     * @param {string} [description] 描述
-     * @returns {Promise<BackendResult<string>>} 任务ID
+     * @param guestID - 云主机ID
+     * @param label - 标签
+     * @param description - 快照描述
+     * @returns 任务ID
      */
     tryCreateSnapshot(guestID, label, description) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3007,11 +3035,11 @@ class TaiyiConnector {
     }
     /**
      * 创建快照
-     * @param {string} guestID 云主机ID
-     * @param {string} label 标签
-     * @param {string} [description] 描述
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 创建结果
+     * @param guestID - 云主机ID
+     * @param label - 标签
+     * @param description - 快照描述
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 创建结果
      */
     createSnapshot(guestID_1, label_1, description_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, label, description, timeoutSeconds = 300) {
@@ -3028,9 +3056,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试恢复快照，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {string} snapshotID 快照ID
-     * @returns {Promise<BackendResult<string>>} 任务ID
+     * @param guestID - 云主机ID
+     * @param snapshotID - 快照ID
+     * @returns 任务ID
      */
     tryRestoreSnapshot(guestID, snapshotID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3053,10 +3081,10 @@ class TaiyiConnector {
     }
     /**
      * 恢复快照
-     * @param {string} guestID 云主机ID
-     * @param {string} snapshotID 快照ID
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 恢复结果
+     * @param guestID - 云主机ID
+     * @param snapshotID - 快照ID
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 恢复结果
      */
     restoreSnapshot(guestID_1, snapshotID_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, snapshotID, timeoutSeconds = 300) {
@@ -3073,9 +3101,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试删除快照，成功返回任务ID
-     * @param {string} guestID 云主机ID
-     * @param {string} snapshotID 快照ID
-     * @returns {Promise<BackendResult<string>>} 任务ID
+     * @param guestID - 云主机ID
+     * @param snapshotID - 快照ID
+     * @returns 任务ID
      */
     tryDeleteSnapshot(guestID, snapshotID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3098,10 +3126,10 @@ class TaiyiConnector {
     }
     /**
      * 删除快照
-     * @param {string} guestID 云主机ID
-     * @param {string} snapshotID 快照ID
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 删除结果
+     * @param guestID - 云主机ID
+     * @param snapshotID - 快照ID
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 删除结果
      */
     deleteSnapshot(guestID_1, snapshotID_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, snapshotID, timeoutSeconds = 300) {
@@ -3117,9 +3145,9 @@ class TaiyiConnector {
         });
     }
     /**
-     * 查询资源使用情况
-     * @param {string[]} targets 目标列表
-     * @returns {Promise<BackendResult<GuestResourceUsageData[]>>} 资源使用数据列表
+     * 查询云主机资源使用情况
+     * @param targets - 目标云主机id列表
+     * @returns 资源使用数据列表
      */
     queryResourceUsages(targets) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3145,10 +3173,10 @@ class TaiyiConnector {
         });
     }
     /**
-     * 查询资源统计信息
-     * @param {string} guest 云主机ID
-     * @param {StatisticRange} range 统计范围
-     * @returns {Promise<BackendResult<ResourceStatisticUnit[]>>} 资源统计单元列表
+     * 查询云主机资源统计信息
+     * @param guest - 云主机ID
+     * @param range - 统计范围
+     * @returns 资源统计单元列表
      */
     queryResourceStatistic(guest, range) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3175,9 +3203,9 @@ class TaiyiConnector {
         });
     }
     /**
-     * 查询计算节点
-     * @param {string} poolID 池ID
-     * @returns {Promise<BackendResult<ClusterNodeData[]>>} 集群节点数据列表
+     * 查询资源池内计算节点
+     * @param poolID - 计算资源池ID
+     * @returns 集群节点数据列表
      */
     queryComputeNodes(poolID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3199,8 +3227,8 @@ class TaiyiConnector {
     }
     /**
      * 查询节点使用情况
-     * @param {string[]} targets 目标列表
-     * @returns {Promise<BackendResult<NodeResourceSnapshot[]>>} 节点资源快照列表
+     * @param targets - 目标节点id列表
+     * @returns 节点资源快照列表
      */
     queryNodesUsage(targets) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3226,9 +3254,9 @@ class TaiyiConnector {
         });
     }
     /**
-     * 查询池使用情况
-     * @param {string[]} targets 目标列表
-     * @returns {Promise<BackendResult<PoolResourceSnapshot[]>>} 池资源快照列表
+     * 查询计算资源池资源用量
+     * @param targets - 目标池id列表
+     * @returns 池资源快照列表
      */
     queryPoolsUsage(targets) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3254,8 +3282,8 @@ class TaiyiConnector {
         });
     }
     /**
-     * 查询集群使用情况
-     * @returns {Promise<BackendResult<ClusterResourceSnapshot>>} 集群资源快照
+     * 查询集群资源用量
+     * @returns 集群资源快照
      */
     queryClusterUsage() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3282,10 +3310,10 @@ class TaiyiConnector {
     }
     /**
      * 查询系统模板
-     * @param {number} offset 起始位置
-     * @param {number} pageSize 页面大小
-     * @param {boolean} onlySelf 是否只查询当前用户的系统模板
-     * @returns {Promise<BackendResult<GuestSystemView[]>>} 系统模板视图列表
+     * @param offset - 起始位置
+     * @param pageSize - 每页记录数量
+     * @param onlySelf - 是否只查询当前用户的系统模板
+     * @returns 系统模板视图列表
      */
     querySystems(offset_1, pageSize_1) {
         return __awaiter(this, arguments, void 0, function* (offset, pageSize, onlySelf = false) {
@@ -3314,8 +3342,8 @@ class TaiyiConnector {
     }
     /**
      * 获取系统模板
-     * @param {string} systemID 系统ID
-     * @returns {Promise<BackendResult<GuestSystemView>>} 系统模板视图
+     * @param systemID - 系统ID
+     * @returns 系统模板视图
      */
     getSystem(systemID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3337,10 +3365,10 @@ class TaiyiConnector {
     }
     /**
      * 添加系统模板
-     * @param {string} label 标签
-     * @param {GuestSystemSpec} spec 系统规格
-     * @param {ResourceAccessLevel} access_level 资源访问级别
-     * @returns {Promise<BackendResult>} 添加结果
+     * @param label - 标签
+     * @param spec - 系统规格
+     * @param access_level - 资源访问级别
+     * @returns 添加结果
      */
     addSystem(label, spec, access_level) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3357,10 +3385,10 @@ class TaiyiConnector {
     }
     /**
      * 修改系统模板
-     * @param {string} systemID 系统ID
-     * @param {string} label 标签
-     * @param {GuestSystemSpec} spec 系统规格
-     * @returns {Promise<BackendResult>} 修改结果
+     * @param systemID - 系统ID
+     * @param label - 标签
+     * @param spec - 系统规格
+     * @returns 修改结果
      */
     modifySystem(systemID, label, spec) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3377,15 +3405,15 @@ class TaiyiConnector {
     }
     /**
      * 删除系统模板
-     * @param {string} id 系统ID
-     * @returns {Promise<BackendResult>} 删除结果
+     * @param systemID - 系统ID
+     * @returns 删除结果
      */
-    removeSystem(id) {
+    removeSystem(systemID) {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.RemoveSystem,
                 remove_system: {
-                    id,
+                    id: systemID,
                 },
             };
             return yield this.sendCommand(cmd);
@@ -3393,7 +3421,7 @@ class TaiyiConnector {
     }
     /**
      * 重置系统模板
-     * @returns {Promise<BackendResult>} 重置结果
+     * @returns 重置结果
      */
     resetSystems() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3405,10 +3433,10 @@ class TaiyiConnector {
     }
     /**
      * 查询日志
-     * @param {string} date 日期,"yyyy-MM-dd"
-     * @param {number} [offset] 偏移量
-     * @param {number} [limit] 限制数量
-     * @returns {Promise<BackendResult<PaginationResult<ConsoleEvent>>>} 日志分页结果
+     * @param date - 日期,"yyyy-MM-dd"
+     * @param offset - 偏移量
+     * @param limit - 每页日志行数
+     * @returns 日志分页结果
      */
     queryLogs(date, offset, limit) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3437,11 +3465,11 @@ class TaiyiConnector {
     }
     /**
      * 查询警告
-     * @param {ConsoleEventLevel} [level] 警告级别
-     * @param {boolean} [unread_only] 是否只查询未读
-     * @param {number} [offset] 偏移量
-     * @param {number} [limit] 限制数量
-     * @returns {Promise<BackendResult<WarningRecordSet>>} 警告记录集
+     * @param level - 警告级别
+     * @param unread_only - 是否只查询未读
+     * @param offset - 偏移量
+     * @param limit - 每页警告数量
+     * @returns 警告记录集
      */
     queryWarnings(level, unread_only, offset, limit) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3474,8 +3502,8 @@ class TaiyiConnector {
     }
     /**
      * 统计节点警告数量
-     * @param {string} nodeID 节点ID
-     * @returns {Promise<BackendResult<WarningStatistic>>} 警告统计信息
+     * @param nodeID - 节点ID
+     * @returns 警告统计信息
      */
     countWarnings(nodeID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3503,8 +3531,8 @@ class TaiyiConnector {
     }
     /**
      * 统计多个节点警告总数
-     * @param {string[]} nodeList 节点列表
-     * @returns {Promise<BackendResult<WarningStatistic>>} 警告统计信息
+     * @param nodeList - 节点列表
+     * @returns 警告统计信息
      */
     sumWarnings(nodeList) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3532,8 +3560,8 @@ class TaiyiConnector {
     }
     /**
      * 删除警告
-     * @param {string[]} idList 警告ID列表
-     * @returns {Promise<BackendResult>} 删除结果
+     * @param idList - 警告ID列表
+     * @returns 删除结果
      */
     removeWarnings(idList) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3548,7 +3576,7 @@ class TaiyiConnector {
     }
     /**
      * 清除所有警告
-     * @returns {Promise<BackendResult>} 清除结果
+     * @returns 清除结果
      */
     clearWarnings() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3560,8 +3588,8 @@ class TaiyiConnector {
     }
     /**
      * 标记警告为已读
-     * @param {string[]} idList 警告ID列表
-     * @returns {Promise<BackendResult>} 标记结果
+     * @param idList - 警告ID列表
+     * @returns 标记结果
      */
     markWarningsAsRead(idList) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3576,7 +3604,7 @@ class TaiyiConnector {
     }
     /**
      * 标记所有警告为已读
-     * @returns {Promise<BackendResult>} 标记结果
+     * @returns 标记结果
      */
     markAllWarningsAsRead() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3588,7 +3616,7 @@ class TaiyiConnector {
     }
     /**
      * 标记所有警告为未读
-     * @returns {Promise<BackendResult>} 标记结果
+     * @returns 标记结果
      */
     markAllWarningsAsUnread() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3600,7 +3628,7 @@ class TaiyiConnector {
     }
     /**
      * 统计未读警告数量
-     * @returns {Promise<BackendResult<WarningStatistic>>} 警告统计信息
+     * @returns 警告统计信息
      */
     countUnreadWarnings() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3625,9 +3653,9 @@ class TaiyiConnector {
     }
     /**
      * 修改节点配置
-     * @param {string} nodeID 节点ID
-     * @param {NodeConfig} config 节点配置
-     * @returns {Promise<BackendResult>} 修改结果
+     * @param nodeID - 节点ID
+     * @param config - 节点配置
+     * @returns 修改结果
      */
     modifyConfig(nodeID, config) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3643,8 +3671,8 @@ class TaiyiConnector {
     }
     /**
      * 获取节点配置
-     * @param {string} nodeID 节点ID
-     * @returns {Promise<BackendResult<NodeConfigStatus>>} 节点配置状态
+     * @param nodeID - 节点ID
+     * @returns 节点配置状态
      */
     getConfig(nodeID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3667,8 +3695,8 @@ class TaiyiConnector {
     }
     /**
      * 重启服务
-     * @param {string} nodeID 节点ID
-     * @returns {Promise<BackendResult>} 重启结果
+     * @param nodeID - 节点ID
+     * @returns 重启结果
      */
     restartService(nodeID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3683,10 +3711,10 @@ class TaiyiConnector {
     }
     /**
      * 添加SSH密钥
-     * @param {string} label 标签
-     * @param {string} content 密钥内容
-     * @param {ResourceAccessLevel} access_level 资源访问级别
-     * @returns {Promise<BackendResult>} 添加结果
+     * @param label - 标签
+     * @param content - 密钥内容
+     * @param access_level - 资源访问级别
+     * @returns 添加结果
      */
     addSSHKey(label, content, access_level) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3703,8 +3731,8 @@ class TaiyiConnector {
     }
     /**
      * 删除SSH密钥
-     * @param {string} id 密钥ID
-     * @returns {Promise<BackendResult>} 删除结果
+     * @param id - 密钥ID
+     * @returns 删除结果
      */
     removeSSHKey(id) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3719,9 +3747,10 @@ class TaiyiConnector {
     }
     /**
      * 查询SSH密钥
-     * @param {number} offset 偏移量
-     * @param {number} pageSize 页面大小
-     * @returns {Promise<BackendResult<SSHKeyView[]>>} SSH密钥视图列表
+     * @param offset - 偏移量
+     * @param pageSize - 每页最大记录数
+     * @param onlySelf - 是否只查询当前用户的密钥
+     * @returns SSH密钥视图列表
      */
     querySSHKeys(offset_1, pageSize_1) {
         return __awaiter(this, arguments, void 0, function* (offset, pageSize, onlySelf = false) {
@@ -3750,7 +3779,7 @@ class TaiyiConnector {
     }
     /**
      * 获取已激活的许可证
-     * @returns {Promise<BackendResult<License>>} 许可证信息
+     * @returns 许可证信息
      */
     getActivatedLicense() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3770,8 +3799,8 @@ class TaiyiConnector {
     }
     /**
      * 激活许可证
-     * @param {string} licenseID 许可证ID
-     * @returns {Promise<BackendResult>} 激活结果
+     * @param licenseID - 许可证ID
+     * @returns 激活结果
      */
     activateLicense(licenseID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3786,8 +3815,8 @@ class TaiyiConnector {
     }
     /**
      * 添加许可证
-     * @param {License} license 许可证信息
-     * @returns {Promise<BackendResult>} 添加结果
+     * @param license - 许可证信息
+     * @returns 添加结果
      */
     addLicense(license) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3802,8 +3831,8 @@ class TaiyiConnector {
     }
     /**
      * 删除许可证
-     * @param {string} licenseID 许可证ID
-     * @returns {Promise<BackendResult>} 删除结果
+     * @param licenseID - 许可证ID
+     * @returns 删除结果
      */
     removeLicense(licenseID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3818,8 +3847,8 @@ class TaiyiConnector {
     }
     /**
      * 获取许可证
-     * @param {string} licenseID 许可证ID
-     * @returns {Promise<BackendResult<License>>} 许可证信息
+     * @param licenseID - 许可证ID
+     * @returns 许可证信息
      */
     getLicense(licenseID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3842,8 +3871,7 @@ class TaiyiConnector {
     }
     /**
      * 查询所有许可证
-     * @returns {Promise<BackendResult<LicenseRecord[]>>} 许可证记录列表
-     * @throws 查询许可证失败
+     * @returns 许可证记录列表
      */
     queryLicenses() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3862,7 +3890,7 @@ class TaiyiConnector {
     }
     /**
      * 查询集群状态
-     * @returns {Promise<BackendResult<ClusterStatus>>} 集群状态
+     * @returns 集群状态
      */
     queryClusterStatus() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3882,7 +3910,7 @@ class TaiyiConnector {
     }
     /**
      * 查询网络拓扑图
-     * @returns {Promise<BackendResult<NetworkGraphNode[]>>} 网络拓扑节点列表
+     * @returns 网络拓扑节点列表
      */
     queryNetworkGraph() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3902,7 +3930,7 @@ class TaiyiConnector {
     }
     /**
      * 获取监控规则
-     * @returns {Promise<BackendResult<ResourceMonitorConfig>>} 资源监控配置
+     * @returns  资源监控配置
      */
     getMonitorRules() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3922,8 +3950,8 @@ class TaiyiConnector {
     }
     /**
      * 设置监控规则
-     * @param {ResourceMonitorConfig} rules 资源监控配置
-     * @returns {Promise<BackendResult>} 设置结果
+     * @param rules - 资源监控配置
+     * @returns 设置结果
      */
     setMonitorRules(rules) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3938,9 +3966,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试重新加载资源节点存储
-     * @param {string} nodeID 节点ID
-     * @param {string} poolID 节点存储标识
-     * @returns {Promise<BackendResult<string>>} 任务ID
+     * @param nodeID - 节点ID
+     * @param poolID - 节点存储标识
+     * @returns 任务ID
      */
     tryReloadResourceStorage(nodeID, poolID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3964,9 +3992,9 @@ class TaiyiConnector {
     }
     /**
      * 更新磁盘卷大小
-     * @param {string} fileID 文件ID
-     * @param {number} sizeInMB 大小（MB）
-     * @returns {Promise<BackendResult>} 更新结果
+     * @param fileID - 文件ID
+     * @param sizeInMB - 大小（MB）
+     * @returns 更新结果
      */
     updateDiskVolumeSize(fileID, sizeInMB) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3982,7 +4010,7 @@ class TaiyiConnector {
     }
     /**
      * 重置监控规则
-     * @returns {Promise<BackendResult>} 重置结果
+     * @returns 重置结果
      */
     resetMonitorRules() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -3994,7 +4022,7 @@ class TaiyiConnector {
     }
     /**
      * 清除任务
-     * @returns {Promise<BackendResult>} 清除结果
+     * @returns 清除结果
      */
     clearTasks() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4006,11 +4034,11 @@ class TaiyiConnector {
     }
     /**
      * 添加导入源
-     * @param {ImportVendor} vendor 供应商类型
-     * @param {string} url 导入源URL
-     * @param {string} token 认证token
-     * @param {string} secret 认证secret
-     * @returns {Promise<BackendResult>} 添加结果
+     * @param vendor - 供应商类型
+     * @param url - 导入源URL
+     * @param token - 认证token
+     * @param secret - 认证secret
+     * @returns 添加结果
      */
     addImportSource(vendor, url, token, secret) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4028,11 +4056,11 @@ class TaiyiConnector {
     }
     /**
      * 修改导入源
-     * @param {string} id 导入源ID
-     * @param {string} url 导入源URL
-     * @param {string} token 认证token
-     * @param {string} secret 认证secret
-     * @returns {Promise<BackendResult>} 修改结果
+     * @param id - 导入源ID
+     * @param url - 导入源URL
+     * @param token - 认证token
+     * @param secret - 认证secret
+     * @returns 修改结果
      */
     modifyImportSource(id, url, token, secret) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4050,8 +4078,8 @@ class TaiyiConnector {
     }
     /**
      * 删除导入源
-     * @param {string} id 导入源ID
-     * @returns {Promise<BackendResult>} 删除结果
+     * @param id - 导入源ID
+     * @returns 删除结果
      */
     removeImportSource(id) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4066,9 +4094,9 @@ class TaiyiConnector {
     }
     /**
      * 查询导入源
-     * @param {number} start 起始索引
-     * @param {number} limit 每页数量
-     * @returns {Promise<BackendResult<PaginationResult<ImportSource>>>} 导入源分页结果
+     * @param start - 起始索引
+     * @param limit - 每页数量
+     * @returns 导入源分页结果
      */
     queryImportSources(start, limit) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4096,8 +4124,8 @@ class TaiyiConnector {
     }
     /**
      * 查询导入目标
-     * @param {string} sourceID 导入源ID
-     * @returns {Promise<BackendResult<ImportTarget[]>>} 导入目标列表
+     * @param sourceID - 导入源ID
+     * @returns 导入目标列表
      */
     queryImportTargets(sourceID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4121,10 +4149,10 @@ class TaiyiConnector {
     }
     /**
      * 尝试导入云主机到节点
-     * @param {string} sourceID 导入源ID
-     * @param {string[]} targetIDs 目标云主机ID列表
-     * @param {string} targetNode 目标节点ID
-     * @returns {Promise<BackendResult<string>>} 任务ID
+     * @param sourceID - 导入源ID
+     * @param targetIDs - 目标云主机ID列表
+     * @param targetNode - 目标节点ID
+     * @returns 任务ID
      */
     tryImportGuestsToNode(sourceID, targetIDs, targetNode) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4150,9 +4178,9 @@ class TaiyiConnector {
     }
     /**
      * 尝试迁移云主机到节点
-     * @param {string} targetNode 目标节点ID
-     * @param {string[]} guests 云主机ID列表
-     * @returns {Promise<BackendResult<string>>} 任务ID
+     * @param targetNode - 目标节点ID
+     * @param guests - 云主机ID列表
+     * @returns 任务ID
      */
     tryMigrateToNode(targetNode, guests) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4177,10 +4205,10 @@ class TaiyiConnector {
     }
     /**
      * 尝试修改外部接口MAC地址
-     * @param {string} guestID 云主机ID
-     * @param {string} device 目标设备(当前MAC)
-     * @param {string} macAddress MAC地址
-     * @returns {Promise<BackendResult<string>>} 任务ID
+     * @param guestID - 云主机ID
+     * @param device - 目标设备(当前MAC)
+     * @param macAddress - MAC地址
+     * @returns 任务ID
      */
     tryModifyExternalInterfaceMAC(guestID, device, macAddress) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4206,11 +4234,11 @@ class TaiyiConnector {
     }
     /**
      * 修改外部接口MAC地址
-     * @param {string} guestID 云主机ID
-     * @param {string} device 目标设备(当前MAC)
-     * @param {string} macAddress MAC地址
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 修改结果
+     * @param guestID - 云主机ID
+     * @param device - 目标设备(当前MAC)
+     * @param macAddress - MAC地址
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 修改结果
      */
     modifyExternalInterfaceMAC(guestID_1, device_1, macAddress_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, device, macAddress, timeoutSeconds = 300) {
@@ -4227,10 +4255,10 @@ class TaiyiConnector {
     }
     /**
      * 尝试修改内部接口MAC地址
-     * @param {string} guestID 云主机ID
-     * @param {string} device 目标设备(当前MAC)
-     * @param {string} macAddress MAC地址
-     * @returns {Promise<BackendResult<string>>} 任务ID
+     * @param guestID - 云主机ID
+     * @param device - 目标设备(当前MAC)
+     * @param macAddress - MAC地址
+     * @returns 任务ID
      */
     tryModifyInternalInterfaceMAC(guestID, device, macAddress) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4256,11 +4284,11 @@ class TaiyiConnector {
     }
     /**
      * 修改内部接口MAC地址
-     * @param {string} guestID 云主机ID
-     * @param {string} device 目标设备(当前MAC)
-     * @param {string} macAddress MAC地址
-     * @param {number} timeoutSeconds 超时时间（秒），默认300秒
-     * @returns {Promise<BackendResult>} 修改结果
+     * @param guestID - 云主机ID
+     * @param device - 目标设备(当前MAC)
+     * @param macAddress - MAC地址
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 修改结果
      */
     modifyInternalInterfaceMAC(guestID_1, device_1, macAddress_1) {
         return __awaiter(this, arguments, void 0, function* (guestID, device, macAddress, timeoutSeconds = 300) {
@@ -4277,7 +4305,7 @@ class TaiyiConnector {
     }
     /**
      * 查询用户角色
-     * @returns {Promise<BackendResult<UserRole[]>>} 用户角色列表
+     * @returns 用户角色列表
      */
     queryUserRoles() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4298,9 +4326,9 @@ class TaiyiConnector {
     }
     /**
      * 修改用户组角色
-     * @param {string} group 用户组
-     * @param {UserRole[]} roles 角色列表
-     * @returns {Promise<BackendResult>} 修改结果
+     * @param group - 用户组
+     * @param roles - 角色列表
+     * @returns 修改结果
      */
     modifyGroupRoles(group, roles) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4316,8 +4344,8 @@ class TaiyiConnector {
     }
     /**
      * 获取用户组角色
-     * @param {string} group 用户组
-     * @returns {Promise<BackendResult<UserRole[]>>} 用户角色列表
+     * @param group - 用户组
+     * @returns 用户角色列表
      */
     getGroupRoles(group) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4341,10 +4369,10 @@ class TaiyiConnector {
     }
     /**
      * 查询用户组成员
-     * @param {string} group 用户组
-     * @param {number} offset 偏移量
-     * @param {number} limit 每页数量
-     * @returns {Promise<BackendResult<PaginationResult<string>>>} 用户组成员分页结果
+     * @param group - 用户组
+     * @param offset - 偏移量
+     * @param limit - 每页数量
+     * @returns 用户组成员分页结果
      */
     queryGroupMembers(group, offset, limit) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4373,8 +4401,8 @@ class TaiyiConnector {
     }
     /**
      * 添加用户组
-     * @param {UserGroup} group 用户组
-     * @returns {Promise<BackendResult>} 添加结果
+     * @param group - 用户组
+     * @returns 添加结果
      */
     addGroup(group) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4389,8 +4417,8 @@ class TaiyiConnector {
     }
     /**
      * 删除用户组
-     * @param {string} group 用户组
-     * @returns {Promise<BackendResult>} 删除结果
+     * @param group - 用户组
+     * @returns 删除结果
      */
     removeGroup(group) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4405,9 +4433,9 @@ class TaiyiConnector {
     }
     /**
      * 查询用户组
-     * @param {number} offset 偏移量
-     * @param {number} limit 每页数量
-     * @returns {Promise<BackendResult<PaginationResult<UserGroupRecord>>>} 用户组分页结果
+     * @param offset - 偏移量
+     * @param limit - 每页数量
+     * @returns 用户组分页结果
      */
     queryGroups(offset, limit) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4435,10 +4463,10 @@ class TaiyiConnector {
     }
     /**
      * 添加用户
-     * @param {string} user 用户名
-     * @param {string} group 用户组
-     * @param {string} password 密码
-     * @returns {Promise<BackendResult>} 添加结果
+     * @param user - 用户名
+     * @param group - 用户组
+     * @param password - 密码
+     * @returns 添加结果
      */
     addUser(user, group, password) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4455,8 +4483,8 @@ class TaiyiConnector {
     }
     /**
      * 删除用户
-     * @param {string} userId 用户ID
-     * @returns {Promise<BackendResult>} 删除结果
+     * @param userId - 用户ID
+     * @returns 删除结果
      */
     removeUser(userId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4471,9 +4499,9 @@ class TaiyiConnector {
     }
     /**
      * 查询用户
-     * @param {number} offset 偏移量
-     * @param {number} limit 每页数量
-     * @returns {Promise<BackendResult<PaginationResult<UserCredentialRecord>>>} 用户分页结果
+     * @param offset - 偏移量
+     * @param limit - 每页数量
+     * @returns 用户分页结果
      */
     queryUsers(offset, limit) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4501,9 +4529,9 @@ class TaiyiConnector {
     }
     /**
      * 修改用户组
-     * @param {string} userId 用户ID
-     * @param {string} groupId 用户组ID
-     * @returns {Promise<BackendResult>} 修改结果
+     * @param userId - 用户ID
+     * @param groupId - 用户组ID
+     * @returns 修改结果
      */
     changeUserGroup(userId, groupId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4519,10 +4547,10 @@ class TaiyiConnector {
     }
     /**
      * 查询用户令牌
-     * @param {string} user 用户名
-     * @param {number} offset 偏移量
-     * @param {number} limit 每页数量
-     * @returns {Promise<BackendResult<PaginationResult<UserToken>>>} 用户令牌分页结果
+     * @param user - 用户名
+     * @param offset - 偏移量
+     * @param limit - 每页数量
+     * @returns 用户令牌分页结果
      */
     queryUserTokens(user, offset, limit) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4551,9 +4579,9 @@ class TaiyiConnector {
     }
     /**
      * 撤销用户令牌
-     * @param {string} user 用户名
-     * @param {string} serial 序列号
-     * @returns {Promise<BackendResult>} 撤销结果
+     * @param user - 用户名
+     * @param serial - 序列号
+     * @returns 撤销结果
      */
     revokeUserToken(user, serial) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4569,9 +4597,9 @@ class TaiyiConnector {
     }
     /**
      * 修改用户密码
-     * @param {string} user 用户名
-     * @param {string} password 新密码
-     * @returns {Promise<BackendResult>} 修改结果
+     * @param user - 用户名
+     * @param password - 新密码
+     * @returns 修改结果
      */
     changeUserSecret(user, password) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4587,8 +4615,8 @@ class TaiyiConnector {
     }
     /**
      * 重置用户密码
-     * @param {string} user 用户名
-     * @returns {Promise<BackendResult<string>>} 新密码
+     * @param user - 用户名
+     * @returns 新密码
      */
     resetUserSecret(user) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4610,8 +4638,8 @@ class TaiyiConnector {
     }
     /**
      * 撤销访问权限
-     * @param {string} token 令牌
-     * @returns {Promise<BackendResult>} 撤销结果
+     * @param token - 令牌
+     * @returns 撤销结果
      */
     revokeAccess(token) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4626,8 +4654,8 @@ class TaiyiConnector {
     }
     /**
      * 使访问权限失效
-     * @param {string} token 令牌
-     * @returns {Promise<BackendResult>} 使访问权限失效结果
+     * @param token - 令牌
+     * @returns 使访问权限失效结果
      */
     invalidateAccess(token) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4642,10 +4670,10 @@ class TaiyiConnector {
     }
     /**
      * 查询访问记录
-     * @param {string} user 用户名
-     * @param {number} offset 偏移量
-     * @param {number} limit 每页数量
-     * @returns {Promise<BackendResult<PaginationResult<UserAccessRecord>>>} 访问记录分页结果
+     * @param user - 用户名
+     * @param offset - 偏移量
+     * @param limit - 每页数量
+     * @returns 访问记录分页结果
      */
     queryAccesses(user, offset, limit) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4674,8 +4702,8 @@ class TaiyiConnector {
     }
     /**
      * 添加白名单
-     * @param {string} address 白名单地址
-     * @returns {Promise<BackendResult>} 添加结果
+     * @param address - 白名单地址
+     * @returns 添加结果
      */
     addWhiteList(address) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4690,8 +4718,8 @@ class TaiyiConnector {
     }
     /**
      * 移除白名单
-     * @param {number} index 白名单索引
-     * @returns {Promise<BackendResult>} 移除结果
+     * @param index - 白名单索引
+     * @returns 移除结果
      */
     removeWhiteList(index) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4706,9 +4734,9 @@ class TaiyiConnector {
     }
     /**
      * 更新白名单
-     * @param {number} index 白名单索引
-     * @param {string} address 新的白名单地址
-     * @returns {Promise<BackendResult>} 更新结果
+     * @param index - 白名单索引
+     * @param address - 新的白名单地址
+     * @returns 更新结果
      */
     updateWhiteList(index, address) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4724,9 +4752,9 @@ class TaiyiConnector {
     }
     /**
      * 查询白名单
-     * @param {number} offset 偏移量
-     * @param {number} limit 每页数量
-     * @returns {Promise<BackendResult<PaginationResult<string>>>} 白名单分页结果
+     * @param offset - 偏移量
+     * @param limit - 每页数量
+     * @returns 白名单分页结果
      */
     queryWhiteList(offset, limit) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4754,10 +4782,10 @@ class TaiyiConnector {
     }
     /**
      * 设置系统资源
-     * @param {ResourceType} type 资源类型
-     * @param {string} id 资源ID
-     * @param {boolean} value 资源值
-     * @returns {Promise<BackendResult>} 设置结果
+     * @param type - 资源类型
+     * @param id - 资源ID
+     * @param value - 资源值
+     * @returns 设置结果
      */
     setSystemResource(type, id, value) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4774,9 +4802,9 @@ class TaiyiConnector {
     }
     /**
      * 获取资源权限
-     * @param {ResourceType} type 资源类型
-     * @param {string} id 资源ID
-     * @returns {Promise<BackendResult<ResourcePermissions>>} 资源权限结果
+     * @param type - 资源类型
+     * @param id - 资源ID
+     * @returns 资源权限结果
      */
     getResourcePermissions(type, id) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4801,10 +4829,10 @@ class TaiyiConnector {
     }
     /**
      * 设置资源权限
-     * @param {ResourceType} type 资源类型
-     * @param {string} id 资源ID
-     * @param {ResourcePermissions} permissions 资源权限
-     * @returns {Promise<BackendResult>} 设置结果
+     * @param type - 资源类型
+     * @param id - 资源ID
+     * @param permissions - 资源权限
+     * @returns 设置结果
      */
     setResourcePermissions(type, id, permissions) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4821,7 +4849,7 @@ class TaiyiConnector {
     }
     /**
      * 检查是否可以创建更多云主机
-     * @returns {Promise<boolean>} 是否可以创建更多云主机
+     * @returns 是否可以创建更多云主机
      */
     couldHasMoreGuests() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4840,7 +4868,7 @@ class TaiyiConnector {
     }
     /**
      * 检查是否可以添加更多节点
-     * @returns {Promise<boolean>} 是否可以添加更多节点
+     * @returns 是否可以添加更多节点
      */
     couldHasMoreNodes() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4859,8 +4887,8 @@ class TaiyiConnector {
     }
     /**
      * 检查指定功能是否已启用
-     * @param {LicenseFeature} feature 要检查的功能
-     * @returns {Promise<boolean>} 功能是否已启用
+     * @param feature - 要检查的功能
+     * @returns 功能是否已启用
      */
     isFeatureEnabled(feature) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4876,7 +4904,7 @@ class TaiyiConnector {
     }
     /**
      * 获取所有SSH密钥
-     * @returns {Promise<BackendResult<SSHKeyView[]>>} SSH密钥列表
+     * @returns SSH密钥列表
      */
     fetchAllSSHKeys() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4912,7 +4940,7 @@ class TaiyiConnector {
     }
     /**
      * 获取所有系统模板
-     * @returns {Promise<BackendResult<GuestSystemView[]>>} 系统列表
+     * @returns 系统列表
      */
     fetchAllSystems() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4948,7 +4976,7 @@ class TaiyiConnector {
     }
     /**
      * 注销设备
-     * @returns {Promise<BackendResult>} 注销结果
+     * @returns 注销结果
      */
     logoutDevice() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -4968,9 +4996,9 @@ class TaiyiConnector {
     }
     /**
      * 查询当前用户已登录设备列表
-     * @param {number} offset 偏移量
-     * @param {number} limit 每页数量
-     * @returns {Promise<BackendResult<PaginationResult<UserAccessRecord>>>} 设备列表
+     * @param offset - 偏移量
+     * @param limit - 每页数量
+     * @returns 设备列表
      */
     queryDevices(offset, limit) {
         return __awaiter(this, void 0, void 0, function* () {

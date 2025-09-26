@@ -18,11 +18,20 @@ import { createId } from "@paralleldrive/cuid2";
 const storageKeyDevice = "taiyi_device";
 
 /**
- * 获取Nextjs的安全连接
+ * 获取适配Nextjs框架，数据安全存储的TaiyiConnector实例
+ * 自动分配设备标识并保持一致，无需手动干预。数据基于cookie和localstorage保存
  * @param backendHost - 后端主机名
  * @param backendPort - 后端端口号，默认值为5851
  * @returns TaiyiConnector
  * @throws 令牌失效
+ * @example
+ * ...
+ * const connector = await getNextConnector(
+ *   process.env.BACKEND_HOST!,
+ *   Number(process.env.BACKEND_PORT)
+ * );
+ * await connector.authenticateByToken(token);
+ * await connector.getGuest(guestID);
  */
 export async function getNextConnector(
   backendHost: string,

@@ -115,9 +115,38 @@ export type StateChangeHandler = (
 
 export type AuthExpiredEvent = (connectorID: string) => void;
 /**
- * 连接处理，提供了与Taiyi Control服务进行交互的方法，包括认证、发送命令、查询访问记录等。
- * 系统状态查询与初始化接口可以直接调用，其他接口需要先认证才能调用。
+ * 提供与Taiyi Control服务进行交互的方法，包括认证、发送命令、查询访问记录等,系统状态查询与初始化接口可以直接调用，其他接口需要先认证才能调用。
+ * 调用者需要实现 SetTokenHandler 和 GetTokenHandler，为 TaiyiConnector 提供令牌的存取能力。如果需要在校验信息失效时，进行特殊处理，可以通过可选的 bindAuthExpiredEvent 方法注册回调。
  * @class TaiyiConnector
+ * @example
+ * ...
+ * //构建 TaiyiConnector 实例
+ * const connector = new TaiyiConnector(backendHost, backendPort, deviceID);
+ * //绑定令牌存取回调
+ * connector.bindCallback(store.id, storeAllocatedTokens, retrieveAllocatedTokens, handleStoreStatusChanged);
+ * //可选：绑定校验过期回调
+ * connector.bindAuthExpiredEvent(handleAuthExpired);
+ * const authResult = await connector.authenticateByToken(token);
+ * if (authResult.unauthenticated) {
+ *   throw new Error("校验失败");
+ * } else if (authResult.error) {
+ *   //其他错误
+ *   throw new Error(authResult.error);
+ * }
+ * const tokens = authResult.data;
+ * console.log("令牌校验成功,当前用户 %s, 角色 %s", tokens.user, tokens.roles);
+ * //从第13个记录开始，查询10条记录
+ * const result = await connector.queryGuests(13, 10);
+ * if (result.error) {
+ *   throw new Error(result.error);
+ * }
+ * //PaginationResult
+ * const data = result.data;
+ * console.log(
+ *   "返回结果 %s, 总记录数 %d",
+ *   JSON.stringify(data.records),
+ *   data.total
+ * );
  */
 export class TaiyiConnector {
   private _id: string;

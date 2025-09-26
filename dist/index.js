@@ -35,15 +35,24 @@ __exportStar(require("./request-forwarder"), exports);
 __exportStar(require("./insecure-store"), exports);
 const insecure_store_1 = require("./insecure-store");
 /**
- * 创建一个不安全的连接
- * 仅用于开发、调试和非Nextjs的基本应用场景
+ * 创建一个令牌校验的连接，数据存储在非安全的内存中。仅用于开发、调试和非Nextjs的基本应用场景，不要在生产环境中使用
  * 建议根据实际业务场景，自行封装更安全的数据存储方法
- * 注意：不安全的连接不支持CSRF攻击保护，不建议在生产环境中使用
- * @param deviceID 设备标识
- * @param accessString 访问字符串，用于认证
- * @param backendHost 后端主机名
- * @param backendPort 后端端口号
- * @returns 不安全的连接
+ * @param deviceID - 设备标识
+ * @param accessString - 访问字符串，用于认证
+ * @param backendHost - 后端主机名
+ * @param backendPort - 后端端口号，默认值为5851
+ * @returns TaiyiConnector
+ * @example
+ * ...
+ * const deviceID = "test-device";
+ * const connector = await newInsecureConnector(
+ *     deviceID,
+ *     process.env.ACCESS_STRING!,
+ *  process.env.BACKEND_HOST!,
+ * Number(process.env.BACKEND_PORT)
+ * );
+ * // 获取云主机信息
+ * await connector.getGuest(guestID);
  */
 function newInsecureConnector(deviceID_1, accessString_1, backendHost_1) {
     return __awaiter(this, arguments, void 0, function* (deviceID, accessString, backendHost, backendPort = 5851) {

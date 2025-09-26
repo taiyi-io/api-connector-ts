@@ -25,8 +25,8 @@ const headerCSRFToken = "X-CSRF-Token";
 
 /**
  * 控制命令URL
- * @param {string} backendURL 后端URL
- * @returns {string} 控制命令URL
+ * @param backendURL - 后端URL
+ * @returns 控制命令URL
  */
 function commandURL(backendURL: string): string {
   return `${backendURL}commands/`;
@@ -43,8 +43,8 @@ async function signEd25519(
 }
 /**
  * 解析控制命令响应
- * @param {Response} response 响应
- * @returns {Promise<BackendResult<ControlCommandResponse>>} 控制命令响应
+ * @param response - 响应
+ * @returns 控制命令响应
  */
 async function parseCommandResponse(
   response: Response
@@ -85,8 +85,8 @@ async function parseCommandResponse(
 }
 /**
  * 解析控制命令结果
- * @param {Response} response 响应
- * @returns {Promise<BackendResult>} 控制命令响应
+ * @param response - 响应
+ * @returns 控制命令响应
  */
 async function parseCommandResult(response: Response): Promise<BackendResult> {
   let result: BackendResult = {};
@@ -116,8 +116,8 @@ async function parseCommandResult(response: Response): Promise<BackendResult> {
 }
 /**
  * 解析认证令牌
- * @param {Response} response 响应
- * @returns {Promise<BackendResult<AllocatedTokens>>} 认证令牌
+ * @param response - 响应
+ * @returns 认证令牌
  */
 async function parseAuthoriedToken(
   response: Response
@@ -158,11 +158,11 @@ async function parseAuthoriedToken(
 }
 /**
  * 发送控制命令，获取标准结果
- * @param {string} backendURL 后端URL
- * @param {string} accessToken 授权令牌
- * @param {string} csrfToken CSRF令牌
- * @param {ControlCommandRequest} command 控制命令请求
- * @returns {Promise<BackendResult<Response>>} 控制命令响应
+ * @param backendURL - 后端URL
+ * @param accessToken - 授权令牌
+ * @param csrfToken - CSRF令牌
+ * @param command - 控制命令请求
+ * @returns 控制命令响应
  */
 async function postAuthenticatedCommand(
   backendURL: string,
@@ -202,10 +202,10 @@ async function postAuthenticatedCommand(
 }
 /**
  * 发送原始请求
- * @param {string} url 请求URL
- * @param {HeadersInit} headers 请求头
- * @param {string} body 请求体
- * @returns {Promise<BackendResult<Response>>} 响应
+ * @param url - 请求URL
+ * @param headers - 请求头
+ * @param body - 请求体
+ * @returns 响应
  */
 async function postRawRequest(
   url: string,
@@ -236,11 +236,11 @@ async function postRawRequest(
 }
 /**
  * 发送控制命令，解析响应内容
- * @param {string} backendURL 后端URL
- * @param {string} accessToken 授权令牌
- * @param {string} csrfToken CSRF令牌
- * @param {ControlCommandRequest} command 控制命令请求
- * @returns {Promise<BackendResult<ControlCommandResponse>>} 控制命令响应
+ * @param backendURL - 后端URL
+ * @param accessToken - 授权令牌
+ * @param csrfToken - CSRF令牌
+ * @param command - 控制命令请求
+ * @returns 控制命令响应
  */
 export async function fetchCommandResponse(
   backendURL: string,
@@ -262,11 +262,11 @@ export async function fetchCommandResponse(
 }
 /**
  * 发送控制命令，检查是否成功
- * @param {string} backendURL 后端URL
- * @param {string} accessToken 授权令牌
- * @param {string} csrfToken CSRF令牌
- * @param {ControlCommandRequest} command 控制命令请求
- * @returns {Promise<BackendResult>} 控制命令响应
+ * @param backendURL - 后端URL
+ * @param accessToken - 授权令牌
+ * @param csrfToken - CSRF令牌
+ * @param command - 控制命令请求
+ * @returns 控制命令响应
  */
 export async function sendCommand(
   backendURL: string,
@@ -289,8 +289,8 @@ export async function sendCommand(
 
 /**
  * 获取系统状态
- * @param {string} backendURL 后端URL
- * @returns {Promise<BackendResult<SystemStatus>>} 系统状态
+ * @param backendURL - 后端URL
+ * @returns 系统状态
  */
 export async function checkSystemStatus(
   backendURL: string
@@ -329,10 +329,10 @@ export async function checkSystemStatus(
 }
 /**
  * 初始化系统
- * @param {string} backendURL 后端URL
- * @param {string} user 用户标识
- * @param {string} password 认证密钥
- * @returns {Promise<BackendResult>} 初始化结果
+ * @param backendURL - 后端URL
+ * @param user - 用户标识
+ * @param password - 认证密钥
+ * @returns 初始化结果
  */
 export async function initialSystem(
   backendURL: string,
@@ -360,11 +360,11 @@ export async function initialSystem(
 }
 /**
  * 使用密码认证
- * @param {string} backendURL 后端URL
- * @param {string} user 用户标识
- * @param {string} device 唯一设备标识
- * @param {string} password 认证密钥
- * @returns {Promise<BackendResult<AllocatedTokens>>} 认证令牌
+ * @param backendURL - 后端URL
+ * @param user - 用户标识
+ * @param device - 唯一设备标识
+ * @param password - 认证密钥
+ * @returns 认证令牌
  */
 export async function authenticateByPassword(
   backendURL: string,
@@ -390,6 +390,16 @@ export async function authenticateByPassword(
   const result = await parseAuthoriedToken(resp.data!);
   return result;
 }
+/**
+ * 使用令牌认证
+ * @param backendURL - 后端URL
+ * @param user - 用户标识
+ * @param device - 唯一设备标识
+ * @param serial - 设备序列号
+ * @param signature_algorithm - 签名算法
+ * @param private_key - 私钥
+ * @returns 认证令牌
+ */
 export async function authenticateByToken(
   backendURL: string,
   user: string,
@@ -450,11 +460,11 @@ export async function authenticateByToken(
 }
 /**
  * 刷新认证令牌
- * @param {string} backendURL 后端URL
- * @param {string} user 用户标识
- * @param {string} device 唯一设备标识
- * @param {string} token 刷新令牌
- * @returns {Promise<BackendResult<AllocatedTokens>>} 刷新后的认证令牌
+ * @param backendURL - 后端URL
+ * @param user - 用户标识
+ * @param device - 唯一设备标识
+ * @param refreshToken - 刷新令牌
+ * @returns 刷新后的认证令牌
  */
 export async function refreshAccessToken(
   backendURL: string,
@@ -482,11 +492,11 @@ export async function refreshAccessToken(
 }
 /**
  * 打开监控通道
- * @param {string} backendURL 后端URL
- * @param {string} accessToken 访问令牌
- * @param {string} csrfToken CSRF令牌
- * @param {string} guestID 目标云主机id
- * @returns {Promise<BackendResult<MonitorResponse>>} 监控通道数据
+ * @param backendURL - 后端URL
+ * @param accessToken - 访问令牌
+ * @param csrfToken - CSRF令牌
+ * @param guestID - 目标云主机id
+ * @returns 监控通道数据
  */
 export async function openMonitorChannel(
   backendURL: string,

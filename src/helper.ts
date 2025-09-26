@@ -27,6 +27,10 @@ import {
 import { ResourceStatisticUnitRecord } from "./request-params";
 import fnv1a from "@sindresorhus/fnv1a";
 
+/**
+ * 生成随机字符串
+ * @returns 随机字符串
+ */
 export function generateNonce() {
   const chars =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -79,6 +83,12 @@ export function findAdminSecret(spec: GuestSpec | null): FoundAdminSecret {
   // No admin credentials found
   return { found: false };
 }
+
+/**
+ * 解析资源统计数据
+ * @param records - 资源统计记录
+ * @returns 解析后的资源统计数据
+ */
 export function unmarshalResourceStatistics(
   records: ResourceStatisticUnitRecord[]
 ): {
@@ -205,6 +215,12 @@ export function unmarshalResourceStatistics(
 
   return { results };
 }
+
+/**
+ * 解析资源用量数据
+ * @param records - 资源用量记录
+ * @returns 解析后的资源使用数据
+ */
 export function unmarshalResourceUsage(records: GuestResourceUsageRecord[]): {
   results: GuestResourceUsageData[];
   error?: string;
@@ -277,6 +293,12 @@ export function unmarshalResourceUsage(records: GuestResourceUsageRecord[]): {
 
   return { results };
 }
+
+/**
+ * 解析节点资源用量数据
+ * @param records - 节点资源用量记录
+ * @returns 解析后的节点资源使用数据
+ */
 export function unmarshalNodesResourceUsage(
   records: NodeResourceSnapshotRecord[]
 ): { results: NodeResourceSnapshot[]; error?: string } {
@@ -340,6 +362,12 @@ export function unmarshalNodesResourceUsage(
 
   return { results, error: undefined };
 }
+
+/**
+ * 解析池资源用量数据
+ * @param records - 池资源用量记录
+ * @returns 解析后的池资源使用数据
+ */
 export function unmarshalPoolsResourceUsage(
   records: PoolResourceSnapshotRecord[]
 ): { results: PoolResourceSnapshot[]; error?: string } {
@@ -406,6 +434,12 @@ export function unmarshalPoolsResourceUsage(
 
   return { results, error: undefined };
 }
+
+/**
+ * 解析集群资源用量数据
+ * @param record - 集群资源用量记录
+ * @returns 解析后的集群资源使用数据
+ */
 export function unmarshalClusterResourceUsage(
   record: ClusterResourceSnapshotRecord
 ): { results: ClusterResourceSnapshot | undefined; error?: string } {
@@ -462,29 +496,53 @@ export function unmarshalClusterResourceUsage(
   return { results: snapshot, error: undefined };
 }
 
+/**
+ * 复制文本到剪贴板
+ * @param text - 要复制的文本
+ * @returns Promise<boolean> - 复制成功返回true，否则返回false
+ */
 export async function copyToClipboard(text: string): Promise<boolean> {
   copy(text);
   return true;
 }
-
-interface OperatableResource {
+/**
+ * 可操作资源接口
+ * @interface
+ */
+export interface OperatableResource {
   actions?: ResourceAction[];
 }
 
+/**
+ * 检查资源是否可查看
+ * @param resource - 可操作资源
+ * @returns 是否可查看
+ */
 export function canViewResource(resource: OperatableResource): boolean {
   return resource.actions?.includes(ResourceAction.View) || false;
 }
+/**
+ * 检查资源是否可编辑
+ * @param resource - 可操作资源
+ * @returns 是否可编辑
+ */
 export function canEditResource(resource: OperatableResource): boolean {
   return resource.actions?.includes(ResourceAction.Edit) || false;
 }
+/**
+ * 检查资源是否可删除
+ * @param resource - 可操作资源
+ * @returns 是否可删除
+ */
 export function canDeleteResource(resource: OperatableResource): boolean {
   return resource.actions?.includes(ResourceAction.Delete) || false;
 }
 
 /**
  * 根据输入的host和port生成一个特征字符串
- * @param host 主机名或IP地址
- * @param port 端口号
+ * @param device - 设备标识
+ * @param host - 主机名或IP地址
+ * @param port - 端口号
  * @returns 生成的特征字符串
  */
 export function generateDeviceFingerprint(

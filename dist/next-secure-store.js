@@ -36,12 +36,10 @@ const cookieDevice = "taiyi_device";
 const cookieStorePrefix = "taiyi_store";
 /**
  * 获取Nextjs的安全数据存储（**仅限服务端组件使用**）
- * @param {string} deviceID 设备ID
- * @param {string} backendHost 后端主机地址
- * @param {number} backendPort 后端端口号
- * @returns {NextSecureStore} 安全数据存储
- * @description 基于设备ID、后端主机地址和后端端口号获取安全数据存储
- * @async
+ * @param deviceID - 设备ID
+ * @param backendHost - 后端主机地址
+ * @param backendPort - 后端端口号
+ * @returns 安全的数据存储
  */
 function getNextStore(deviceID_1, backendHost_1) {
     return __awaiter(this, arguments, void 0, function* (deviceID, backendHost, backendPort = 5851) {
@@ -80,11 +78,9 @@ function getNextStore(deviceID_1, backendHost_1) {
 }
 /**
  * 检查安全数据存储是否已认证（**仅限服务端组件使用**）
- * @param {string} backendHost 后端主机地址
- * @param {number} backendPort 后端端口号
- * @returns {Promise<boolean>} 是否已认证
- * @description 基于后端主机地址和后端端口号检查安全数据存储是否已认证
- * @async
+ * @param backendHost - 后端主机地址
+ * @param backendPort - 后端端口号
+ * @returns 是否已认证
  */
 function isStoreAuthenticated(backendHost_1) {
     return __awaiter(this, arguments, void 0, function* (backendHost, backendPort = 5851) {
@@ -95,11 +91,9 @@ function isStoreAuthenticated(backendHost_1) {
 }
 /**
  * 保存安全连接封装的令牌（**仅限服务端组件使用**）
- * @param {string} storeID 安全连接封装ID
- * @param {AllocatedTokens} tokens 分配令牌
- * @returns {Promise<void>} 无返回值
- * @description 更新安全连接封装的访问令牌、访问令牌过期时间、用户角色列表和用户名称
- * @async
+ * @param storeID - 安全连接封装ID
+ * @param tokens - 分配令牌
+ * @returns 无返回值
  */
 function storeAllocatedTokens(storeID, tokens) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -144,11 +138,9 @@ function storeAllocatedTokens(storeID, tokens) {
     });
 }
 /**
- * 获取安全连接封装的令牌（**仅限服务端组件使用**）
- * @param {string} storeID 安全连接封装ID
- * @returns {Promise<AllocatedTokens>} 分配令牌
- * @description 从cookie中获取安全连接封装的访问令牌、访问令牌过期时间、用户角色列表和用户名称
- * @async
+ * 从安全存储中获取已分配令牌（**仅限服务端组件使用**）
+ * @param storeID - 安全连接封装ID
+ * @returns 分配令牌
  */
 function retrieveAllocatedTokens(storeID) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -188,10 +180,8 @@ function retrieveAllocatedTokens(storeID) {
 }
 /**
  * 存储关键值（**仅限服务端组件使用**）
- * @param {string} storeID 连接器ID
- * @param {CriticalValues} values 关键值
- * @description 存储csrf令牌、刷新令牌和刷新令牌过期时间到cookie中
- * @async
+ * @param storeID - 存储ID
+ * @param values - 关键值
  */
 function storeCriticalValues(storeID, values) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -222,10 +212,8 @@ function storeCriticalValues(storeID, values) {
 }
 /**
  * 获取关键值（**仅限服务端组件使用**）
- * @param {string} storeID 连接器ID
- * @returns {CriticalValues} 关键值
- * @description 从cookie中获取csrf令牌、刷新令牌和刷新令牌过期时间
- * @async
+ * @param storeID - 存储ID
+ * @returns 关键值
  */
 function retrieveCriticalValues(storeID) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -244,10 +232,8 @@ function retrieveCriticalValues(storeID) {
     });
 }
 /**
- * 设置设备ID（**仅限服务端组件使用**）
- * @param {string} id 设备ID
- * @description 将设备ID存储到cookie中
- * @async
+ * cookie中存储设备ID（**仅限服务端组件使用**）
+ * @param id - 设备ID
  */
 function setDeviceID(id) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -259,10 +245,8 @@ function setDeviceID(id) {
     });
 }
 /**
- * 获取设备ID（**仅限服务端组件使用**）
- * @returns {Promise<string>} 设备ID
- * @description 从cookie中获取设备ID，如果不存在，生成一个新的设备ID并存储到cookie中
- * @async
+ * 从cookie中获取设备ID（**仅限服务端组件使用**）
+ * @returns 设备ID
  */
 function getDeviceID() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -273,11 +257,9 @@ function getDeviceID() {
     });
 }
 /**
- * 存储安全状态变化处理（**仅限服务端组件使用**）
- * @param {string} storeID 安全连接封装ID
- * @param {boolean} authenticated 认证状态
- * @description 将安全连接封装的认证状态存储到cookie中
- * @async
+ * 处理存储状态变化（**仅限服务端组件使用**）
+ * @param storeID - 存储ID
+ * @param authenticated - 是否已认证
  */
 function handleStoreStatusChanged(storeID, authenticated) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -299,9 +281,8 @@ function handleStoreStatusChanged(storeID, authenticated) {
 }
 /**
  * 验证存储的数据（**仅限服务端组件使用**）
- * @param {NextSecureStore} store 安全连接封装
- * @returns {boolean} 验证结果
- * @description 验证存储的数据是否完整和有效
+ * @param store - 存储数据
+ * @returns 验证结果
  */
 function validateStoredData(store) {
     if (!store.id ||

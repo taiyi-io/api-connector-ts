@@ -23,8 +23,8 @@ const connector_1 = require("./connector");
 const tokenStorage = new Map();
 /**
  * 存储令牌
- * @param connectorID connector.id
- * @param tokens 要存储的令牌
+ * @param connectorID - connector.id
+ * @param tokens - 要存储的令牌
  * @returns Promise<void>
  */
 const insecureSetTokens = (connectorID, tokens) => __awaiter(void 0, void 0, void 0, function* () {
@@ -34,7 +34,7 @@ const insecureSetTokens = (connectorID, tokens) => __awaiter(void 0, void 0, voi
 exports.insecureSetTokens = insecureSetTokens;
 /**
  * 获取令牌
- * @param connectorID connector.id
+ * @param connectorID - connector.id
  * @returns Promise<AllocatedTokens>
  */
 const insecureGetTokens = (connectorID) => __awaiter(void 0, void 0, void 0, function* () {
@@ -48,7 +48,7 @@ const insecureGetTokens = (connectorID) => __awaiter(void 0, void 0, void 0, fun
 exports.insecureGetTokens = insecureGetTokens;
 /**
  * 清除指定storeID的令牌
- * @param connectorID connector.id
+ * @param connectorID - connector.id
  */
 const clearInsecureTokens = (connectorID) => {
     console.log(`insecure-store: 清除令牌 for ${connectorID}`);
@@ -57,9 +57,9 @@ const clearInsecureTokens = (connectorID) => {
 exports.clearInsecureTokens = clearInsecureTokens;
 /**
  * 获取使用内存存储的TaiyiConnector实例
- * @param deviceID 设备标识
- * @param backendHost 后端主机名
- * @param backendPort 后端端口号
+ * @param deviceID - 设备标识
+ * @param backendHost - 后端主机名
+ * @param backendPort - 后端端口号，默认值为5851
  * @returns Promise<TaiyiConnector>
  */
 function getInsecureConnector(deviceID_1, backendHost_1) {

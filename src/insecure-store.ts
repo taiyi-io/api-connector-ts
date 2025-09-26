@@ -13,8 +13,8 @@ const tokenStorage: Map<string, AllocatedTokens> = new Map();
 
 /**
  * 存储令牌
- * @param connectorID connector.id
- * @param tokens 要存储的令牌
+ * @param connectorID - connector.id
+ * @param tokens - 要存储的令牌
  * @returns Promise<void>
  */
 export const insecureSetTokens: SetTokenHandler = async (
@@ -27,7 +27,7 @@ export const insecureSetTokens: SetTokenHandler = async (
 
 /**
  * 获取令牌
- * @param connectorID connector.id
+ * @param connectorID - connector.id
  * @returns Promise<AllocatedTokens>
  */
 export const insecureGetTokens: GetTokenHandler = async (
@@ -43,7 +43,7 @@ export const insecureGetTokens: GetTokenHandler = async (
 
 /**
  * 清除指定storeID的令牌
- * @param connectorID connector.id
+ * @param connectorID - connector.id
  */
 export const clearInsecureTokens = (connectorID: string): void => {
   console.log(`insecure-store: 清除令牌 for ${connectorID}`);
@@ -52,9 +52,9 @@ export const clearInsecureTokens = (connectorID: string): void => {
 
 /**
  * 获取使用内存存储的TaiyiConnector实例
- * @param deviceID 设备标识
- * @param backendHost 后端主机名
- * @param backendPort 后端端口号
+ * @param deviceID - 设备标识
+ * @param backendHost - 后端主机名
+ * @param backendPort - 后端端口号，默认值为5851
  * @returns Promise<TaiyiConnector>
  */
 export async function getInsecureConnector(

@@ -29,10 +29,15 @@
   },
   "packageManager": "yarn@4.10.3",
   "devDependencies": {
+    "@microsoft/tsdoc-config": "^0.17.1",
     "@types/node": "^24.5.2",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "^8.44.1",
+    "@typescript-eslint/parser": "^8.44.1",
     "eslint": "^9.36.0",
+    "eslint-plugin-tsdoc": "^0.4.0",
+    "typedoc": "^0.28.13",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   },

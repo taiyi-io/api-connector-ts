@@ -6,9 +6,9 @@
 import { TaiyiConnector } from "./connector";
 /**
  * 获取Nextjs的安全连接
- * @param {string} backendHost 后端主机名
- * @param {number} backendPort 后端端口号
- * @returns {TaiyiConnector} 安全连接
- * @async
+ * @param backendHost - 后端主机名
+ * @param backendPort - 后端端口号，默认值为5851
+ * @returns TaiyiConnector
+ * @throws {Error} 令牌失效
  */
 export declare function getNextConnector(backendHost: string, backendPort?: number): Promise<TaiyiConnector>;

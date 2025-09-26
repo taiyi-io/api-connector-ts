@@ -31,6 +31,10 @@ exports.StreamEnabled = StreamEnabled;
 const copy_to_clipboard_1 = __importDefault(require("copy-to-clipboard"));
 const enums_1 = require("./enums");
 const fnv1a_1 = __importDefault(require("@sindresorhus/fnv1a"));
+/**
+ * 生成随机字符串
+ * @returns 随机字符串
+ */
 function generateNonce() {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let result = "";
@@ -75,6 +79,11 @@ function findAdminSecret(spec) {
     // No admin credentials found
     return { found: false };
 }
+/**
+ * 解析资源统计数据
+ * @param records - 资源统计记录
+ * @returns 解析后的资源统计数据
+ */
 function unmarshalResourceStatistics(records) {
     const results = [];
     const expectedLength = enums_1.StatisticUnitRecordField.Count;
@@ -163,6 +172,11 @@ function unmarshalResourceStatistics(records) {
     }
     return { results };
 }
+/**
+ * 解析资源用量数据
+ * @param records - 资源用量记录
+ * @returns 解析后的资源使用数据
+ */
 function unmarshalResourceUsage(records) {
     const results = [];
     const expectedLength = enums_1.ResourceUsageDurationField.Count;
@@ -215,6 +229,11 @@ function unmarshalResourceUsage(records) {
     }
     return { results };
 }
+/**
+ * 解析节点资源用量数据
+ * @param records - 节点资源用量记录
+ * @returns 解析后的节点资源使用数据
+ */
 function unmarshalNodesResourceUsage(records) {
     const results = [];
     for (const record of records) {
@@ -265,6 +284,11 @@ function unmarshalNodesResourceUsage(records) {
     }
     return { results, error: undefined };
 }
+/**
+ * 解析池资源用量数据
+ * @param records - 池资源用量记录
+ * @returns 解析后的池资源使用数据
+ */
 function unmarshalPoolsResourceUsage(records) {
     const results = [];
     for (const record of records) {
@@ -318,6 +342,11 @@ function unmarshalPoolsResourceUsage(records) {
     }
     return { results, error: undefined };
 }
+/**
+ * 解析集群资源用量数据
+ * @param record - 集群资源用量记录
+ * @returns 解析后的集群资源使用数据
+ */
 function unmarshalClusterResourceUsage(record) {
     if (record.fields.length !== enums_1.ResourceSnapshotField.Count) {
         return {
@@ -364,28 +393,49 @@ function unmarshalClusterResourceUsage(record) {
     };
     return { results: snapshot, error: undefined };
 }
+/**
+ * 复制文本到剪贴板
+ * @param text - 要复制的文本
+ * @returns Promise<boolean> - 复制成功返回true，否则返回false
+ */
 function copyToClipboard(text) {
     return __awaiter(this, void 0, void 0, function* () {
         (0, copy_to_clipboard_1.default)(text);
         return true;
     });
 }
+/**
+ * 检查资源是否可查看
+ * @param resource - 可操作资源
+ * @returns 是否可查看
+ */
 function canViewResource(resource) {
     var _a;
     return ((_a = resource.actions) === null || _a === void 0 ? void 0 : _a.includes(enums_1.ResourceAction.View)) || false;
 }
+/**
+ * 检查资源是否可编辑
+ * @param resource - 可操作资源
+ * @returns 是否可编辑
+ */
 function canEditResource(resource) {
     var _a;
     return ((_a = resource.actions) === null || _a === void 0 ? void 0 : _a.includes(enums_1.ResourceAction.Edit)) || false;
 }
+/**
+ * 检查资源是否可删除
+ * @param resource - 可操作资源
+ * @returns 是否可删除
+ */
 function canDeleteResource(resource) {
     var _a;
     return ((_a = resource.actions) === null || _a === void 0 ? void 0 : _a.includes(enums_1.ResourceAction.Delete)) || false;
 }
 /**
  * 根据输入的host和port生成一个特征字符串
- * @param host 主机名或IP地址
- * @param port 端口号
+ * @param device - 设备标识
+ * @param host - 主机名或IP地址
+ * @param port - 端口号
  * @returns 生成的特征字符串
  */
 function generateDeviceFingerprint(device, host, port) {

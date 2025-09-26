@@ -7,3 +7,13 @@ Typescript connector to control API
 ```
 npm install @taiyi-io/api-connector-ts
 ```
+
+## 使用
+
+### 校验
+
+### 基本操作
+
+### 异步任务
+
+### 分页

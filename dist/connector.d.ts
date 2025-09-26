@@ -9,10 +9,9 @@ export type GetTokenHandler = (storeID: string) => Promise<AllocatedTokens>;
 export type StateChangeHandler = (storeID: string, authenticated: boolean) => void;
 export type AuthExpiredEvent = (connectorID: string) => void;
 /**
- * 连接处理，用于与Taiyi Control服务进行交互
- * @class TaiyiConnector
- * @description 该类提供了与Taiyi Control服务进行交互的方法，包括认证、发送命令、查询访问记录等。
+ * 连接处理，提供了与Taiyi Control服务进行交互的方法，包括认证、发送命令、查询访问记录等。
  * 系统状态查询与初始化接口可以直接调用，其他接口需要先认证才能调用。
+ * @class TaiyiConnector
  */
 export declare class TaiyiConnector {
     private _id;
@@ -116,19 +115,16 @@ export declare class TaiyiConnector {
      */
     loadTokens(tokens: AllocatedTokens): BackendResult;
     /**
-     * 计划刷新令牌
-     * @description 访问令牌过期时间提前90秒，自动触发刷新令牌
+     * 计划刷新令牌,访问令牌过期时间提前90秒，自动触发刷新令牌
      */
     startHeartBeat(): void;
     private keepAlive;
     /**
-     * 停止刷新令牌
-     * @description 调用此方法后，令牌将不再自动刷新
+     * 停止刷新令牌，调用此方法后，令牌将不再自动刷新
      */
     private stopHeartBeat;
     /**
-     * 校验令牌过期
-     * @description 校验令牌是否过期，过期则触发刷新令牌
+     * 校验令牌过期。 校验令牌是否过期，过期则触发刷新令牌
      */
     private onValidationExpired;
     /**
@@ -150,8 +146,7 @@ export declare class TaiyiConnector {
      */
     private resendCommand;
     /**
-     * 同步令牌
-     * @description 从后端获取令牌，更新本地令牌
+     * 同步令牌。从存储中获取令牌，更新本地令牌
      * @returns {Promise<boolean>} 是否令牌已更新
      */
     private syncTokens;

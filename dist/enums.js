@@ -6,7 +6,7 @@ exports.TokenSigningMethod = exports.PasswordHasher = exports.UserRole = exports
  */
 /**
  * 控制命令枚举
- * @enum {string}
+ * @enum
  *
  */
 var controlCommandEnum;
@@ -533,7 +533,7 @@ var controlCommandEnum;
 })(controlCommandEnum || (exports.controlCommandEnum = controlCommandEnum = {}));
 /**
  * 任务类型枚举
- * @enum {string}
+ * @enum
  */
 var TaskType;
 (function (TaskType) {
@@ -705,7 +705,7 @@ var TaskType;
 })(TaskType || (exports.TaskType = TaskType = {}));
 /**
  * 资源类型枚举
- * @enum {string}
+ * @enum
  */
 var ResourceType;
 (function (ResourceType) {
@@ -722,7 +722,7 @@ var ResourceType;
 })(ResourceType || (exports.ResourceType = ResourceType = {}));
 /**
  * 资源访问权限枚举
- * @enum {string}
+ * @enum
  */
 var ResourceAccessLevel;
 (function (ResourceAccessLevel) {
@@ -749,7 +749,7 @@ var ResourceAccessLevel;
 })(ResourceAccessLevel || (exports.ResourceAccessLevel = ResourceAccessLevel = {}));
 /**
  * 资源操作权限枚举
- * @enum {string}
+ * @enum
  */
 var ResourceAction;
 (function (ResourceAction) {
@@ -771,7 +771,7 @@ var ResourceAction;
 })(ResourceAction || (exports.ResourceAction = ResourceAction = {}));
 /**
  * 资源访问范围枚举
- * @enum {string}
+ * @enum
  */
 var ResourceAccessScope;
 (function (ResourceAccessScope) {
@@ -793,7 +793,7 @@ var ResourceAccessScope;
 })(ResourceAccessScope || (exports.ResourceAccessScope = ResourceAccessScope = {}));
 /**
  * 资源统计指标字段枚举
- * @enum {number}
+ * @enum
  */
 var StatisticUnitRecordField;
 (function (StatisticUnitRecordField) {
@@ -1010,7 +1010,7 @@ var StatisticUnitRecordField;
 })(StatisticUnitRecordField || (exports.StatisticUnitRecordField = StatisticUnitRecordField = {}));
 /**
  * 资源快照字段枚举
- * @enum {number}
+ * @enum
  */
 var ResourceSnapshotField;
 (function (ResourceSnapshotField) {
@@ -1152,7 +1152,7 @@ var ResourceSnapshotField;
 })(ResourceSnapshotField || (exports.ResourceSnapshotField = ResourceSnapshotField = {}));
 /**
  * 资源使用时长字段枚举
- * @enum {number}
+ * @enum
  */
 var ResourceUsageDurationField;
 (function (ResourceUsageDurationField) {
@@ -1259,7 +1259,7 @@ var ResourceUsageDurationField;
 })(ResourceUsageDurationField || (exports.ResourceUsageDurationField = ResourceUsageDurationField = {}));
 /**
  * 系统类别枚举
- * @enum {string}
+ * @enum
  */
 var SystemCategory;
 (function (SystemCategory) {
@@ -1286,7 +1286,7 @@ var SystemCategory;
 })(SystemCategory || (exports.SystemCategory = SystemCategory = {}));
 /**
  * 云主机磁盘模式枚举
- * @enum {string}
+ * @enum
  */
 var GuestDiskMode;
 (function (GuestDiskMode) {
@@ -1328,7 +1328,7 @@ var GuestDiskMode;
 })(GuestDiskMode || (exports.GuestDiskMode = GuestDiskMode = {}));
 /**
  * 网络模型类型枚举
- * @enum {string}
+ * @enum
  */
 var NetworkModelType;
 (function (NetworkModelType) {
@@ -1440,7 +1440,7 @@ var NetworkModelType;
 })(NetworkModelType || (exports.NetworkModelType = NetworkModelType = {}));
 /**
  * 显示驱动枚举
- * @enum {string}
+ * @enum
  */
 var DisplayDriver;
 (function (DisplayDriver) {
@@ -1472,7 +1472,7 @@ var DisplayDriver;
 })(DisplayDriver || (exports.DisplayDriver = DisplayDriver = {}));
 /**
  * 远程协议枚举
- * @enum {string}
+ * @enum
  */
 var RemoteProtocol;
 (function (RemoteProtocol) {
@@ -1489,7 +1489,7 @@ var RemoteProtocol;
 })(RemoteProtocol || (exports.RemoteProtocol = RemoteProtocol = {}));
 /**
  * USB控制器模型枚举
- * @enum {string}
+ * @enum
  */
 var USBModel;
 (function (USBModel) {
@@ -1556,7 +1556,7 @@ var USBModel;
 })(USBModel || (exports.USBModel = USBModel = {}));
 /**
  * 云主机固件模式枚举
- * @enum {string}
+ * @enum
  */
 var GuestFirmwareMode;
 (function (GuestFirmwareMode) {
@@ -1583,7 +1583,7 @@ var GuestFirmwareMode;
 })(GuestFirmwareMode || (exports.GuestFirmwareMode = GuestFirmwareMode = {}));
 /**
  * 云主机声音模型枚举
- * @enum {string}
+ * @enum
  */
 var GuestSoundModel;
 (function (GuestSoundModel) {
@@ -1640,7 +1640,7 @@ var GuestSoundModel;
 })(GuestSoundModel || (exports.GuestSoundModel = GuestSoundModel = {}));
 /**
  * 云主机平板模式枚举
- * @enum {string}
+ * @enum
  */
 var GuestTabletMode;
 (function (GuestTabletMode) {
@@ -1662,7 +1662,7 @@ var GuestTabletMode;
 })(GuestTabletMode || (exports.GuestTabletMode = GuestTabletMode = {}));
 /**
  * 任务状态枚举
- * @enum {string}
+ * @enum
  */
 var TaskStatus;
 (function (TaskStatus) {
@@ -1684,7 +1684,7 @@ var TaskStatus;
 })(TaskStatus || (exports.TaskStatus = TaskStatus = {}));
 /**
  * 云主机状态
- * @enum {string}
+ * @enum
  */
 var GuestState;
 (function (GuestState) {
@@ -1726,7 +1726,7 @@ var GuestState;
 })(GuestState || (exports.GuestState = GuestState = {}));
 /**
  * 网络模式
- * @enum {string}
+ * @enum
  */
 var NetworkMode;
 (function (NetworkMode) {
@@ -1735,7 +1735,7 @@ var NetworkMode;
 })(NetworkMode || (exports.NetworkMode = NetworkMode = {}));
 /**
  * 卷容器策略
- * @enum {string}
+ * @enum
  */
 var VolumeContainerStrategy;
 (function (VolumeContainerStrategy) {
@@ -1769,7 +1769,7 @@ var VolumeFormat;
 })(VolumeFormat || (exports.VolumeFormat = VolumeFormat = {}));
 /**
  * 接口模式
- * @enum {string}
+ * @enum
  */
 var InterfaceMode;
 (function (InterfaceMode) {
@@ -1782,7 +1782,7 @@ var InterfaceMode;
 })(InterfaceMode || (exports.InterfaceMode = InterfaceMode = {}));
 /**
  * 节点模式
- * @enum {string}
+ * @enum
  */
 var NodeMode;
 (function (NodeMode) {
@@ -1793,7 +1793,7 @@ var NodeMode;
 })(NodeMode || (exports.NodeMode = NodeMode = {}));
 /**
  * 节点状态
- * @enum {string}
+ * @enum
  */
 var NodeState;
 (function (NodeState) {
@@ -1808,7 +1808,7 @@ var NodeState;
 })(NodeState || (exports.NodeState = NodeState = {}));
 /**
  * 计算资源池分配资源节点策略
- * @enum {string}
+ * @enum
  */
 var ComputePoolStrategy;
 (function (ComputePoolStrategy) {
@@ -1843,7 +1843,7 @@ var AuthorizationMode;
 })(AuthorizationMode || (exports.AuthorizationMode = AuthorizationMode = {}));
 /**
  * 许可证功能
- * @enum {string}
+ * @enum
  */
 var LicenseFeature;
 (function (LicenseFeature) {
@@ -1891,7 +1891,7 @@ var FileFormat;
 })(FileFormat || (exports.FileFormat = FileFormat = {}));
 /**
  * 文件状态
- * @enum {string}
+ * @enum
  */
 var FileState;
 (function (FileState) {
@@ -1906,7 +1906,7 @@ var FileState;
 })(FileState || (exports.FileState = FileState = {}));
 /**
  * 统计范围
- * @enum {string}
+ * @enum
  */
 var StatisticRange;
 (function (StatisticRange) {
@@ -1921,7 +1921,7 @@ var StatisticRange;
 })(StatisticRange || (exports.StatisticRange = StatisticRange = {}));
 /**
  * 控制台事件等级
- * @enum {string}
+ * @enum
  */
 var ConsoleEventLevel;
 (function (ConsoleEventLevel) {
@@ -1936,7 +1936,7 @@ var ConsoleEventLevel;
 })(ConsoleEventLevel || (exports.ConsoleEventLevel = ConsoleEventLevel = {}));
 /**
  * 控制台事件范围
- * @enum {string}
+ * @enum
  */
 var ConsoleEventRange;
 (function (ConsoleEventRange) {
@@ -1951,7 +1951,7 @@ var ConsoleEventRange;
 })(ConsoleEventRange || (exports.ConsoleEventRange = ConsoleEventRange = {}));
 /**
  * 控制台事件分类
- * @enum {string}
+ * @enum
  */
 var ConsoleEventCategory;
 (function (ConsoleEventCategory) {
@@ -1976,7 +1976,7 @@ var ConsoleEventCategory;
 })(ConsoleEventCategory || (exports.ConsoleEventCategory = ConsoleEventCategory = {}));
 /**
  * 导入云主机供应商
- * @enum {string}
+ * @enum
  */
 var ImportVendor;
 (function (ImportVendor) {
@@ -1987,7 +1987,7 @@ exports.NODE_RESOURCE_SNAPSHOT_FIELD_COUNT = ResourceSnapshotField.GuestUnknown 
 exports.POOL_RESOURCE_SNAPSHOT_FIELD_COUNT = ResourceSnapshotField.NodeLost + 1;
 /**
  * 用户角色枚举
- * @enum {string}
+ * @enum
  */
 var UserRole;
 (function (UserRole) {
@@ -2006,7 +2006,7 @@ var UserRole;
 })(UserRole || (exports.UserRole = UserRole = {}));
 /**
  * 密码哈希算法枚举
- * @enum {string}
+ * @enum
  */
 var PasswordHasher;
 (function (PasswordHasher) {
@@ -2017,7 +2017,7 @@ var PasswordHasher;
 })(PasswordHasher || (exports.PasswordHasher = PasswordHasher = {}));
 /**
  * 令牌签名方法枚举
- * @enum {string}
+ * @enum
  * secret - ['HS256', 'HS384', 'HS512']
  * rsa - ['RS256', 'RS384', 'RS512']
  * ec - ['ES256', 'ES384', 'ES512']

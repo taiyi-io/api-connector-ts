@@ -281,9 +281,9 @@ export interface ResourceUsageDurationRecord {
 /**
  * 密码校验请求参数
  * @interface ControlAuthBySecretParams
- * @param {string} user 用户标识
- * @param {string} device 设备标识
- * @param {string} secret 认证密钥
+ * @param user - 用户标识
+ * @param device - 设备标识
+ * @param secret - 认证密钥
  */
 export interface ControlAuthBySecretParams {
   /** 用户标识 */
@@ -297,13 +297,13 @@ export interface ControlAuthBySecretParams {
 /**
  * 令牌校验请求参数
  * @interface ControlAuthByTokenParams
- * @param {string} user 用户标识
- * @param {string} device 设备标识
- * @param {string} serial 序列号
- * @param {string} nonce 随机数
- * @param {string} timestamp 时间戳
- * @param {string} signature 签名
- * @param {SignatureAlgorithm} signature_algorithm 签名算法
+ * @param user - 用户标识
+ * @param device - 设备标识
+ * @param serial - 序列号
+ * @param nonce - 随机数
+ * @param timestamp - 时间戳
+ * @param signature - 签名
+ * @param signature_algorithm - 签名算法
  */
 export interface ControlAuthByTokenParams {
   user: string;
@@ -318,9 +318,9 @@ export interface ControlAuthByTokenParams {
 /**
  * 更新令牌请求参数
  * @interface ControlAuthRefreshParams
- * @param {string} user 用户标识
- * @param {string} device 设备标识
- * @param {string} token 认证令牌
+ * @param user - 用户标识
+ * @param device - 设备标识
+ * @param token - 认证令牌
  */
 export interface ControlAuthRefreshParams {
   /** 用户标识 */
@@ -333,8 +333,8 @@ export interface ControlAuthRefreshParams {
 /**
  * 云主机网卡请求参数
  * @interface
- * @property {string} guest - 关联云主机ID
- * @property {string} mac_address - 网卡MAC地址
+ * @property guest - 关联云主机ID
+ * @property mac_address - 网卡MAC地址
  */
 export interface ControlInterfaceParams {
   guest: string;
@@ -344,15 +344,15 @@ export interface ControlInterfaceParams {
 /**
  * 云主机创建请求参数
  * @interface
- * @property {string} name 名称
- * @property {number} cores 核心数
- * @property {number} memory 内存大小，单位MB
- * @property {number[]} disks 磁盘大小列表，单位MB
- * @property {string} source_image 源镜像
- * @property {boolean} auto_start 自动启动
- * @property {ControlCloudInitConfig} cloud_init CloudInit配置
- * @property {string} pool - 所属计算资源池
- * @property {string} system - 云主机系统规格
+ * @property name - 名称
+ * @property cores - 核心数
+ * @property memory - 内存大小，单位MB
+ * @property disks - 磁盘大小列表，单位MB
+ * @property source_image - 源镜像
+ * @property auto_start - 自动启动
+ * @property cloud_init - CloudInit配置
+ * @property pool - 所属计算资源池
+ * @property system - 云主机系统规格
  */
 export interface ControlCreateGuestParams extends GuestConfig {
   pool: string;
@@ -361,7 +361,7 @@ export interface ControlCreateGuestParams extends GuestConfig {
 /**
  * 云主机删除请求参数
  * @interface
- * @property {string} guest - 云主机ID
+ * @property guest - 云主机ID
  */
 export interface ControlDeleteGuestParams {
   guest: string;
@@ -369,8 +369,8 @@ export interface ControlDeleteGuestParams {
 /**
  * 云主机添加磁盘请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {VolumeSpec} volume - 磁盘规格
+ * @property guest - 云主机ID
+ * @property volume - 磁盘规格
  */
 export interface ControlAddVolumeParams {
   guest: string;
@@ -379,8 +379,8 @@ export interface ControlAddVolumeParams {
 /**
  * 云主机删除磁盘请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {string} tag - 磁盘标签
+ * @property guest - 云主机ID
+ * @property tag - 磁盘标签
  */
 export interface ControlDeleteVolumeParams {
   guest: string;
@@ -389,8 +389,8 @@ export interface ControlDeleteVolumeParams {
 /**
  * 云主机修改CPU请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {number} cores - 核心数
+ * @property guest - 云主机ID
+ * @property cores - 核心数
  */
 export interface ControlModifyCPUParams {
   guest: string;
@@ -399,8 +399,8 @@ export interface ControlModifyCPUParams {
 /**
  * 云主机修改内存请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {number} memory - 内存大小，单位MB
+ * @property guest - 云主机ID
+ * @property memory - 内存大小，单位MB
  */
 export interface ControlModifyMemoryParams {
   guest: string;
@@ -409,8 +409,8 @@ export interface ControlModifyMemoryParams {
 /**
  * 云主机修改主机名请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {string} hostname - 主机名
+ * @property guest - 云主机ID
+ * @property hostname - 主机名
  */
 export interface ControlModifyHostnameParams {
   guest: string;
@@ -419,7 +419,7 @@ export interface ControlModifyHostnameParams {
 /**
  * 云主机重置监控密码请求参数
  * @interface
- * @property {string} guest - 云主机ID
+ * @property guest - 云主机ID
  */
 export interface ControlResetMonitorParams {
   guest: string;
@@ -427,8 +427,8 @@ export interface ControlResetMonitorParams {
 /**
  * 云主机启动请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {string} media - 媒体ID，无媒体启动留空
+ * @property guest - 云主机ID
+ * @property media - 媒体ID，无媒体启动留空
  */
 export interface ControlStartGuestParams {
   guest: string;
@@ -437,9 +437,9 @@ export interface ControlStartGuestParams {
 /**
  * 云主机停止请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {boolean} reboot - 是否重启
- * @property {boolean} force - 是否强制停止
+ * @property guest - 云主机ID
+ * @property reboot - 是否重启
+ * @property force - 是否强制停止
  */
 export interface ControlStopGuestParams {
   guest: string;
@@ -449,9 +449,9 @@ export interface ControlStopGuestParams {
 /**
  * 云主机修改密码请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {string} user - 用户名
- * @property {string} password - 密码
+ * @property guest - 云主机ID
+ * @property user - 用户名
+ * @property password - 密码
  */
 export interface ControlModifyPasswordParams {
   guest: string;
@@ -461,8 +461,8 @@ export interface ControlModifyPasswordParams {
 /**
  * 云主机修改自动启动请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {boolean} enable - 是否自动启动
+ * @property guest - 云主机ID
+ * @property enable - 是否自动启动
  */
 export interface ControlModifyAutoStartParams {
   guest: string;
@@ -471,8 +471,8 @@ export interface ControlModifyAutoStartParams {
 /**
  * 云主机添加媒体请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {string} media - 媒体ID
+ * @property guest - 云主机ID
+ * @property media - 媒体ID
  */
 export interface ControlInsertMediaParams {
   guest: string;
@@ -481,7 +481,7 @@ export interface ControlInsertMediaParams {
 /**
  * 云主机弹出媒体请求参数
  * @interface
- * @property {string} guest - 云主机ID
+ * @property guest - 云主机ID
  */
 export interface ControlEjectMediaParams {
   guest: string;
@@ -489,9 +489,9 @@ export interface ControlEjectMediaParams {
 /**
  * 云主机调整磁盘大小请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {string} volume - 磁盘标签
- * @property {number} size - 目标大小
+ * @property guest - 云主机ID
+ * @property volume - 磁盘标签
+ * @property size - 目标大小
  */
 export interface ControlResizeDiskParams {
   guest: string;
@@ -501,8 +501,8 @@ export interface ControlResizeDiskParams {
 /**
  * 云主机压缩磁盘请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {string} volume - 磁盘标签
+ * @property guest - 云主机ID
+ * @property volume - 磁盘标签
  */
 export interface ControlShrinkDiskParams {
   guest: string;
@@ -511,9 +511,9 @@ export interface ControlShrinkDiskParams {
 /**
  * 云主机安装镜像请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {string} volume - 磁盘标签
- * @property {string} file - 镜像文件ID
+ * @property guest - 云主机ID
+ * @property volume - 磁盘标签
+ * @property file - 镜像文件ID
  */
 export interface ControlInstallDiskImageParams {
   guest: string;
@@ -523,10 +523,10 @@ export interface ControlInstallDiskImageParams {
 /**
  * 云主机创建镜像请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {string} volume - 磁盘标签
- * @property {FileSpec} spec - 镜像规格
- * @property {ResourceAccessLevel} access_level - 资源访问级别
+ * @property guest - 云主机ID
+ * @property volume - 磁盘标签
+ * @property spec - 镜像规格
+ * @property access_level - 资源访问级别
  */
 export interface ControlCreateDiskImageParams {
   guest: string;
@@ -537,7 +537,7 @@ export interface ControlCreateDiskImageParams {
 /**
  * 读取任务请求参数
  * @interface
- * @property {string} id - 任务ID
+ * @property id - 任务ID
  */
 export interface ControlGetTaskParams {
   id: string;
@@ -545,8 +545,8 @@ export interface ControlGetTaskParams {
 /**
  * 查询任务列表请求参数
  * @interface
- * @property {number} offset - 偏移量
- * @property {number} page_size - 每页数量
+ * @property offset - 偏移量
+ * @property page_size - 每页数量
  */
 export interface ControlQueryTasksParams {
   offset: number;
@@ -555,7 +555,7 @@ export interface ControlQueryTasksParams {
 /**
  * 集群删除节点请求参数
  * @interface
- * @property {string} id - 节点ID
+ * @property id - 节点ID
  */
 export interface ControlRemoveNodeParams {
   id: string;
@@ -564,7 +564,7 @@ export interface ControlRemoveNodeParams {
 /**
  * 获取节点信息请求参数
  * @interface
- * @property {string} id - 节点ID
+ * @property id - 节点ID
  */
 export interface ControlGetNodeParams {
   id: string;
@@ -572,7 +572,7 @@ export interface ControlGetNodeParams {
 /**
  * 获取计算资源池请求参数
  * @interface
- * @property {string} id - 资源池ID
+ * @property id - 资源池ID
  */
 export interface ControlGetPoolParams {
   id: string;
@@ -580,7 +580,7 @@ export interface ControlGetPoolParams {
 /**
  * 删除计算资源池请求参数
  * @interface
- * @property {string} id - 资源池ID
+ * @property id - 资源池ID
  */
 export interface ControlDeletePoolParams {
   id: string;
@@ -588,8 +588,8 @@ export interface ControlDeletePoolParams {
 /**
  * 添加计算资源池节点请求参数
  * @interface
- * @property {string} pool - 资源池ID
- * @property {string} node - 节点ID
+ * @property pool - 资源池ID
+ * @property node - 节点ID
  */
 export interface ControlAddPoolNodeParams {
   pool: string;
@@ -598,8 +598,8 @@ export interface ControlAddPoolNodeParams {
 /**
  * 删除计算资源池节点请求参数
  * @interface
- * @property {string} pool - 资源池ID
- * @property {string} node - 节点ID
+ * @property pool - 资源池ID
+ * @property node - 节点ID
  */
 export interface ControlRemovePoolNodeParams {
   pool: string;
@@ -608,7 +608,7 @@ export interface ControlRemovePoolNodeParams {
 /**
  * 获取存储资源池请求参数
  * @interface
- * @property {string} id - 资源池ID
+ * @property id - 资源池ID
  */
 export interface ControlGetStoragePoolParams {
   id: string;
@@ -616,12 +616,12 @@ export interface ControlGetStoragePoolParams {
 /**
  * 添加存储资源池请求参数
  * @interface
- * @property {string} id - 资源池ID
- * @property {StorageType} type - 资源池类型
- * @property {string} description - 资源池描述
- * @property {string} uri - 资源池URI
- * @property {string} access_token - 资源池访问令牌
- * @property {string} access_secret - 资源池访问密钥
+ * @property id - 资源池ID
+ * @property type - 资源池类型
+ * @property description - 资源池描述
+ * @property uri - 资源池URI
+ * @property access_token - 资源池访问令牌
+ * @property access_secret - 资源池访问密钥
  */
 export interface ControlAddStoragePoolParams {
   id: string;
@@ -634,7 +634,7 @@ export interface ControlAddStoragePoolParams {
 /**
  * 删除存储资源池请求参数
  * @interface
- * @property {string} id - 资源池ID
+ * @property id - 资源池ID
  */
 export interface ControlRemoveStoragePoolParams {
   id: string;
@@ -642,8 +642,8 @@ export interface ControlRemoveStoragePoolParams {
 /**
  * 修改后端存储策略请求参数
  * @interface
- * @property {string} pool_id - 资源池ID
- * @property {VolumeContainerStrategy} strategy - 存储策略
+ * @property pool_id - 资源池ID
+ * @property strategy - 存储策略
  */
 export interface ControlModifyRemoteStorageStrategyParams {
   pool_id: string;
@@ -652,8 +652,8 @@ export interface ControlModifyRemoteStorageStrategyParams {
 /**
  * 添加后端存储容器请求参数
  * @interface
- * @property {string} pool_id - 资源池ID
- * @property {VolumeContainer} container - 存储容器
+ * @property pool_id - 资源池ID
+ * @property container - 存储容器
  */
 export interface ControlAddRemoteContainerParams {
   pool_id: string;
@@ -662,9 +662,9 @@ export interface ControlAddRemoteContainerParams {
 /**
  * 修改后端存储容器请求参数
  * @interface
- * @property {string} pool_id - 资源池ID
- * @property {number} index - 容器索引
- * @property {VolumeContainer} container - 存储容器
+ * @property pool_id - 资源池ID
+ * @property index - 容器索引
+ * @property container - 存储容器
  */
 export interface ControlModifyRemoteContainerParams {
   pool_id: string;
@@ -674,8 +674,8 @@ export interface ControlModifyRemoteContainerParams {
 /**
  * 删除后端存储容器请求参数
  * @interface
- * @property {string} pool_id - 资源池ID
- * @property {number} index - 容器索引
+ * @property pool_id - 资源池ID
+ * @property index - 容器索引
  */
 export interface ControlRemoveRemoteContainerParams {
   pool_id: string;
@@ -684,9 +684,9 @@ export interface ControlRemoveRemoteContainerParams {
 /**
  * 修改后端存储容器状态请求参数
  * @interface
- * @property {string} pool_id - 资源池ID
- * @property {number} index - 容器索引
- * @property {boolean} enabled - 是否启用
+ * @property pool_id - 资源池ID
+ * @property index - 容器索引
+ * @property enabled - 是否启用
  */
 export interface ControlChangeRemoteContainerFlagParams {
   pool_id: string;
@@ -722,9 +722,9 @@ export interface ControlAddressRangeParams {
 /**
  * 查询云主机请求参数
  * @interface
- * @property {number} start - 起始索引
- * @property {number} limit - 每页数量
- * @property {GuestFilter} filter - 云主机筛选条件
+ * @property start - 起始索引
+ * @property limit - 每页数量
+ * @property filter - 云主机筛选条件
  */
 export interface ControlQueryGuestsParams {
   start: number;
@@ -734,7 +734,7 @@ export interface ControlQueryGuestsParams {
 /**
  * 获取云主机详情请求参数
  * @interface
- * @property {string} id - 云主机ID
+ * @property id - 云主机ID
  */
 export interface ControlGetGuestParams {
   id: string;
@@ -742,7 +742,7 @@ export interface ControlGetGuestParams {
 /**
  * 获取文件请求参数
  * @interface
- * @property {string} id - 云主机ID
+ * @property id - 文件ID
  */
 export interface ControlGetFileParams {
   id: string;
@@ -750,9 +750,9 @@ export interface ControlGetFileParams {
 /**
  * 查询文件请求参数
  * @interface
- * @property {number} start - 起始索引
- * @property {number} limit - 每页数量
- * @property {boolean} only_self - 是否只查询当前用户的文件
+ * @property start - 起始索引
+ * @property limit - 每页数量
+ * @property only_self - 是否只查询当前用户的文件
  */
 export interface ControlQueryFileParams {
   start: number;
@@ -762,8 +762,8 @@ export interface ControlQueryFileParams {
 /**
  * 创建文件请求参数
  * @interface
- * @property {FileSpec} spec - 文件规格
- * @property {ResourceAccessLevel} access_level - 资源访问级别
+ * @property spec - 文件规格
+ * @property access_level - 资源访问级别
  */
 export interface CreateFileParams {
   spec: FileSpec;
@@ -772,8 +772,8 @@ export interface CreateFileParams {
 /**
  * 修改文件请求参数
  * @interface
- * @property {string} id - 文件ID
- * @property {FileSpec} spec - 文件规格
+ * @property id - 文件ID
+ * @property spec - 文件规格
  */
 export interface ModifyFileParams {
   id: string;
@@ -782,7 +782,7 @@ export interface ModifyFileParams {
 /**
  * 删除文件请求参数
  * @interface
- * @property {string} id - 文件ID
+ * @property id - 文件ID
  */
 export interface DeleteFileParams {
   id: string;
@@ -790,7 +790,7 @@ export interface DeleteFileParams {
 /**
  * 资源节点存储池查询请求参数
  * @interface
- * @property {string} node_id - 节点ID
+ * @property node_id - 节点ID
  */
 export interface ControlQueryResourcePoolsParams {
   node_id: string;
@@ -798,9 +798,9 @@ export interface ControlQueryResourcePoolsParams {
 /**
  * 资源节点存储池策略修改请求参数
  * @interface
- * @property {string} node_id - 节点ID
- * @property {string} pool_id - 存储池ID
- * @property {VolumeContainerStrategy} strategy - 存储策略
+ * @property node_id - 节点ID
+ * @property pool_id - 存储池ID
+ * @property strategy - 存储策略
  */
 export interface ControlModifyResourceStorageStrategyParams {
   node_id: string;
@@ -810,9 +810,9 @@ export interface ControlModifyResourceStorageStrategyParams {
 /**
  * 资源节点存储容器添加请求参数
  * @interface
- * @property {string} node_id - 节点ID
- * @property {string} pool_id - 存储池ID
- * @property {VolumeContainer} container - 存储容器
+ * @property node_id - 节点ID
+ * @property pool_id - 存储池ID
+ * @property container - 存储容器
  */
 export interface ControlAddResourceContainerParams {
   node_id: string;
@@ -822,10 +822,10 @@ export interface ControlAddResourceContainerParams {
 /**
  * 资源节点存储容器修改请求参数
  * @interface
- * @property {string} node_id - 节点ID
- * @property {string} pool_id - 存储池ID
- * @property {number} index - 容器索引
- * @property {VolumeContainer} container - 存储容器
+ * @property node_id - 节点ID
+ * @property pool_id - 存储池ID
+ * @property index - 容器索引
+ * @property container - 存储容器
  */
 export interface ControlModifyResourceContainerParams {
   node_id: string;
@@ -836,9 +836,9 @@ export interface ControlModifyResourceContainerParams {
 /**
  * 资源节点存储容器删除请求参数
  * @interface
- * @property {string} node_id - 节点ID
- * @property {string} pool_id - 存储池ID
- * @property {number} index - 容器索引
+ * @property node_id - 节点ID
+ * @property pool_id - 存储池ID
+ * @property index - 容器索引
  */
 export interface ControlRemoveResourceContainerParams {
   node_id: string;
@@ -848,10 +848,10 @@ export interface ControlRemoveResourceContainerParams {
 /**
  * 资源节点存储容器状态修改请求参数
  * @interface
- * @property {string} node_id - 节点ID
- * @property {string} pool_id - 存储池ID
- * @property {number} index - 容器索引
- * @property {boolean} enabled - 是否启用
+ * @property node_id - 节点ID
+ * @property pool_id - 存储池ID
+ * @property index - 容器索引
+ * @property enabled - 是否启用
  */
 export interface ControlChangeResourceContainerFlagParams {
   node_id: string;
@@ -862,7 +862,7 @@ export interface ControlChangeResourceContainerFlagParams {
 /**
  * 云主机快照查询请求参数
  * @interface
- * @property {string} guest - 云主机ID
+ * @property guest - 云主机ID
  */
 export interface ControlQuerySnapshotParams {
   guest: string;
@@ -870,8 +870,8 @@ export interface ControlQuerySnapshotParams {
 /**
  * 云主机快照详情请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {string} snapshot - 快照ID
+ * @property guest - 云主机ID
+ * @property snapshot - 快照ID
  */
 export interface ControlGetSnapshotParams {
   guest: string;
@@ -880,9 +880,9 @@ export interface ControlGetSnapshotParams {
 /**
  * 云主机快照创建请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {string} label - 快照标签
- * @property {string} description - 快照描述
+ * @property guest - 云主机ID
+ * @property label - 快照标签
+ * @property description - 快照描述
  */
 export interface ControlCreateSnapshotParams {
   guest: string;
@@ -892,8 +892,8 @@ export interface ControlCreateSnapshotParams {
 /**
  * 云主机快照恢复请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {string} snapshot - 快照ID
+ * @property guest - 云主机ID
+ * @property snapshot - 快照ID
  */
 export interface ControlRestoreSnapshotParams {
   guest: string;
@@ -902,8 +902,8 @@ export interface ControlRestoreSnapshotParams {
 /**
  * 云主机快照删除请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {string} snapshot - 快照ID
+ * @property guest - 云主机ID
+ * @property snapshot - 快照ID
  */
 export interface ControlDeleteSnapshotParams {
   guest: string;
@@ -912,7 +912,7 @@ export interface ControlDeleteSnapshotParams {
 /**
  * 查询云主机资源用量请求参数
  * @interface
- * @property {string[]} targets - 目标云主机ID列表
+ * @property targets - 目标云主机ID列表
  */
 export interface ControlQueryResourceUsagesParams {
   targets: string[];
@@ -920,8 +920,8 @@ export interface ControlQueryResourceUsagesParams {
 /**
  * 查询云主机资源统计请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {StatisticRange} range - 统计范围
+ * @property guest - 云主机ID
+ * @property range - 统计范围
  */
 export interface ControlQueryResourceStatisticParams {
   guest: string;
@@ -930,7 +930,7 @@ export interface ControlQueryResourceStatisticParams {
 /**
  * 计算资源池查询所属节点列表请求参数
  * @interface
- * @property {string} pool_id - 存储池ID
+ * @property pool_id - 存储池ID
  */
 export interface ControlQueryComputeNodesParams {
   pool_id: string;
@@ -938,7 +938,7 @@ export interface ControlQueryComputeNodesParams {
 /**
  * 查询节点资源用量请求参数
  * @interface
- * @property {string[]} targets - 目标云主机ID列表
+ * @property targets - 目标云主机ID列表
  */
 export interface ControlQueryNodesUsageParams {
   targets: string[];
@@ -946,7 +946,7 @@ export interface ControlQueryNodesUsageParams {
 /**
  * 查询计算池资源用量请求参数
  * @interface
- * @property {string[]} targets - 目标存储池ID列表
+ * @property targets - 目标存储池ID列表
  */
 export interface ControlQueryPoolsUsageParams {
   targets: string[];
@@ -954,7 +954,7 @@ export interface ControlQueryPoolsUsageParams {
 /**
  * 修改节点状态请求参数
  * @interface
- * @property {string} node_id - 节点ID
+ * @property node_id - 节点ID
  */
 export interface ControlNodeFlagParams {
   node_id: string;
@@ -962,8 +962,8 @@ export interface ControlNodeFlagParams {
 /**
  * 修改计算池分配策略请求参数
  * @interface
- * @property {string} pool_id - 存储池ID
- * @property {ComputePoolStrategy} strategy - 存储策略
+ * @property pool_id - 存储池ID
+ * @property strategy - 存储策略
  */
 export interface ControlComputePoolStrategyParams {
   pool_id: string;
@@ -972,9 +972,9 @@ export interface ControlComputePoolStrategyParams {
 /**
  * 查询操作日志请求参数
  * @interface
- * @property {string} date - 日期
- * @property {number} offset - 偏移量
- * @property {number} limit - 限制数量
+ * @property date - 日期
+ * @property offset - 偏移量
+ * @property limit - 限制数量
  */
 export interface ControlQueryLogsParams {
   date: string; //'2006-01-02'
@@ -984,10 +984,10 @@ export interface ControlQueryLogsParams {
 /**
  * 查询警告列表请求参数
  * @interface
- * @property {ConsoleEventLevel} level - 警告等级
- * @property {boolean} unread_only - 是否只查询未读警告
- * @property {number} offset - 偏移量
- * @property {number} limit - 限制数量
+ * @property level - 警告等级
+ * @property unread_only - 是否只查询未读警告
+ * @property offset - 偏移量
+ * @property limit - 限制数量
  */
 export interface ControlQueryWarningsParams {
   level?: ConsoleEventLevel;
@@ -998,7 +998,7 @@ export interface ControlQueryWarningsParams {
 /**
  * 查询警告数量请求参数
  * @interface
- * @property {string} node_id - 节点ID
+ * @property node_id - 节点ID
  */
 export interface ControlCountWarningsParams {
   node_id: string;
@@ -1006,7 +1006,7 @@ export interface ControlCountWarningsParams {
 /**
  * 统计警告总数请求参数
  * @interface
- * @property {string[]} node_list - 节点ID列表
+ * @property node_list - 节点ID列表
  */
 export interface ControlSumWarningsParams {
   node_list: string[];
@@ -1014,7 +1014,7 @@ export interface ControlSumWarningsParams {
 /**
  * 删除警告请求参数
  * @interface
- * @property {string[]} id_list - 警告ID列表
+ * @property id_list - 警告ID列表
  */
 export interface ControlRemoveWarningsParams {
   id_list: string[];
@@ -1022,7 +1022,7 @@ export interface ControlRemoveWarningsParams {
 /**
  * 标记警告为已读请求参数
  * @interface
- * @property {string[]} id_list - 警告ID列表
+ * @property id_list - 警告ID列表
  */
 export interface ControlMarkWarningsAsReadParams {
   id_list: string[];
@@ -1030,8 +1030,8 @@ export interface ControlMarkWarningsAsReadParams {
 /**
  * 修改节点配置请求参数
  * @interface
- * @property {string} node_id - 节点ID
- * @property {NodeConfig} config - 节点配置
+ * @property node_id - 节点ID
+ * @property config - 节点配置
  */
 export interface ControlModifyConfigParams {
   node_id: string;
@@ -1040,7 +1040,7 @@ export interface ControlModifyConfigParams {
 /**
  * 获取节点配置请求参数
  * @interface
- * @property {string} node_id - 节点ID
+ * @property node_id - 节点ID
  */
 export interface ControlGetConfigParams {
   node_id: string;
@@ -1048,7 +1048,7 @@ export interface ControlGetConfigParams {
 /**
  * 重启节点服务请求参数
  * @interface
- * @property {string} node_id - 节点ID
+ * @property node_id - 节点ID
  */
 export interface ControlRestartServiceParams {
   node_id: string;
@@ -1056,9 +1056,9 @@ export interface ControlRestartServiceParams {
 /**
  * 添加SSH密钥请求参数
  * @interface
- * @property {string} label - 密钥标签
- * @property {string} content - 密钥内容
- * @property {ResourceAccessLevel} access_level - 资源访问级别
+ * @property label - 密钥标签
+ * @property content - 密钥内容
+ * @property access_level - 资源访问级别
  */
 export interface ControlAddSSHKeyParams {
   label: string;
@@ -1068,7 +1068,7 @@ export interface ControlAddSSHKeyParams {
 /**
  * 删除SSH密钥请求参数
  * @interface
- * @property {string} id - 密钥ID
+ * @property id - 密钥ID
  */
 export interface ControlRemoveSSHKeyParams {
   id: string;
@@ -1076,9 +1076,9 @@ export interface ControlRemoveSSHKeyParams {
 /**
  * 查询SSH密钥列表请求参数
  * @interface
- * @property {number} offset - 查询起始偏移量
- * @property {number} limit - 每页数量
- * @property {boolean} only_self - 是否只查询当前用户的密钥
+ * @property offset - 查询起始偏移量
+ * @property limit - 每页数量
+ * @property only_self - 是否只查询当前用户的密钥
  */
 export interface ControlQuerySSHKeysParams {
   offset: number;
@@ -1088,7 +1088,7 @@ export interface ControlQuerySSHKeysParams {
 /**
  * 获取许可证详情请求参数
  * @interface
- * @property {string} id - 许可证ID
+ * @property id - 许可证ID
  */
 export interface ControlGetLicenseParams {
   id: string;
@@ -1096,7 +1096,7 @@ export interface ControlGetLicenseParams {
 /**
  * 激活许可证请求参数
  * @interface
- * @property {string} id - 许可证ID
+ * @property id - 许可证ID
  */
 export interface ControlActiveLicenseParams {
   id: string;
@@ -1104,7 +1104,7 @@ export interface ControlActiveLicenseParams {
 /**
  * 添加许可证请求参数
  * @interface
- * @property {License} license - 许可证信息
+ * @property license - 许可证信息
  */
 export interface ControlAddLicenseParams {
   license: License;
@@ -1112,7 +1112,7 @@ export interface ControlAddLicenseParams {
 /**
  * 删除许可证请求参数
  * @interface
- * @property {string} id - 许可证ID
+ * @property id - 许可证ID
  */
 export interface ControlRemoveLicenseParams {
   id: string;
@@ -1120,7 +1120,7 @@ export interface ControlRemoveLicenseParams {
 /**
  * 修改监控规则请求参数
  * @interface
- * @property {ResourceMonitorConfig} config - 监控规则配置
+ * @property config - 监控规则配置
  */
 export interface ControlSetMonitorRulesParams {
   config: ResourceMonitorConfig;
@@ -1128,8 +1128,8 @@ export interface ControlSetMonitorRulesParams {
 /**
  * 节点重载存储请求参数
  * @interface
- * @property {string} node_id - 节点ID
- * @property {string} pool_id - 存储池ID
+ * @property node_id - 节点ID
+ * @property pool_id - 存储池ID
  */
 export interface ControlReloadResourceStorageParams {
   node_id: string;
@@ -1138,8 +1138,8 @@ export interface ControlReloadResourceStorageParams {
 /**
  * 修改磁盘卷大小请求参数
  * @interface
- * @property {string} id - 磁盘卷ID
- * @property {number} size - 目标大小（MB）
+ * @property id - 磁盘卷ID
+ * @property size - 目标大小（MB）
  */
 export interface ControlUpdateDiskVolumeSizeParams {
   id: string;
@@ -1148,10 +1148,10 @@ export interface ControlUpdateDiskVolumeSizeParams {
 /**
  * 添加导入源请求参数
  * @interface
- * @property {ImportVendor} vendor - 导入源供应商
- * @property {string} url - 导入源URL
- * @property {string} token - 导入源访问令牌
- * @property {string} secret - 导入源访问密钥
+ * @property vendor - 导入源供应商
+ * @property url - 导入源URL
+ * @property token - 导入源访问令牌
+ * @property secret - 导入源访问密钥
  */
 export interface ControlAddImportSourceParams {
   vendor: ImportVendor;
@@ -1162,10 +1162,10 @@ export interface ControlAddImportSourceParams {
 /**
  * 修改导入源请求参数
  * @interface
- * @property {string} id - 导入源ID
- * @property {string} url - 导入源URL
- * @property {string} token - 导入源访问令牌
- * @property {string} secret - 导入源访问密钥
+ * @property id - 导入源ID
+ * @property url - 导入源URL
+ * @property token - 导入源访问令牌
+ * @property secret - 导入源访问密钥
  */
 export interface ControlModifyImportSourceParams {
   id: string;
@@ -1176,7 +1176,7 @@ export interface ControlModifyImportSourceParams {
 /**
  * 删除导入源请求参数
  * @interface
- * @property {string} id - 导入源ID
+ * @property id - 导入源ID
  */
 export interface ControlRemoveImportSourceParams {
   id: string;
@@ -1184,8 +1184,8 @@ export interface ControlRemoveImportSourceParams {
 /**
  * 查询导入源列表请求参数
  * @interface
- * @property {number} start - 起始偏移量
- * @property {number} limit - 限制数量
+ * @property start - 起始偏移量
+ * @property limit - 限制数量
  */
 export interface ControlQueryImportSourcesParams {
   start: number;
@@ -1194,7 +1194,7 @@ export interface ControlQueryImportSourcesParams {
 /**
  * 查询导入目标列表请求参数
  * @interface
- * @property {string} source - 导入源ID
+ * @property source - 导入源ID
  */
 export interface ControlQueryImportTargetsParams {
   source: string;
@@ -1202,9 +1202,9 @@ export interface ControlQueryImportTargetsParams {
 /**
  * 导入云主机请求参数
  * @interface
- * @property {string} source - 导入源ID
- * @property {string[]} guests - 客户机ID列表
- * @property {string} to_node - 目标节点ID（可选）
+ * @property source - 导入源ID
+ * @property guests - 客户机ID列表
+ * @property to_node - 目标节点ID（可选）
  */
 export interface ControlImportGuestsParams {
   source: string;
@@ -1214,9 +1214,9 @@ export interface ControlImportGuestsParams {
 /**
  * 查询系统模板列表请求参数
  * @interface
- * @property {number} offset - 分页偏移量
- * @property {number} limit - 每页数量
- * @property {boolean} only_self - 是否只查询当前用户的系统模板
+ * @property offset - 分页偏移量
+ * @property limit - 每页数量
+ * @property only_self - 是否只查询当前用户的系统模板
  */
 export interface ControlQuerySystemsParams {
   offset: number;
@@ -1226,7 +1226,7 @@ export interface ControlQuerySystemsParams {
 /**
  * 获取系统模板详情请求参数
  * @interface
- * @property {string} id - 系统模板ID
+ * @property id - 系统模板ID
  */
 export interface ControlGetSystemParams {
   id: string;
@@ -1234,9 +1234,9 @@ export interface ControlGetSystemParams {
 /**
  * 添加系统模板请求参数
  * @interface
- * @property {string} label - 系统模板名称
- * @property {GuestSystemSpec} spec - 系统模板规格
- * @property {ResourceAccessLevel} access_level - 资源访问级别
+ * @property label - 系统模板名称
+ * @property spec - 系统模板规格
+ * @property access_level - 资源访问级别
  */
 export interface ControlAddSystemParams {
   label: string;
@@ -1246,9 +1246,9 @@ export interface ControlAddSystemParams {
 /**
  * 修改系统模板请求参数
  * @interface
- * @property {string} id - 系统模板ID
- * @property {string} label - 系统模板名称
- * @property {GuestSystemSpec} spec - 系统模板规格
+ * @property id - 系统模板ID
+ * @property label - 系统模板名称
+ * @property spec - 系统模板规格
  */
 export interface ControlModifySystemParams {
   id: string;
@@ -1258,7 +1258,7 @@ export interface ControlModifySystemParams {
 /**
  * 删除系统模板请求参数
  * @interface
- * @property {string} id - 系统模板ID
+ * @property id - 系统模板ID
  */
 export interface ControlRemoveSystemParams {
   id: string;
@@ -1266,8 +1266,8 @@ export interface ControlRemoveSystemParams {
 /**
  * 迁移云主机到目标节点请求参数
  * @interface
- * @property {string} target_node - 目标节点ID
- * @property {string[]} guests - 云主机ID列表
+ * @property target_node - 目标节点ID
+ * @property guests - 云主机ID列表
  */
 export interface ControlMigrateToNodeParams {
   target_node: string;
@@ -1276,9 +1276,9 @@ export interface ControlMigrateToNodeParams {
 /**
  * 修改外部网卡MAC地址请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {string} device - 设备名称
- * @property {string} mac_address - 新MAC地址
+ * @property guest - 云主机ID
+ * @property device - 设备名称
+ * @property mac_address - 新MAC地址
  */
 export interface ControlModifyExternalInterfaceMACParams {
   guest: string;
@@ -1288,9 +1288,9 @@ export interface ControlModifyExternalInterfaceMACParams {
 /**
  * 修改内部网卡MAC地址请求参数
  * @interface
- * @property {string} guest - 云主机ID
- * @property {string} device - 设备名称
- * @property {string} mac_address - 新MAC地址
+ * @property guest - 云主机ID
+ * @property device - 设备名称
+ * @property mac_address - 新MAC地址
  */
 export interface ControlModifyInternalInterfaceMACParams {
   guest: string;
@@ -1300,8 +1300,8 @@ export interface ControlModifyInternalInterfaceMACParams {
 /**
  * 获取资源权限的请求参数
  * @interface
- * @property {ResourceType} type - 资源类型
- * @property {string} id - 资源ID
+ * @property type - 资源类型
+ * @property id - 资源ID
  */
 export interface ControlGetResourcePermissionsParams {
   type: ResourceType;
@@ -1311,9 +1311,9 @@ export interface ControlGetResourcePermissionsParams {
 /**
  * 设置资源权限的请求参数
  * @interface
- * @property {ResourceType} type - 资源类型
- * @property {string} id - 资源ID
- * @property {ResourcePermissions} permissions - 资源权限
+ * @property type - 资源类型
+ * @property id - 资源ID
+ * @property permissions - 资源权限
  */
 export interface ControlSetResourcePermissionsParams {
   type: ResourceType;
@@ -1324,9 +1324,9 @@ export interface ControlSetResourcePermissionsParams {
 /**
  * 设置系统资源的请求参数
  * @interface
- * @property {ResourceType} type - 资源类型
- * @property {string} id - 资源ID
- * @property {boolean} value - 资源值
+ * @property type - 资源类型
+ * @property id - 资源ID
+ * @property value - 资源值
  */
 export interface ControlSetSystemResourceParams {
   type: ResourceType;
@@ -1337,7 +1337,7 @@ export interface ControlSetSystemResourceParams {
 /**
  * 添加白名单请求参数
  * @interface
- * @property {string} address - 白名单IP或者IP段(CIDR)
+ * @property address - 白名单IP或者IP段(CIDR)
  */
 export interface ControlAddWhiteListParams {
   address: string;
@@ -1346,7 +1346,7 @@ export interface ControlAddWhiteListParams {
 /**
  * 移除白名单请求参数
  * @interface
- * @property {number} index - 白名单索引
+ * @property index - 白名单索引
  */
 export interface ControlRemoveWhiteListParams {
   index: number;
@@ -1355,8 +1355,8 @@ export interface ControlRemoveWhiteListParams {
 /**
  * 更新白名单请求参数
  * @interface
- * @property {number} index - 白名单索引
- * @property {string} address - 白名单IP或者IP段(CIDR)
+ * @property index - 白名单索引
+ * @property address - 白名单IP或者IP段(CIDR)
  */
 export interface ControlUpdateWhiteListParams {
   index: number;
@@ -1366,8 +1366,8 @@ export interface ControlUpdateWhiteListParams {
 /**
  * 查询白名单请求参数
  * @interface
- * @property {number} offset - 查询起始偏移量
- * @property {number} limit - 分页大小
+ * @property offset - 查询起始偏移量
+ * @property limit - 分页大小
  */
 export interface ControlQueryWhiteListParams {
   offset: number;
@@ -1378,8 +1378,8 @@ export interface ControlQueryWhiteListParams {
  * 修改用户组角色
  * @interface ControlModifyGroupRolesParams
  * 用户组操作参数结构 - 修改用户组角色参数
- * @property {string} group 用户组名称
- * @property {UserRole[]} roles 用户角色列表
+ * @property group - 用户组名称
+ * @property roles - 用户角色列表
  */
 export interface ControlModifyGroupRolesParams {
   group: string;
@@ -1390,7 +1390,7 @@ export interface ControlModifyGroupRolesParams {
  * 获取用户组角色
  * @interface ControlGetGroupRolesParams
  * 获取用户组角色参数
- * @property {string} group 用户组名称
+ * @property group - 用户组名称
  */
 export interface ControlGetGroupRolesParams {
   group: string;
@@ -1400,9 +1400,9 @@ export interface ControlGetGroupRolesParams {
  * 查询用户组成员
  * @interface ControlQueryGroupMembersParams
  * 查询用户组成员参数
- * @property {string} group 用户组名称
- * @property {number} [offset] 偏移量，可选
- * @property {number} [limit] 限制数量，可选
+ * @property group - 用户组名称
+ * @property offset - 偏移量，可选
+ * @property limit - 限制数量，可选
  */
 export interface ControlQueryGroupMembersParams {
   group: string;
@@ -1414,7 +1414,7 @@ export interface ControlQueryGroupMembersParams {
  * 添加用户组
  * @interface ControlAddGroupParams
  * 添加用户组参数
- * @property {UserGroup} group 用户组信息
+ * @property group - 用户组信息
  */
 export interface ControlAddGroupParams {
   group: UserGroup;
@@ -1424,7 +1424,7 @@ export interface ControlAddGroupParams {
  * 删除用户组
  * @interface ControlRemoveGroupParams
  * 删除用户组参数
- * @property {string} group 用户组名称
+ * @property group - 用户组名称
  */
 export interface ControlRemoveGroupParams {
   group: string;
@@ -1434,8 +1434,8 @@ export interface ControlRemoveGroupParams {
  * 查询用户组列表
  * @interface ControlQueryGroupsParams
  * 查询用户组列表参数
- * @property {number} offset 偏移量
- * @property {number} limit 限制数量
+ * @property offset - 偏移量
+ * @property limit - 限制数量
  */
 export interface ControlQueryGroupsParams {
   offset: number;
@@ -1446,8 +1446,8 @@ export interface ControlQueryGroupsParams {
  * 初始化系统
  * @interface ControlInitializeSystemParams
  * 初始化系统参数
- * @property {string} user 用户名
- * @property {string} password 用户密码
+ * @property user - 用户名
+ * @property password - 用户密码
  */
 export interface ControlInitializeSystemParams {
   user: string;
@@ -1458,9 +1458,9 @@ export interface ControlInitializeSystemParams {
  * 添加用户
  * @interface ControlAddUserParams
  * 添加用户参数
- * @property {string} user 用户名
- * @property {string} group 用户所属组名
- * @property {string} password 用户密码
+ * @property user - 用户名
+ * @property group - 用户所属组名
+ * @property password - 用户密码
  */
 export interface ControlAddUserParams {
   user: string;
@@ -1472,7 +1472,7 @@ export interface ControlAddUserParams {
  * 删除用户
  * @interface ControlRemoveUserParams
  * 删除用户参数
- * @property {string} user 用户名
+ * @property user - 用户名
  */
 export interface ControlRemoveUserParams {
   user: string;
@@ -1482,8 +1482,8 @@ export interface ControlRemoveUserParams {
  * 查询用户列表
  * @interface ControlQueryUsersParams
  * 查询用户列表参数
- * @property {number} offset 偏移量
- * @property {number} limit 限制数量
+ * @property offset - 偏移量
+ * @property limit - 限制数量
  */
 export interface ControlQueryUsersParams {
   offset: number;
@@ -1494,8 +1494,8 @@ export interface ControlQueryUsersParams {
  * 修改用户所属组
  * @interface ControlChangeUserGroupParams
  * 修改用户所属组参数
- * @property {string} user 用户名
- * @property {string} group 目标用户组名称
+ * @property user - 用户名
+ * @property group - 目标用户组名称
  */
 export interface ControlChangeUserGroupParams {
   user: string;
@@ -1506,9 +1506,9 @@ export interface ControlChangeUserGroupParams {
  * 查询用户令牌列表
  * @interface ControlQueryUserTokensParams
  * 查询用户令牌列表参数
- * @property {string} user 用户名
- * @property {number} offset 偏移量
- * @property {number} limit 限制数量
+ * @property user - 用户名
+ * @property offset - 偏移量
+ * @property limit - 限制数量
  */
 export interface ControlQueryUserTokensParams {
   user: string;
@@ -1520,9 +1520,9 @@ export interface ControlQueryUserTokensParams {
  * 生成用户令牌
  * @interface ControlGenerateUserTokenParams
  * 生成用户令牌参数
- * @property {string} user 用户名
- * @property {string} [description] 令牌描述，可选
- * @property {number} [months] 令牌有效期（月），可选
+ * @property user - 用户名
+ * @property [description] - 令牌描述，可选
+ * @property [months] - 令牌有效期（月），可选
  */
 export interface ControlGenerateUserTokenParams {
   user: string;
@@ -1534,8 +1534,8 @@ export interface ControlGenerateUserTokenParams {
  * 撤销用户令牌
  * @interface ControlRevokeUserTokenParams
  * 撤销用户令牌参数
- * @property {string} user 用户名
- * @property {string} serial 令牌序列号
+ * @property user - 用户名
+ * @property serial - 令牌序列号
  */
 export interface ControlRevokeUserTokenParams {
   user: string;
@@ -1546,8 +1546,8 @@ export interface ControlRevokeUserTokenParams {
  * 修改用户密码请求参数
  * @interface ControlChangeUserSecretParams
  * 修改用户密码参数
- * @property {string} user 用户名
- * @property {string} password 新密码
+ * @property user - 用户名
+ * @property password - 新密码
  */
 export interface ControlChangeUserSecretParams {
   user: string;
@@ -1558,7 +1558,7 @@ export interface ControlChangeUserSecretParams {
  * 重置用户密码请求参数
  * @interface ControlResetUserSecretParams
  * 重置用户密码参数
- * @property {string} user 用户名
+ * @property user - 用户名
  */
 export interface ControlResetUserSecretParams {
   user: string;
@@ -1568,7 +1568,7 @@ export interface ControlResetUserSecretParams {
  * 撤销访问权限请求参数
  * @interface ControlRevokeAccessParams
  * 撤销访问权限参数
- * @property {string} token 访问令牌
+ * @property token - 访问令牌
  */
 export interface ControlRevokeAccessParams {
   token: string;
@@ -1578,7 +1578,7 @@ export interface ControlRevokeAccessParams {
  * 使访问权限失效请求参数
  * @interface ControlInvalidateAccessParams
  * 使访问权限失效参数
- * @property {string} token 访问令牌
+ * @property token - 访问令牌
  */
 export interface ControlInvalidateAccessParams {
   token: string;
@@ -1588,9 +1588,9 @@ export interface ControlInvalidateAccessParams {
  * 查询访问权限列表请求参数
  * @interface ControlQueryAccessesParams
  * 查询访问权限列表参数
- * @property {string} user 用户名
- * @property {number} offset 偏移量
- * @property {number} limit 限制数量
+ * @property user - 用户名
+ * @property offset - 偏移量
+ * @property limit - 限制数量
  */
 export interface ControlQueryAccessesParams {
   user: string;
@@ -1600,8 +1600,8 @@ export interface ControlQueryAccessesParams {
 /**
  * 查询当前用户已登录设备列表
  * @interface ControlQueryDevicesParams
- * @property {number} offset - 偏移量
- * @property {number} limit - 限制数量
+ * @property offset - 偏移量
+ * @property limit - 限制数量
  */
 export interface ControlQueryDevicesParams {
   offset: number;

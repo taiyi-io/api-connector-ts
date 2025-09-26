@@ -1,6 +1,6 @@
 /**
  * 控制命令枚举
- * @enum {string}
+ * @enum
  *
  */
 export declare enum controlCommandEnum {
@@ -526,7 +526,7 @@ export declare enum controlCommandEnum {
 }
 /**
  * 任务类型枚举
- * @enum {string}
+ * @enum
  */
 export declare enum TaskType {
     /**
@@ -697,7 +697,7 @@ export declare enum TaskType {
 }
 /**
  * 资源类型枚举
- * @enum {string}
+ * @enum
  */
 export declare enum ResourceType {
     /** SSH密钥   */
@@ -713,7 +713,7 @@ export declare enum ResourceType {
 }
 /**
  * 资源访问权限枚举
- * @enum {string}
+ * @enum
  */
 export declare enum ResourceAccessLevel {
     /**
@@ -739,7 +739,7 @@ export declare enum ResourceAccessLevel {
 }
 /**
  * 资源操作权限枚举
- * @enum {string}
+ * @enum
  */
 export declare enum ResourceAction {
     /**
@@ -760,7 +760,7 @@ export declare enum ResourceAction {
 }
 /**
  * 资源访问范围枚举
- * @enum {string}
+ * @enum
  */
 export declare enum ResourceAccessScope {
     /**
@@ -781,7 +781,7 @@ export declare enum ResourceAccessScope {
 }
 /**
  * 资源统计指标字段枚举
- * @enum {number}
+ * @enum
  */
 export declare enum StatisticUnitRecordField {
     /**
@@ -997,7 +997,7 @@ export declare enum StatisticUnitRecordField {
 }
 /**
  * 资源快照字段枚举
- * @enum {number}
+ * @enum
  */
 export declare enum ResourceSnapshotField {
     /**
@@ -1138,7 +1138,7 @@ export declare enum ResourceSnapshotField {
 }
 /**
  * 资源使用时长字段枚举
- * @enum {number}
+ * @enum
  */
 export declare enum ResourceUsageDurationField {
     /**
@@ -1244,7 +1244,7 @@ export declare enum ResourceUsageDurationField {
 }
 /**
  * 系统类别枚举
- * @enum {string}
+ * @enum
  */
 export declare enum SystemCategory {
     /**
@@ -1270,7 +1270,7 @@ export declare enum SystemCategory {
 }
 /**
  * 云主机磁盘模式枚举
- * @enum {string}
+ * @enum
  */
 export declare enum GuestDiskMode {
     /**
@@ -1311,7 +1311,7 @@ export declare enum GuestDiskMode {
 }
 /**
  * 网络模型类型枚举
- * @enum {string}
+ * @enum
  */
 export declare enum NetworkModelType {
     /**
@@ -1422,7 +1422,7 @@ export declare enum NetworkModelType {
 }
 /**
  * 显示驱动枚举
- * @enum {string}
+ * @enum
  */
 export declare enum DisplayDriver {
     /**
@@ -1453,7 +1453,7 @@ export declare enum DisplayDriver {
 }
 /**
  * 远程协议枚举
- * @enum {string}
+ * @enum
  */
 export declare enum RemoteProtocol {
     /**
@@ -1469,7 +1469,7 @@ export declare enum RemoteProtocol {
 }
 /**
  * USB控制器模型枚举
- * @enum {string}
+ * @enum
  */
 export declare enum USBModel {
     /**
@@ -1535,7 +1535,7 @@ export declare enum USBModel {
 }
 /**
  * 云主机固件模式枚举
- * @enum {string}
+ * @enum
  */
 export declare enum GuestFirmwareMode {
     /**
@@ -1561,7 +1561,7 @@ export declare enum GuestFirmwareMode {
 }
 /**
  * 云主机声音模型枚举
- * @enum {string}
+ * @enum
  */
 export declare enum GuestSoundModel {
     /**
@@ -1617,7 +1617,7 @@ export declare enum GuestSoundModel {
 }
 /**
  * 云主机平板模式枚举
- * @enum {string}
+ * @enum
  */
 export declare enum GuestTabletMode {
     /**
@@ -1638,7 +1638,7 @@ export declare enum GuestTabletMode {
 }
 /**
  * 任务状态枚举
- * @enum {string}
+ * @enum
  */
 export declare enum TaskStatus {
     /**
@@ -1659,7 +1659,7 @@ export declare enum TaskStatus {
 }
 /**
  * 云主机状态
- * @enum {string}
+ * @enum
  */
 export declare enum GuestState {
     /**
@@ -1700,7 +1700,7 @@ export declare enum GuestState {
 }
 /**
  * 网络模式
- * @enum {string}
+ * @enum
  */
 export declare enum NetworkMode {
     /** 桥接模式 */
@@ -1708,7 +1708,7 @@ export declare enum NetworkMode {
 }
 /**
  * 卷容器策略
- * @enum {string}
+ * @enum
  */
 export declare enum VolumeContainerStrategy {
     /** 最少分配磁盘卷的路径 */
@@ -1738,7 +1738,7 @@ export declare enum VolumeFormat {
 }
 /**
  * 接口模式
- * @enum {string}
+ * @enum
  */
 export declare enum InterfaceMode {
     /** 直接模式 */
@@ -1750,7 +1750,7 @@ export declare enum InterfaceMode {
 }
 /**
  * 节点模式
- * @enum {string}
+ * @enum
  */
 export declare enum NodeMode {
     /** 主控节点 */
@@ -1760,7 +1760,7 @@ export declare enum NodeMode {
 }
 /**
  * 节点状态
- * @enum {string}
+ * @enum
  */
 export declare enum NodeState {
     /** 已连接 */
@@ -1774,7 +1774,7 @@ export declare enum NodeState {
 }
 /**
  * 计算资源池分配资源节点策略
- * @enum {string}
+ * @enum
  */
 export declare enum ComputePoolStrategy {
     /** 最多可用内存 */
@@ -1805,7 +1805,7 @@ export declare enum AuthorizationMode {
 }
 /**
  * 许可证功能
- * @enum {string}
+ * @enum
  */
 export declare enum LicenseFeature {
     /** 快照 */
@@ -1848,7 +1848,7 @@ export declare enum FileFormat {
 }
 /**
  * 文件状态
- * @enum {string}
+ * @enum
  */
 export declare enum FileState {
     /** 已分配，无数据 */
@@ -1862,7 +1862,7 @@ export declare enum FileState {
 }
 /**
  * 统计范围
- * @enum {string}
+ * @enum
  */
 export declare enum StatisticRange {
     /** 最近1小时 */
@@ -1876,7 +1876,7 @@ export declare enum StatisticRange {
 }
 /**
  * 控制台事件等级
- * @enum {string}
+ * @enum
  */
 export declare enum ConsoleEventLevel {
     /** 信息 */
@@ -1890,7 +1890,7 @@ export declare enum ConsoleEventLevel {
 }
 /**
  * 控制台事件范围
- * @enum {string}
+ * @enum
  */
 export declare enum ConsoleEventRange {
     /** 系统 */
@@ -1904,7 +1904,7 @@ export declare enum ConsoleEventRange {
 }
 /**
  * 控制台事件分类
- * @enum {string}
+ * @enum
  */
 export declare enum ConsoleEventCategory {
     /** 云主机 */
@@ -1928,7 +1928,7 @@ export declare enum ConsoleEventCategory {
 }
 /**
  * 导入云主机供应商
- * @enum {string}
+ * @enum
  */
 export declare enum ImportVendor {
     /** VMware ESXi */
@@ -1938,7 +1938,7 @@ export declare const NODE_RESOURCE_SNAPSHOT_FIELD_COUNT: number;
 export declare const POOL_RESOURCE_SNAPSHOT_FIELD_COUNT: number;
 /**
  * 用户角色枚举
- * @enum {string}
+ * @enum
  */
 export declare enum UserRole {
     /**
@@ -1956,7 +1956,7 @@ export declare enum UserRole {
 }
 /**
  * 密码哈希算法枚举
- * @enum {string}
+ * @enum
  */
 export declare enum PasswordHasher {
     /**
@@ -1966,7 +1966,7 @@ export declare enum PasswordHasher {
 }
 /**
  * 令牌签名方法枚举
- * @enum {string}
+ * @enum
  * secret - ['HS256', 'HS384', 'HS512']
  * rsa - ['RS256', 'RS384', 'RS512']
  * ec - ['ES256', 'ES384', 'ES512']

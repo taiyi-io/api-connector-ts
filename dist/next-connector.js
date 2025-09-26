@@ -21,10 +21,10 @@ const cuid2_1 = require("@paralleldrive/cuid2");
 const storageKeyDevice = "taiyi_device";
 /**
  * 获取Nextjs的安全连接
- * @param {string} backendHost 后端主机名
- * @param {number} backendPort 后端端口号
- * @returns {TaiyiConnector} 安全连接
- * @async
+ * @param backendHost - 后端主机名
+ * @param backendPort - 后端端口号，默认值为5851
+ * @returns TaiyiConnector
+ * @throws {Error} 令牌失效
  */
 function getNextConnector(backendHost_1) {
     return __awaiter(this, arguments, void 0, function* (backendHost, backendPort = 5851) {

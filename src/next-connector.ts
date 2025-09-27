@@ -38,7 +38,6 @@ export async function getNextConnector(
   backendPort: number = 5851
 ): Promise<TaiyiConnector> {
   const deviceID = await getDeviceFromBrowser();
-  console.log(`next-connector: get connector with deviceID ${deviceID}`);
   const store = await getNextStore(deviceID, backendHost, backendPort);
   const connector = new TaiyiConnector(
     store.backend_host,
@@ -107,6 +106,5 @@ async function getDeviceFromBrowser(): Promise<string> {
   // 保存到localStorage
   localStorage.setItem(storageKeyDevice, deviceID);
   await setDeviceID(deviceID);
-  // console.log(`new device id ${deviceID} ready`);
   return deviceID;
 }

@@ -21,7 +21,6 @@ export const insecureSetTokens: SetTokenHandler = async (
   connectorID: string,
   tokens: AllocatedTokens
 ): Promise<void> => {
-  console.log(`insecure-store: 存储令牌 for ${connectorID}`);
   tokenStorage.set(connectorID, tokens);
 };
 
@@ -33,7 +32,6 @@ export const insecureSetTokens: SetTokenHandler = async (
 export const insecureGetTokens: GetTokenHandler = async (
   connectorID: string
 ): Promise<AllocatedTokens> => {
-  console.log(`insecure-store: 获取令牌 for ${connectorID}`);
   const tokens = tokenStorage.get(connectorID);
   if (!tokens) {
     throw new Error(`未找到storeID ${connectorID} 对应的令牌`);
@@ -46,7 +44,6 @@ export const insecureGetTokens: GetTokenHandler = async (
  * @param connectorID - connector.id
  */
 export const clearInsecureTokens = (connectorID: string): void => {
-  console.log(`insecure-store: 清除令牌 for ${connectorID}`);
   tokenStorage.delete(connectorID);
 };
 
@@ -75,7 +72,6 @@ export async function getInsecureConnector(
   backendHost: string,
   backendPort: number = 5851
 ): Promise<TaiyiConnector> {
-  console.log(`insecure-store: 创建连接器 with deviceID ${deviceID}`);
   // 创建TaiyiConnector实例
   const connector = new TaiyiConnector(backendHost, backendPort, deviceID);
 

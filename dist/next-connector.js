@@ -38,7 +38,6 @@ const storageKeyDevice = "taiyi_device";
 function getNextConnector(backendHost_1) {
     return __awaiter(this, arguments, void 0, function* (backendHost, backendPort = 5851) {
         const deviceID = yield getDeviceFromBrowser();
-        console.log(`next-connector: get connector with deviceID ${deviceID}`);
         const store = yield (0, next_secure_store_1.getNextStore)(deviceID, backendHost, backendPort);
         const connector = new connector_1.TaiyiConnector(store.backend_host, store.backend_port, store.device);
         connector.bindCallback(store.id, next_secure_store_1.storeAllocatedTokens, next_secure_store_1.retrieveAllocatedTokens, next_secure_store_1.handleStoreStatusChanged);
@@ -102,7 +101,6 @@ function getDeviceFromBrowser() {
         // 保存到localStorage
         localStorage.setItem(storageKeyDevice, deviceID);
         yield (0, next_secure_store_1.setDeviceID)(deviceID);
-        // console.log(`new device id ${deviceID} ready`);
         return deviceID;
     });
 }

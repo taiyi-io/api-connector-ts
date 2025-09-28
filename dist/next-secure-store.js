@@ -129,10 +129,6 @@ function storeAllocatedTokens(storeID, tokens) {
                     refresh_expire: tokens.refresh_expired_at,
                 };
                 yield storeCriticalValues(storeID, stored);
-                // console.log(`store-${storeID}: tokens authenticated, user ${store.user}`);
-            }
-            else {
-                console.log(`丢弃已失效存储数据: ${JSON.stringify(store)}`);
             }
         }
     });
@@ -164,7 +160,6 @@ function retrieveAllocatedTokens(storeID) {
                 };
             }
         }
-        // console.log(`store-${storeID}: warning: no tokens found`);
         return {
             access_token: "",
             access_expired_at: "",
@@ -269,7 +264,6 @@ function handleStoreStatusChanged(storeID, authenticated) {
         if (storeItem && storeItem.value) {
             const store = JSON.parse(storeItem.value);
             if (authenticated != store.authenticated) {
-                // console.log(`store-${storeID}: status changed to ${authenticated}`);
                 store.authenticated = authenticated;
                 cks.set(storeKey, JSON.stringify(store), {
                     sameSite: "strict", // 防 CSRF 攻击

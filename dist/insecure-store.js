@@ -28,7 +28,6 @@ const tokenStorage = new Map();
  * @returns Promise<void>
  */
 const insecureSetTokens = (connectorID, tokens) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(`insecure-store: 存储令牌 for ${connectorID}`);
     tokenStorage.set(connectorID, tokens);
 });
 exports.insecureSetTokens = insecureSetTokens;
@@ -38,7 +37,6 @@ exports.insecureSetTokens = insecureSetTokens;
  * @returns Promise<AllocatedTokens>
  */
 const insecureGetTokens = (connectorID) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(`insecure-store: 获取令牌 for ${connectorID}`);
     const tokens = tokenStorage.get(connectorID);
     if (!tokens) {
         throw new Error(`未找到storeID ${connectorID} 对应的令牌`);
@@ -51,7 +49,6 @@ exports.insecureGetTokens = insecureGetTokens;
  * @param connectorID - connector.id
  */
 const clearInsecureTokens = (connectorID) => {
-    console.log(`insecure-store: 清除令牌 for ${connectorID}`);
     tokenStorage.delete(connectorID);
 };
 exports.clearInsecureTokens = clearInsecureTokens;
@@ -77,7 +74,6 @@ exports.clearInsecureTokens = clearInsecureTokens;
  */
 function getInsecureConnector(deviceID_1, backendHost_1) {
     return __awaiter(this, arguments, void 0, function* (deviceID, backendHost, backendPort = 5851) {
-        console.log(`insecure-store: 创建连接器 with deviceID ${deviceID}`);
         // 创建TaiyiConnector实例
         const connector = new connector_1.TaiyiConnector(backendHost, backendPort, deviceID);
         // 绑定回调函数，不需要stateChange

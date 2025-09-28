@@ -89,7 +89,6 @@ class TaiyiConnector {
      */
     release() {
         this.stopHeartBeat();
-        // console.log(`connector-${this._id} released`);
     }
     /**
      * 获取连接标识
@@ -282,7 +281,6 @@ class TaiyiConnector {
             const tokens = result.data;
             const err = this.validateTokens(tokens);
             if (err) {
-                console.log(`connector-${this._id}: 刷新令牌校验失败,${err}`);
                 return {
                     error: "无效令牌",
                 };
@@ -300,7 +298,6 @@ class TaiyiConnector {
     loadTokens(tokens) {
         const error = this.validateTokens(tokens);
         if (error) {
-            console.log(`connector-${this._id}: 加载令牌校验失败,${error}`);
             return {
                 error: "无效令牌",
             };
@@ -327,9 +324,6 @@ class TaiyiConnector {
             yield this.keepAlive();
         }), expireTime);
         this._keepAlive = true;
-        // console.log(
-        //   `connector-${this._id}: start keep alive timer ${this._refreshTimer}`
-        // );
     }
     keepAlive() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -338,11 +332,9 @@ class TaiyiConnector {
             //刷新令牌
             const refreshResult = yield this.refreshToken();
             if (refreshResult.unauthenticated || refreshResult.error) {
-                console.log(`connector-${this._id}: expired when keep alive, refresh ${this._authenticatedTokens.refresh_token}, ${refreshResult.unauthenticated}, ${refreshResult.error}`);
                 this.onValidationExpired();
                 return;
             }
-            // console.log(`connector-${this._id}: keep alive success`);
         });
     }
     /**
@@ -353,9 +345,6 @@ class TaiyiConnector {
             return;
         }
         if (this._refreshTimer) {
-            // console.log(
-            //   `connector-${this._id}: stop keep alive timer ${this._refreshTimer}`
-            // );
             clearInterval(this._refreshTimer);
         }
         this._keepAlive = false;
@@ -368,7 +357,6 @@ class TaiyiConnector {
             //only invoke once
             return;
         }
-        console.log(`connector-${this._id}: validation expired`);
         this._authenticated = false;
         this._authenticatedTokens = {};
         this.stopHeartBeat();
@@ -465,7 +453,6 @@ class TaiyiConnector {
                 //无令牌变化，自己尝试刷新
                 const refreshResult = yield this.refreshToken();
                 if (refreshResult.unauthenticated || refreshResult.error) {
-                    console.log(`connector-${this._id}: expired when resend command ${cmd.type}, refresh ${this._authenticatedTokens.refresh_token}, ${refreshResult.unauthenticated}, ${refreshResult.error}`);
                     this.onValidationExpired();
                     return {
                         unauthenticated: refreshResult.unauthenticated,

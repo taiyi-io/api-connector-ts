@@ -52,3 +52,4 @@ certificates
 # generated docs
 docs
 *.tar.gz
+.opencode

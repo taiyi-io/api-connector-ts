@@ -526,6 +526,38 @@ export enum controlCommandEnum {
   LogoutDevice = "logout_device",
   /** 查询设备 */
   QueryDevices = "query_devices",
+  /** 创建安全策略组 */
+  CreateSecurityPolicy = "create_security_policy",
+  /** 查询安全策略组列表 */
+  QuerySecurityPolicies = "query_security_policies",
+  /** 获取安全策略组详情 */
+  GetSecurityPolicy = "get_security_policy",
+  /** 修改安全策略组 */
+  ModifySecurityPolicy = "modify_security_policy",
+  /** 删除安全策略组 */
+  DeleteSecurityPolicy = "delete_security_policy",
+  /** 复制安全策略组 */
+  CopySecurityPolicy = "copy_security_policy",
+  /** 获取云主机安全策略 */
+  GetGuestSecurityPolicy = "get_guest_security_policy",
+  /** 修改云主机安全策略 */
+  ModifyGuestSecurityPolicy = "modify_guest_security_policy",
+  /** 重置云主机安全策略 */
+  ResetGuestSecurityPolicy = "reset_guest_security_policy",
+  /** 创建地址池（新版） */
+  CreateAddressPool = "create_address_pool",
+  /** 修改地址池（新版） */
+  ModifyAddressPoolV2 = "modify_address_pool_v2",
+  /** 添加地址范围（新版） */
+  AddAddressRange = "add_address_range",
+  /** 删除地址范围（新版） */
+  RemoveAddressRange = "remove_address_range",
+  /** 查询地址池配置列表（新版） */
+  QueryAddressPoolConfigs = "query_address_pool_configs",
+  /** 获取地址池详情（新版） */
+  GetAddressPoolDetail = "get_address_pool_detail",
+  /** 删除地址池（新版） */
+  DeleteAddressPool = "delete_address_pool",
 }
 /**
  * 任务类型枚举
@@ -1843,6 +1875,8 @@ export enum LicenseFeature {
   Migration = "migration",
   /** 地址池 */
   AddressPool = "address_pool",
+  /** 安全策略 */
+  SecurityPolicy = "security_policy",
   /** 内存合并 */
   MemoryMerge = "memory_merge",
 }

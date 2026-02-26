@@ -26,6 +26,8 @@
   - [计算资源池管理](#计算资源池管理)
   - [存储池管理](#存储池管理)
   - [地址池管理（⚠️ Deprecated）](#地址池管理-deprecated)
+  - [地址池管理（新版）](#地址池管理新版)
+  - [安全策略管理](#安全策略管理)
   - [文件管理](#文件管理)
   - [系统模板管理](#系统模板管理)
   - [日志与告警](#日志与告警)
@@ -681,16 +683,18 @@ const result3 = await connector.queryGuests(0, 10, {
 #### tryStartGuest / startGuest
 
 ```typescript
-tryStartGuest(guestID: string, media?: string): Promise<BackendResult<string>>
-startGuest(guestID: string, media?: string, timeoutSeconds?: number): Promise<BackendResult>
+tryStartGuest(guestID: string, media?: string, expectEpoch?: number): Promise<BackendResult<string>>
+startGuest(guestID: string, media?: string, timeoutSeconds?: number, expectEpoch?: number): Promise<BackendResult>
 ```
 
-启动云主机，可选挂载 ISO 介质。
+启动云主机，可选挂载 ISO 介质。支持 HA 模式下指定 `expectEpoch` 参数。
 
 ```typescript
 await connector.startGuest("guest-id");
 // 挂载ISO启动
 await connector.startGuest("guest-id", "iso-file-id");
+// HA模式：指定epoch值启动
+await connector.startGuest("guest-id", undefined, 300, 1);
 ```
 
 #### tryStopGuest / stopGuest
@@ -1121,6 +1125,166 @@ removeExternalAddressRange(poolID: string, begin: string, end: string): Promise<
 removeInternalAddressRange(poolID: string, begin: string, end: string): Promise<BackendResult>
 ```
 
+### 地址池管理（新版）
+
+新版地址池采用四集合模型（外部IPv4、外部IPv6、内部IPv4、内部IPv6），支持网关、DNS、上游网关等配置。
+
+#### 创建/修改/删除地址池
+
+```typescript
+// 异步版本
+tryCreateAddressPool(id: string, mode: string, description?: string, gatewayV4?: string, gatewayV6?: string, dns?: string[], upstreamGateway?: string): Promise<BackendResult<string>>
+// 同步版本
+createAddressPool(id: string, mode: string, description?: string, gatewayV4?: string, gatewayV6?: string, dns?: string[], upstreamGateway?: string, timeoutSeconds?: number): Promise<BackendResult>
+
+// 修改地址池
+tryModifyAddressPoolV2(id: string, description?: string, gatewayV4?: string, gatewayV6?: string, dns?: string[], upstreamGateway?: string): Promise<BackendResult<string>>
+modifyAddressPoolV2(id: string, description?: string, gatewayV4?: string, gatewayV6?: string, dns?: string[], upstreamGateway?: string, timeoutSeconds?: number): Promise<BackendResult>
+
+// 删除地址池
+tryDeleteAddressPool(poolID: string): Promise<BackendResult<string>>
+deleteAddressPool(poolID: string, timeoutSeconds?: number): Promise<BackendResult>
+```
+
+```typescript
+// 创建地址池
+await connector.createAddressPool("pool-1", "address", "生产网络", "192.168.1.1", undefined, ["8.8.8.8"]);
+
+// 修改地址池
+await connector.modifyAddressPoolV2("pool-1", "更新描述", "192.168.1.254");
+
+// 删除地址池
+await connector.deleteAddressPool("pool-1");
+```
+
+#### 查询/获取地址池
+
+```typescript
+queryAddressPoolConfigs(): Promise<BackendResult<AddressPoolConfig[]>>
+getAddressPoolDetail(poolID: string): Promise<BackendResult<AddressPoolDetail>>
+```
+
+```typescript
+// 查询所有地址池配置
+const configs = await connector.queryAddressPoolConfigs();
+if (configs.data) {
+  for (const config of configs.data) {
+    console.log("地址池:", config.id, "模式:", config.mode);
+  }
+}
+
+// 获取地址池详情（含四个地址集合）
+const detail = await connector.getAddressPoolDetail("pool-1");
+if (detail.data) {
+  console.log("外部IPv4范围:", detail.data.external_v4.ranges);
+  console.log("已分配地址:", detail.data.external_v4.allocations);
+}
+```
+
+#### 地址范围管理
+
+```typescript
+// 添加地址范围（setType: "ext-v4" | "ext-v6" | "int-v4" | "int-v6"）
+tryAddAddressRange(pool: string, setType: string, begin?: string, end?: string, cidr?: string): Promise<BackendResult<string>>
+addAddressRange(pool: string, setType: string, begin?: string, end?: string, cidr?: string, timeoutSeconds?: number): Promise<BackendResult>
+
+// 删除地址范围
+tryRemoveAddressRange(pool: string, setType: string, begin: string, end: string): Promise<BackendResult<string>>
+removeAddressRange(pool: string, setType: string, begin: string, end: string, timeoutSeconds?: number): Promise<BackendResult>
+```
+
+```typescript
+// 添加外部IPv4地址范围
+await connector.addAddressRange("pool-1", "ext-v4", "192.168.1.100", "192.168.1.200");
+
+// 添加内部IPv4地址范围（CIDR格式）
+await connector.addAddressRange("pool-1", "int-v4", undefined, undefined, "10.0.0.0/24");
+
+// 删除地址范围
+await connector.removeAddressRange("pool-1", "ext-v4", "192.168.1.100", "192.168.1.200");
+```
+
+### 安全策略管理
+
+安全策略组定义了网卡级别的防火墙规则模板，可应用到云主机的外部和内部网卡。
+
+#### 策略组 CRUD
+
+```typescript
+// 创建安全策略组
+tryCreateSecurityPolicy(id: string, name: string, externalRules: SecurityRule[], internalRules: SecurityRule[], description?: string, isDefault?: boolean): Promise<BackendResult<string>>
+createSecurityPolicy(id: string, name: string, externalRules: SecurityRule[], internalRules: SecurityRule[], description?: string, isDefault?: boolean, timeoutSeconds?: number): Promise<BackendResult>
+
+// 查询安全策略组列表
+querySecurityPolicies(): Promise<BackendResult<SecurityPolicyGroup[]>>
+
+// 获取安全策略组详情
+getSecurityPolicy(policyID: string): Promise<BackendResult<SecurityPolicyGroup>>
+
+// 修改安全策略组
+tryModifySecurityPolicy(id: string, name?: string, description?: string, isDefault?: boolean, externalRules?: SecurityRule[], internalRules?: SecurityRule[]): Promise<BackendResult<string>>
+modifySecurityPolicy(id: string, name?: string, description?: string, isDefault?: boolean, externalRules?: SecurityRule[], internalRules?: SecurityRule[], timeoutSeconds?: number): Promise<BackendResult>
+
+// 删除安全策略组
+tryDeleteSecurityPolicy(policyID: string): Promise<BackendResult<string>>
+deleteSecurityPolicy(policyID: string, timeoutSeconds?: number): Promise<BackendResult>
+
+// 复制安全策略组
+tryCopySecurityPolicy(sourceID: string, newID: string, name: string): Promise<BackendResult<string>>
+copySecurityPolicy(sourceID: string, newID: string, name: string, timeoutSeconds?: number): Promise<BackendResult>
+```
+
+```typescript
+import { SecurityRule } from "@taiyi-io/api-connector-ts";
+
+// 创建安全策略组
+const externalRules: SecurityRule[] = [
+  { source_address: "0.0.0.0/0", dest_port: 22, dest_port_end: 22, protocol: "tcp", action: "accept", description: "允许SSH" },
+  { source_address: "0.0.0.0/0", dest_port: 80, dest_port_end: 80, protocol: "tcp", action: "accept", description: "允许HTTP" },
+];
+await connector.createSecurityPolicy("web-policy", "Web服务器策略", externalRules, [], "用于Web服务器");
+
+// 查询所有策略组
+const policies = await connector.querySecurityPolicies();
+
+// 复制策略组
+await connector.copySecurityPolicy("web-policy", "web-policy-v2", "Web服务器策略V2");
+```
+
+#### 云主机安全策略
+
+```typescript
+// 获取云主机安全策略
+getGuestSecurityPolicy(guestID: string): Promise<BackendResult<GuestSecurityPolicy>>
+
+// 修改云主机指定网卡的安全策略
+tryModifyGuestSecurityPolicy(guestID: string, macAddress: string, rules: SecurityRule[]): Promise<BackendResult<string>>
+modifyGuestSecurityPolicy(guestID: string, macAddress: string, rules: SecurityRule[], timeoutSeconds?: number): Promise<BackendResult>
+
+// 重置云主机指定网卡的安全策略（恢复为策略组默认规则）
+tryResetGuestSecurityPolicy(guestID: string, macAddress: string): Promise<BackendResult<string>>
+resetGuestSecurityPolicy(guestID: string, macAddress: string, timeoutSeconds?: number): Promise<BackendResult>
+```
+
+```typescript
+// 获取云主机安全策略
+const policy = await connector.getGuestSecurityPolicy("guest-id");
+if (policy.data) {
+  for (const p of policy.data.policies) {
+    console.log("网卡:", p.mac_address, "外部:", p.is_external, "规则数:", p.rules.length);
+  }
+}
+
+// 修改指定网卡的规则
+const rules: SecurityRule[] = [
+  { source_address: "10.0.0.0/8", dest_port: 3306, dest_port_end: 3306, protocol: "tcp", action: "accept", description: "允许内网MySQL" },
+];
+await connector.modifyGuestSecurityPolicy("guest-id", "52:54:00:ab:cd:ef", rules);
+
+// 重置为策略组默认规则
+await connector.resetGuestSecurityPolicy("guest-id", "52:54:00:ab:cd:ef");
+```
+
 ### 文件管理
 
 #### ISO 文件
@@ -1399,6 +1563,7 @@ copyToClipboard(text: string): Promise<boolean>
 | `GuestStatus` | 云主机状态，继承 GuestSpec 并添加运行时信息 |
 | `GuestFilter` | 查询过滤条件：关键字、状态、资源池、节点、仅自己 |
 | `GuestQoS` | QoS参数：CPU优先级、读写速度、IOPS、网络带宽 |
+| `GuestHAConfig` | HA配置：是否启用、epoch值 |
 | `GuestSystemSpec` | 系统规格：OS类别、磁盘模式、网络模型、显示驱动等 |
 | `GuestSystemView` | 系统模板视图 |
 
@@ -1424,7 +1589,7 @@ copyToClipboard(text: string): Promise<boolean>
 | `ClusterNode` | 集群节点配置 |
 | `ClusterNodeData` | 集群节点数据 |
 | `ClusterStatus` | 集群状态 |
-| `ComputePoolConfig` | 计算资源池配置 |
+| `ComputePoolConfig` | 计算资源池配置（含HA：enable_ha、interface_mode、address_mode、security_policy） |
 | `ComputePoolStatus` | 计算资源池状态 |
 | `NodeConfig` | 节点配置（含语言、端口、最大云主机数） |
 | `NodeConfigStatus` | 节点配置状态（含是否已修改） |
@@ -1443,9 +1608,23 @@ copyToClipboard(text: string): Promise<boolean>
 | `NetworkInterface` | 网络接口：MAC、IP(v4/v6)、DNS、网关 |
 | `NetworkInterfaces` | 网络接口集合（内部+外部） |
 | `NetworkGraphNode` | 网络拓扑图节点 |
-| `AddressPool` / `AddressPoolRecord` | 地址池 |
+| `AddressPool` / `AddressPoolRecord` | 地址池（旧版） |
+| `AddressPoolConfig` | 地址池配置（新版） |
+| `AddressPoolDetail` | 地址池详情（新版四集合模型） |
+| `AddressSet` | 地址集（含范围和已分配地址） |
+| `AddressSetRange` | 地址范围（新版，含begin/end/cidr） |
+| `AddressAllocation` | 已分配地址（含云主机ID、接口类型、分配时间） |
 | `AddressRange` | 地址范围 |
 | `MonitorResponse` | 监控通道响应 |
+
+### 安全策略
+
+| 接口 | 说明 |
+|------|------|
+| `SecurityRule` | 安全策略规则：源地址、目标端口、协议、动作 |
+| `SecurityPolicyGroup` | 安全策略组：名称、描述、外部/内部规则模板 |
+| `GuestSecurityPolicy` | 云主机安全策略：接口策略列表 |
+| `InterfaceSecurityPolicy` | 接口安全策略：MAC地址、来源策略组、规则列表 |
 
 ### 用户与权限
 
@@ -1565,7 +1744,7 @@ copyToClipboard(text: string): Promise<boolean>
 | `SignatureAlgorithm` | 签名算法 | `Ed25519` |
 | `PasswordHasher` | 密码哈希算法 | `Bcrypt` |
 | `AuthorizationMode` | 授权模式 | `Machine`, `Project`, `Account` |
-| `LicenseFeature` | 许可证功能 | `Snapshot`, `Backup`, `HighAvailability`, `Migration` 等 |
+| `LicenseFeature` | 许可证功能 | `Snapshot`, `Backup`, `HighAvailability`, `Migration`, `SecurityPolicy`, `AddressPool` 等 |
 | `ImportVendor` | 导入供应商 | `VMWareESXi` |
 
 ### 其他

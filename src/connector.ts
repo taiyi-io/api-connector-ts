@@ -36,6 +36,11 @@ import {
 import {
   AddressPool,
   AddressPoolRecord,
+  AddressPoolConfig,
+  AddressPoolDetail,
+  SecurityPolicyGroup,
+  GuestSecurityPolicy,
+  SecurityRule,
   AllocatedTokens,
   BackendResult,
   ClusterNode,
@@ -978,17 +983,20 @@ export class TaiyiConnector {
    * 尝试启动云主机，成功返回任务ID
    * @param guestID - 云主机ID
    * @param media - ISO镜像ID（可选）
+   * @param expectEpoch - HA epoch值（可选）
    * @returns 任务id
    */
   public async tryStartGuest(
     guestID: string,
-    media?: string
+    media?: string,
+    expectEpoch?: number
   ): Promise<BackendResult<string>> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.StartGuest,
       start_guest: {
         guest: guestID,
         media: media,
+        expect_epoch: expectEpoch,
       },
     };
     const resp = await this.requestCommandResponse(cmd);
@@ -1007,14 +1015,16 @@ export class TaiyiConnector {
    * @param guestID - 云主机ID
    * @param media - ISO镜像ID（可选）
    * @param timeoutSeconds - 超时时间（秒），默认300秒
+   * @param expectEpoch - HA epoch值（可选）
    * @returns 启动结果
    */
   public async startGuest(
     guestID: string,
     media?: string,
-    timeoutSeconds: number = 300
+    timeoutSeconds: number = 300,
+    expectEpoch?: number
   ): Promise<BackendResult> {
-    const taskResult = await this.tryStartGuest(guestID, media);
+    const taskResult = await this.tryStartGuest(guestID, media, expectEpoch);
     if (taskResult.error) {
       return {
         error: taskResult.error,
@@ -5494,5 +5504,818 @@ export class TaiyiConnector {
         total: resp.data.total || 0,
       },
     };
+  }
+
+  // ==================== 新版地址池管理 ====================
+
+  /**
+   * 创建地址池（新版四集合模型）
+   * @param id - 地址池ID
+   * @param mode - 模式 (address/port)
+   * @param description - 描述
+   * @param gatewayV4 - IPv4网关地址
+   * @param gatewayV6 - IPv6网关地址
+   * @param dns - DNS服务器列表
+   * @param upstreamGateway - 上游网关地址
+   * @returns 任务ID
+   */
+  public async tryCreateAddressPool(
+    id: string,
+    mode: string,
+    description?: string,
+    gatewayV4?: string,
+    gatewayV6?: string,
+    dns?: string[],
+    upstreamGateway?: string
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.CreateAddressPool,
+      create_address_pool: {
+        id,
+        mode,
+        description,
+        gateway_v4: gatewayV4,
+        gateway_v6: gatewayV6,
+        dns,
+        upstream_gateway: upstreamGateway,
+      },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.id) {
+      return { error: "创建地址池失败" };
+    }
+    return { data: resp.data.id };
+  }
+
+  /**
+   * 创建地址池并等待完成
+   * @param id - 地址池ID
+   * @param mode - 模式 (address/port)
+   * @param description - 描述
+   * @param gatewayV4 - IPv4网关地址
+   * @param gatewayV6 - IPv6网关地址
+   * @param dns - DNS服务器列表
+   * @param upstreamGateway - 上游网关地址
+   * @param timeoutSeconds - 超时时间（秒），默认300秒
+   * @returns 操作结果
+   */
+  public async createAddressPool(
+    id: string,
+    mode: string,
+    description?: string,
+    gatewayV4?: string,
+    gatewayV6?: string,
+    dns?: string[],
+    upstreamGateway?: string,
+    timeoutSeconds: number = 300
+  ): Promise<BackendResult> {
+    const taskResult = await this.tryCreateAddressPool(
+      id,
+      mode,
+      description,
+      gatewayV4,
+      gatewayV6,
+      dns,
+      upstreamGateway
+    );
+    if (taskResult.error) {
+      return { error: taskResult.error };
+    }
+    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
+    if (taskData.error) {
+      return { error: taskData.error };
+    }
+    return {};
+  }
+
+  /**
+   * 查询地址池配置列表（新版）
+   * @returns 地址池配置列表
+   */
+  public async queryAddressPoolConfigs(): Promise<
+    BackendResult<AddressPoolConfig[]>
+  > {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.QueryAddressPoolConfigs,
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.address_pool_configs) {
+      return { error: "获取地址池列表失败" };
+    }
+    return { data: resp.data.address_pool_configs };
+  }
+
+  /**
+   * 获取地址池详情（新版四集合模型）
+   * @param poolID - 地址池ID
+   * @returns 地址池详情
+   */
+  public async getAddressPoolDetail(
+    poolID: string
+  ): Promise<BackendResult<AddressPoolDetail>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.GetAddressPoolDetail,
+      get_address_pool: { id: poolID },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.address_pool_detail) {
+      return { error: "地址池不存在" };
+    }
+    return { data: resp.data.address_pool_detail };
+  }
+
+  /**
+   * 修改地址池（新版）
+   * @param id - 地址池ID
+   * @param description - 描述
+   * @param gatewayV4 - IPv4网关地址
+   * @param gatewayV6 - IPv6网关地址
+   * @param dns - DNS服务器列表
+   * @param upstreamGateway - 上游网关地址
+   * @returns 任务ID
+   */
+  public async tryModifyAddressPoolV2(
+    id: string,
+    description?: string,
+    gatewayV4?: string,
+    gatewayV6?: string,
+    dns?: string[],
+    upstreamGateway?: string
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.ModifyAddressPoolV2,
+      modify_address_pool_v2: {
+        id,
+        description,
+        gateway_v4: gatewayV4,
+        gateway_v6: gatewayV6,
+        dns,
+        upstream_gateway: upstreamGateway,
+      },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.id) {
+      return { error: "修改地址池失败" };
+    }
+    return { data: resp.data.id };
+  }
+
+  /**
+   * 修改地址池并等待完成（新版）
+   * @param id - 地址池ID
+   * @param description - 描述
+   * @param gatewayV4 - IPv4网关地址
+   * @param gatewayV6 - IPv6网关地址
+   * @param dns - DNS服务器列表
+   * @param upstreamGateway - 上游网关地址
+   * @param timeoutSeconds - 超时时间（秒），默认300秒
+   * @returns 操作结果
+   */
+  public async modifyAddressPoolV2(
+    id: string,
+    description?: string,
+    gatewayV4?: string,
+    gatewayV6?: string,
+    dns?: string[],
+    upstreamGateway?: string,
+    timeoutSeconds: number = 300
+  ): Promise<BackendResult> {
+    const taskResult = await this.tryModifyAddressPoolV2(
+      id,
+      description,
+      gatewayV4,
+      gatewayV6,
+      dns,
+      upstreamGateway
+    );
+    if (taskResult.error) {
+      return { error: taskResult.error };
+    }
+    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
+    if (taskData.error) {
+      return { error: taskData.error };
+    }
+    return {};
+  }
+
+  /**
+   * 删除地址池（新版）
+   * @param poolID - 地址池ID
+   * @returns 任务ID
+   */
+  public async tryDeleteAddressPool(
+    poolID: string
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.DeleteAddressPool,
+      remove_address_pool: { id: poolID },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.id) {
+      return { error: "删除地址池失败" };
+    }
+    return { data: resp.data.id };
+  }
+
+  /**
+   * 删除地址池并等待完成（新版）
+   * @param poolID - 地址池ID
+   * @param timeoutSeconds - 超时时间（秒），默认300秒
+   * @returns 操作结果
+   */
+  public async deleteAddressPool(
+    poolID: string,
+    timeoutSeconds: number = 300
+  ): Promise<BackendResult> {
+    const taskResult = await this.tryDeleteAddressPool(poolID);
+    if (taskResult.error) {
+      return { error: taskResult.error };
+    }
+    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
+    if (taskData.error) {
+      return { error: taskData.error };
+    }
+    return {};
+  }
+
+  /**
+   * 添加地址范围到地址池（新版）
+   * @param pool - 地址池ID
+   * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
+   * @param begin - 起始地址
+   * @param end - 结束地址
+   * @param cidr - CIDR格式
+   * @returns 任务ID
+   */
+  public async tryAddAddressRange(
+    pool: string,
+    setType: string,
+    begin?: string,
+    end?: string,
+    cidr?: string
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.AddAddressRange,
+      add_address_range: {
+        pool,
+        set_type: setType,
+        begin,
+        end,
+        cidr,
+      },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.id) {
+      return { error: "添加地址范围失败" };
+    }
+    return { data: resp.data.id };
+  }
+
+  /**
+   * 添加地址范围并等待完成（新版）
+   * @param pool - 地址池ID
+   * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
+   * @param begin - 起始地址
+   * @param end - 结束地址
+   * @param cidr - CIDR格式
+   * @param timeoutSeconds - 超时时间（秒），默认300秒
+   * @returns 操作结果
+   */
+  public async addAddressRange(
+    pool: string,
+    setType: string,
+    begin?: string,
+    end?: string,
+    cidr?: string,
+    timeoutSeconds: number = 300
+  ): Promise<BackendResult> {
+    const taskResult = await this.tryAddAddressRange(
+      pool,
+      setType,
+      begin,
+      end,
+      cidr
+    );
+    if (taskResult.error) {
+      return { error: taskResult.error };
+    }
+    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
+    if (taskData.error) {
+      return { error: taskData.error };
+    }
+    return {};
+  }
+
+  /**
+   * 从地址池删除地址范围（新版）
+   * @param pool - 地址池ID
+   * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
+   * @param begin - 起始地址
+   * @param end - 结束地址
+   * @returns 任务ID
+   */
+  public async tryRemoveAddressRange(
+    pool: string,
+    setType: string,
+    begin: string,
+    end: string
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.RemoveAddressRange,
+      remove_address_range: {
+        pool,
+        set_type: setType,
+        begin,
+        end,
+      },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.id) {
+      return { error: "删除地址范围失败" };
+    }
+    return { data: resp.data.id };
+  }
+
+  /**
+   * 从地址池删除地址范围并等待完成（新版）
+   * @param pool - 地址池ID
+   * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
+   * @param begin - 起始地址
+   * @param end - 结束地址
+   * @param timeoutSeconds - 超时时间（秒），默认300秒
+   * @returns 操作结果
+   */
+  public async removeAddressRange(
+    pool: string,
+    setType: string,
+    begin: string,
+    end: string,
+    timeoutSeconds: number = 300
+  ): Promise<BackendResult> {
+    const taskResult = await this.tryRemoveAddressRange(
+      pool,
+      setType,
+      begin,
+      end
+    );
+    if (taskResult.error) {
+      return { error: taskResult.error };
+    }
+    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
+    if (taskData.error) {
+      return { error: taskData.error };
+    }
+    return {};
+  }
+
+  // ==================== 安全策略管理 ====================
+
+  /**
+   * 创建安全策略组
+   * @param id - 策略组ID
+   * @param name - 策略组名称
+   * @param externalRules - 外部网卡规则模板
+   * @param internalRules - 内部网卡规则模板
+   * @param description - 描述
+   * @param isDefault - 是否默认策略组
+   * @returns 任务ID
+   */
+  public async tryCreateSecurityPolicy(
+    id: string,
+    name: string,
+    externalRules: SecurityRule[],
+    internalRules: SecurityRule[],
+    description?: string,
+    isDefault?: boolean
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.CreateSecurityPolicy,
+      create_security_policy: {
+        id,
+        name,
+        external_rules: externalRules,
+        internal_rules: internalRules,
+        description,
+        is_default: isDefault,
+      },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.id) {
+      return { error: "创建安全策略组失败" };
+    }
+    return { data: resp.data.id };
+  }
+
+  /**
+   * 创建安全策略组并等待完成
+   * @param id - 策略组ID
+   * @param name - 策略组名称
+   * @param externalRules - 外部网卡规则模板
+   * @param internalRules - 内部网卡规则模板
+   * @param description - 描述
+   * @param isDefault - 是否默认策略组
+   * @param timeoutSeconds - 超时时间（秒），默认300秒
+   * @returns 操作结果
+   */
+  public async createSecurityPolicy(
+    id: string,
+    name: string,
+    externalRules: SecurityRule[],
+    internalRules: SecurityRule[],
+    description?: string,
+    isDefault?: boolean,
+    timeoutSeconds: number = 300
+  ): Promise<BackendResult> {
+    const taskResult = await this.tryCreateSecurityPolicy(
+      id,
+      name,
+      externalRules,
+      internalRules,
+      description,
+      isDefault
+    );
+    if (taskResult.error) {
+      return { error: taskResult.error };
+    }
+    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
+    if (taskData.error) {
+      return { error: taskData.error };
+    }
+    return {};
+  }
+
+  /**
+   * 查询安全策略组列表
+   * @returns 安全策略组列表
+   */
+  public async querySecurityPolicies(): Promise<
+    BackendResult<SecurityPolicyGroup[]>
+  > {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.QuerySecurityPolicies,
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.security_policies) {
+      return { error: "获取安全策略组列表失败" };
+    }
+    return { data: resp.data.security_policies };
+  }
+
+  /**
+   * 获取安全策略组详情
+   * @param policyID - 策略组ID
+   * @returns 安全策略组详情
+   */
+  public async getSecurityPolicy(
+    policyID: string
+  ): Promise<BackendResult<SecurityPolicyGroup>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.GetSecurityPolicy,
+      get_security_policy: { id: policyID },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.security_policy) {
+      return { error: "安全策略组不存在" };
+    }
+    return { data: resp.data.security_policy };
+  }
+
+  /**
+   * 修改安全策略组
+   * @param id - 策略组ID
+   * @param name - 策略组名称
+   * @param description - 描述
+   * @param isDefault - 是否默认策略组
+   * @param externalRules - 外部网卡规则模板
+   * @param internalRules - 内部网卡规则模板
+   * @returns 任务ID
+   */
+  public async tryModifySecurityPolicy(
+    id: string,
+    name?: string,
+    description?: string,
+    isDefault?: boolean,
+    externalRules?: SecurityRule[],
+    internalRules?: SecurityRule[]
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.ModifySecurityPolicy,
+      modify_security_policy: {
+        id,
+        name,
+        description,
+        is_default: isDefault,
+        external_rules: externalRules,
+        internal_rules: internalRules,
+      },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.id) {
+      return { error: "修改安全策略组失败" };
+    }
+    return { data: resp.data.id };
+  }
+
+  /**
+   * 修改安全策略组并等待完成
+   * @param id - 策略组ID
+   * @param name - 策略组名称
+   * @param description - 描述
+   * @param isDefault - 是否默认策略组
+   * @param externalRules - 外部网卡规则模板
+   * @param internalRules - 内部网卡规则模板
+   * @param timeoutSeconds - 超时时间（秒），默认300秒
+   * @returns 操作结果
+   */
+  public async modifySecurityPolicy(
+    id: string,
+    name?: string,
+    description?: string,
+    isDefault?: boolean,
+    externalRules?: SecurityRule[],
+    internalRules?: SecurityRule[],
+    timeoutSeconds: number = 300
+  ): Promise<BackendResult> {
+    const taskResult = await this.tryModifySecurityPolicy(
+      id,
+      name,
+      description,
+      isDefault,
+      externalRules,
+      internalRules
+    );
+    if (taskResult.error) {
+      return { error: taskResult.error };
+    }
+    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
+    if (taskData.error) {
+      return { error: taskData.error };
+    }
+    return {};
+  }
+
+  /**
+   * 删除安全策略组
+   * @param policyID - 策略组ID
+   * @returns 任务ID
+   */
+  public async tryDeleteSecurityPolicy(
+    policyID: string
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.DeleteSecurityPolicy,
+      delete_security_policy: { id: policyID },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.id) {
+      return { error: "删除安全策略组失败" };
+    }
+    return { data: resp.data.id };
+  }
+
+  /**
+   * 删除安全策略组并等待完成
+   * @param policyID - 策略组ID
+   * @param timeoutSeconds - 超时时间（秒），默认300秒
+   * @returns 操作结果
+   */
+  public async deleteSecurityPolicy(
+    policyID: string,
+    timeoutSeconds: number = 300
+  ): Promise<BackendResult> {
+    const taskResult = await this.tryDeleteSecurityPolicy(policyID);
+    if (taskResult.error) {
+      return { error: taskResult.error };
+    }
+    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
+    if (taskData.error) {
+      return { error: taskData.error };
+    }
+    return {};
+  }
+
+  /**
+   * 复制安全策略组
+   * @param sourceID - 源策略组ID
+   * @param newID - 新策略组ID
+   * @param name - 新策略组名称
+   * @returns 任务ID
+   */
+  public async tryCopySecurityPolicy(
+    sourceID: string,
+    newID: string,
+    name: string
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.CopySecurityPolicy,
+      copy_security_policy: {
+        source_id: sourceID,
+        new_id: newID,
+        name,
+      },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.id) {
+      return { error: "复制安全策略组失败" };
+    }
+    return { data: resp.data.id };
+  }
+
+  /**
+   * 复制安全策略组并等待完成
+   * @param sourceID - 源策略组ID
+   * @param newID - 新策略组ID
+   * @param name - 新策略组名称
+   * @param timeoutSeconds - 超时时间（秒），默认300秒
+   * @returns 操作结果
+   */
+  public async copySecurityPolicy(
+    sourceID: string,
+    newID: string,
+    name: string,
+    timeoutSeconds: number = 300
+  ): Promise<BackendResult> {
+    const taskResult = await this.tryCopySecurityPolicy(sourceID, newID, name);
+    if (taskResult.error) {
+      return { error: taskResult.error };
+    }
+    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
+    if (taskData.error) {
+      return { error: taskData.error };
+    }
+    return {};
+  }
+
+  /**
+   * 获取云主机安全策略
+   * @param guestID - 云主机ID
+   * @returns 云主机安全策略
+   */
+  public async getGuestSecurityPolicy(
+    guestID: string
+  ): Promise<BackendResult<GuestSecurityPolicy>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.GetGuestSecurityPolicy,
+      get_guest_security_policy: { guest: guestID },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.guest_security_policy) {
+      return { error: "获取云主机安全策略失败" };
+    }
+    return { data: resp.data.guest_security_policy };
+  }
+
+  /**
+   * 修改云主机安全策略
+   * @param guestID - 云主机ID
+   * @param macAddress - 目标网卡MAC地址
+   * @param rules - 新规则列表
+   * @returns 任务ID
+   */
+  public async tryModifyGuestSecurityPolicy(
+    guestID: string,
+    macAddress: string,
+    rules: SecurityRule[]
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.ModifyGuestSecurityPolicy,
+      modify_guest_security_policy: {
+        guest: guestID,
+        mac_address: macAddress,
+        rules,
+      },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.id) {
+      return { error: "修改云主机安全策略失败" };
+    }
+    return { data: resp.data.id };
+  }
+
+  /**
+   * 修改云主机安全策略并等待完成
+   * @param guestID - 云主机ID
+   * @param macAddress - 目标网卡MAC地址
+   * @param rules - 新规则列表
+   * @param timeoutSeconds - 超时时间（秒），默认300秒
+   * @returns 操作结果
+   */
+  public async modifyGuestSecurityPolicy(
+    guestID: string,
+    macAddress: string,
+    rules: SecurityRule[],
+    timeoutSeconds: number = 300
+  ): Promise<BackendResult> {
+    const taskResult = await this.tryModifyGuestSecurityPolicy(
+      guestID,
+      macAddress,
+      rules
+    );
+    if (taskResult.error) {
+      return { error: taskResult.error };
+    }
+    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
+    if (taskData.error) {
+      return { error: taskData.error };
+    }
+    return {};
+  }
+
+  /**
+   * 重置云主机安全策略
+   * @param guestID - 云主机ID
+   * @param macAddress - 目标网卡MAC地址
+   * @returns 任务ID
+   */
+  public async tryResetGuestSecurityPolicy(
+    guestID: string,
+    macAddress: string
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.ResetGuestSecurityPolicy,
+      reset_guest_security_policy: {
+        guest: guestID,
+        mac_address: macAddress,
+      },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.id) {
+      return { error: "重置云主机安全策略失败" };
+    }
+    return { data: resp.data.id };
+  }
+
+  /**
+   * 重置云主机安全策略并等待完成
+   * @param guestID - 云主机ID
+   * @param macAddress - 目标网卡MAC地址
+   * @param timeoutSeconds - 超时时间（秒），默认300秒
+   * @returns 操作结果
+   */
+  public async resetGuestSecurityPolicy(
+    guestID: string,
+    macAddress: string,
+    timeoutSeconds: number = 300
+  ): Promise<BackendResult> {
+    const taskResult = await this.tryResetGuestSecurityPolicy(
+      guestID,
+      macAddress
+    );
+    if (taskResult.error) {
+      return { error: taskResult.error };
+    }
+    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
+    if (taskData.error) {
+      return { error: taskData.error };
+    }
+    return {};
   }
 }

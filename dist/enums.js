@@ -530,6 +530,38 @@ var controlCommandEnum;
     controlCommandEnum["LogoutDevice"] = "logout_device";
     /** 查询设备 */
     controlCommandEnum["QueryDevices"] = "query_devices";
+    /** 创建安全策略组 */
+    controlCommandEnum["CreateSecurityPolicy"] = "create_security_policy";
+    /** 查询安全策略组列表 */
+    controlCommandEnum["QuerySecurityPolicies"] = "query_security_policies";
+    /** 获取安全策略组详情 */
+    controlCommandEnum["GetSecurityPolicy"] = "get_security_policy";
+    /** 修改安全策略组 */
+    controlCommandEnum["ModifySecurityPolicy"] = "modify_security_policy";
+    /** 删除安全策略组 */
+    controlCommandEnum["DeleteSecurityPolicy"] = "delete_security_policy";
+    /** 复制安全策略组 */
+    controlCommandEnum["CopySecurityPolicy"] = "copy_security_policy";
+    /** 获取云主机安全策略 */
+    controlCommandEnum["GetGuestSecurityPolicy"] = "get_guest_security_policy";
+    /** 修改云主机安全策略 */
+    controlCommandEnum["ModifyGuestSecurityPolicy"] = "modify_guest_security_policy";
+    /** 重置云主机安全策略 */
+    controlCommandEnum["ResetGuestSecurityPolicy"] = "reset_guest_security_policy";
+    /** 创建地址池（新版） */
+    controlCommandEnum["CreateAddressPool"] = "create_address_pool";
+    /** 修改地址池（新版） */
+    controlCommandEnum["ModifyAddressPoolV2"] = "modify_address_pool_v2";
+    /** 添加地址范围（新版） */
+    controlCommandEnum["AddAddressRange"] = "add_address_range";
+    /** 删除地址范围（新版） */
+    controlCommandEnum["RemoveAddressRange"] = "remove_address_range";
+    /** 查询地址池配置列表（新版） */
+    controlCommandEnum["QueryAddressPoolConfigs"] = "query_address_pool_configs";
+    /** 获取地址池详情（新版） */
+    controlCommandEnum["GetAddressPoolDetail"] = "get_address_pool_detail";
+    /** 删除地址池（新版） */
+    controlCommandEnum["DeleteAddressPool"] = "delete_address_pool";
 })(controlCommandEnum || (exports.controlCommandEnum = controlCommandEnum = {}));
 /**
  * 任务类型枚举
@@ -1871,6 +1903,8 @@ var LicenseFeature;
     LicenseFeature["Migration"] = "migration";
     /** 地址池 */
     LicenseFeature["AddressPool"] = "address_pool";
+    /** 安全策略 */
+    LicenseFeature["SecurityPolicy"] = "security_policy";
     /** 内存合并 */
     LicenseFeature["MemoryMerge"] = "memory_merge";
 })(LicenseFeature || (exports.LicenseFeature = LicenseFeature = {}));

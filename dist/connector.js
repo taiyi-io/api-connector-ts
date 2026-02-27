@@ -826,15 +826,17 @@ class TaiyiConnector {
      * 尝试启动云主机，成功返回任务ID
      * @param guestID - 云主机ID
      * @param media - ISO镜像ID（可选）
+     * @param expectEpoch - HA epoch值（可选）
      * @returns 任务id
      */
-    tryStartGuest(guestID, media) {
+    tryStartGuest(guestID, media, expectEpoch) {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.StartGuest,
                 start_guest: {
                     guest: guestID,
                     media: media,
+                    expect_epoch: expectEpoch,
                 },
             };
             const resp = yield this.requestCommandResponse(cmd);
@@ -853,11 +855,12 @@ class TaiyiConnector {
      * @param guestID - 云主机ID
      * @param media - ISO镜像ID（可选）
      * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @param expectEpoch - HA epoch值（可选）
      * @returns 启动结果
      */
     startGuest(guestID_1, media_1) {
-        return __awaiter(this, arguments, void 0, function* (guestID, media, timeoutSeconds = 300) {
-            const taskResult = yield this.tryStartGuest(guestID, media);
+        return __awaiter(this, arguments, void 0, function* (guestID, media, timeoutSeconds = 300, expectEpoch) {
+            const taskResult = yield this.tryStartGuest(guestID, media, expectEpoch);
             if (taskResult.error) {
                 return {
                     error: taskResult.error,
@@ -5009,6 +5012,666 @@ class TaiyiConnector {
                     total: resp.data.total || 0,
                 },
             };
+        });
+    }
+    // ==================== 新版地址池管理 ====================
+    /**
+     * 创建地址池（新版四集合模型）
+     * @param id - 地址池ID
+     * @param mode - 模式 (address/port)
+     * @param description - 描述
+     * @param gatewayV4 - IPv4网关地址
+     * @param gatewayV6 - IPv6网关地址
+     * @param dns - DNS服务器列表
+     * @param upstreamGateway - 上游网关地址
+     * @returns 任务ID
+     */
+    tryCreateAddressPool(id, mode, description, gatewayV4, gatewayV6, dns, upstreamGateway) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.CreateAddressPool,
+                create_address_pool: {
+                    id,
+                    mode,
+                    description,
+                    gateway_v4: gatewayV4,
+                    gateway_v6: gatewayV6,
+                    dns,
+                    upstream_gateway: upstreamGateway,
+                },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.id) {
+                return { error: "创建地址池失败" };
+            }
+            return { data: resp.data.id };
+        });
+    }
+    /**
+     * 创建地址池并等待完成
+     * @param id - 地址池ID
+     * @param mode - 模式 (address/port)
+     * @param description - 描述
+     * @param gatewayV4 - IPv4网关地址
+     * @param gatewayV6 - IPv6网关地址
+     * @param dns - DNS服务器列表
+     * @param upstreamGateway - 上游网关地址
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 操作结果
+     */
+    createAddressPool(id_1, mode_1, description_1, gatewayV4_1, gatewayV6_1, dns_1, upstreamGateway_1) {
+        return __awaiter(this, arguments, void 0, function* (id, mode, description, gatewayV4, gatewayV6, dns, upstreamGateway, timeoutSeconds = 300) {
+            const taskResult = yield this.tryCreateAddressPool(id, mode, description, gatewayV4, gatewayV6, dns, upstreamGateway);
+            if (taskResult.error) {
+                return { error: taskResult.error };
+            }
+            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
+            if (taskData.error) {
+                return { error: taskData.error };
+            }
+            return {};
+        });
+    }
+    /**
+     * 查询地址池配置列表（新版）
+     * @returns 地址池配置列表
+     */
+    queryAddressPoolConfigs() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.QueryAddressPoolConfigs,
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.address_pool_configs) {
+                return { error: "获取地址池列表失败" };
+            }
+            return { data: resp.data.address_pool_configs };
+        });
+    }
+    /**
+     * 获取地址池详情（新版四集合模型）
+     * @param poolID - 地址池ID
+     * @returns 地址池详情
+     */
+    getAddressPoolDetail(poolID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.GetAddressPoolDetail,
+                get_address_pool: { id: poolID },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.address_pool_detail) {
+                return { error: "地址池不存在" };
+            }
+            return { data: resp.data.address_pool_detail };
+        });
+    }
+    /**
+     * 修改地址池（新版）
+     * @param id - 地址池ID
+     * @param description - 描述
+     * @param gatewayV4 - IPv4网关地址
+     * @param gatewayV6 - IPv6网关地址
+     * @param dns - DNS服务器列表
+     * @param upstreamGateway - 上游网关地址
+     * @returns 任务ID
+     */
+    tryModifyAddressPoolV2(id, description, gatewayV4, gatewayV6, dns, upstreamGateway) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.ModifyAddressPoolV2,
+                modify_address_pool_v2: {
+                    id,
+                    description,
+                    gateway_v4: gatewayV4,
+                    gateway_v6: gatewayV6,
+                    dns,
+                    upstream_gateway: upstreamGateway,
+                },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.id) {
+                return { error: "修改地址池失败" };
+            }
+            return { data: resp.data.id };
+        });
+    }
+    /**
+     * 修改地址池并等待完成（新版）
+     * @param id - 地址池ID
+     * @param description - 描述
+     * @param gatewayV4 - IPv4网关地址
+     * @param gatewayV6 - IPv6网关地址
+     * @param dns - DNS服务器列表
+     * @param upstreamGateway - 上游网关地址
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 操作结果
+     */
+    modifyAddressPoolV2(id_1, description_1, gatewayV4_1, gatewayV6_1, dns_1, upstreamGateway_1) {
+        return __awaiter(this, arguments, void 0, function* (id, description, gatewayV4, gatewayV6, dns, upstreamGateway, timeoutSeconds = 300) {
+            const taskResult = yield this.tryModifyAddressPoolV2(id, description, gatewayV4, gatewayV6, dns, upstreamGateway);
+            if (taskResult.error) {
+                return { error: taskResult.error };
+            }
+            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
+            if (taskData.error) {
+                return { error: taskData.error };
+            }
+            return {};
+        });
+    }
+    /**
+     * 删除地址池（新版）
+     * @param poolID - 地址池ID
+     * @returns 任务ID
+     */
+    tryDeleteAddressPool(poolID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.DeleteAddressPool,
+                remove_address_pool: { id: poolID },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.id) {
+                return { error: "删除地址池失败" };
+            }
+            return { data: resp.data.id };
+        });
+    }
+    /**
+     * 删除地址池并等待完成（新版）
+     * @param poolID - 地址池ID
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 操作结果
+     */
+    deleteAddressPool(poolID_1) {
+        return __awaiter(this, arguments, void 0, function* (poolID, timeoutSeconds = 300) {
+            const taskResult = yield this.tryDeleteAddressPool(poolID);
+            if (taskResult.error) {
+                return { error: taskResult.error };
+            }
+            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
+            if (taskData.error) {
+                return { error: taskData.error };
+            }
+            return {};
+        });
+    }
+    /**
+     * 添加地址范围到地址池（新版）
+     * @param pool - 地址池ID
+     * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
+     * @param begin - 起始地址
+     * @param end - 结束地址
+     * @param cidr - CIDR格式
+     * @returns 任务ID
+     */
+    tryAddAddressRange(pool, setType, begin, end, cidr) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.AddAddressRange,
+                add_address_range: {
+                    pool,
+                    set_type: setType,
+                    begin,
+                    end,
+                    cidr,
+                },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.id) {
+                return { error: "添加地址范围失败" };
+            }
+            return { data: resp.data.id };
+        });
+    }
+    /**
+     * 添加地址范围并等待完成（新版）
+     * @param pool - 地址池ID
+     * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
+     * @param begin - 起始地址
+     * @param end - 结束地址
+     * @param cidr - CIDR格式
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 操作结果
+     */
+    addAddressRange(pool_1, setType_1, begin_1, end_1, cidr_1) {
+        return __awaiter(this, arguments, void 0, function* (pool, setType, begin, end, cidr, timeoutSeconds = 300) {
+            const taskResult = yield this.tryAddAddressRange(pool, setType, begin, end, cidr);
+            if (taskResult.error) {
+                return { error: taskResult.error };
+            }
+            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
+            if (taskData.error) {
+                return { error: taskData.error };
+            }
+            return {};
+        });
+    }
+    /**
+     * 从地址池删除地址范围（新版）
+     * @param pool - 地址池ID
+     * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
+     * @param begin - 起始地址
+     * @param end - 结束地址
+     * @returns 任务ID
+     */
+    tryRemoveAddressRange(pool, setType, begin, end) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.RemoveAddressRange,
+                remove_address_range: {
+                    pool,
+                    set_type: setType,
+                    begin,
+                    end,
+                },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.id) {
+                return { error: "删除地址范围失败" };
+            }
+            return { data: resp.data.id };
+        });
+    }
+    /**
+     * 从地址池删除地址范围并等待完成（新版）
+     * @param pool - 地址池ID
+     * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
+     * @param begin - 起始地址
+     * @param end - 结束地址
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 操作结果
+     */
+    removeAddressRange(pool_1, setType_1, begin_1, end_1) {
+        return __awaiter(this, arguments, void 0, function* (pool, setType, begin, end, timeoutSeconds = 300) {
+            const taskResult = yield this.tryRemoveAddressRange(pool, setType, begin, end);
+            if (taskResult.error) {
+                return { error: taskResult.error };
+            }
+            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
+            if (taskData.error) {
+                return { error: taskData.error };
+            }
+            return {};
+        });
+    }
+    // ==================== 安全策略管理 ====================
+    /**
+     * 创建安全策略组
+     * @param id - 策略组ID
+     * @param name - 策略组名称
+     * @param externalRules - 外部网卡规则模板
+     * @param internalRules - 内部网卡规则模板
+     * @param description - 描述
+     * @param isDefault - 是否默认策略组
+     * @returns 任务ID
+     */
+    tryCreateSecurityPolicy(id, name, externalRules, internalRules, description, isDefault) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.CreateSecurityPolicy,
+                create_security_policy: {
+                    id,
+                    name,
+                    external_rules: externalRules,
+                    internal_rules: internalRules,
+                    description,
+                    is_default: isDefault,
+                },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.id) {
+                return { error: "创建安全策略组失败" };
+            }
+            return { data: resp.data.id };
+        });
+    }
+    /**
+     * 创建安全策略组并等待完成
+     * @param id - 策略组ID
+     * @param name - 策略组名称
+     * @param externalRules - 外部网卡规则模板
+     * @param internalRules - 内部网卡规则模板
+     * @param description - 描述
+     * @param isDefault - 是否默认策略组
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 操作结果
+     */
+    createSecurityPolicy(id_1, name_1, externalRules_1, internalRules_1, description_1, isDefault_1) {
+        return __awaiter(this, arguments, void 0, function* (id, name, externalRules, internalRules, description, isDefault, timeoutSeconds = 300) {
+            const taskResult = yield this.tryCreateSecurityPolicy(id, name, externalRules, internalRules, description, isDefault);
+            if (taskResult.error) {
+                return { error: taskResult.error };
+            }
+            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
+            if (taskData.error) {
+                return { error: taskData.error };
+            }
+            return {};
+        });
+    }
+    /**
+     * 查询安全策略组列表
+     * @returns 安全策略组列表
+     */
+    querySecurityPolicies() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.QuerySecurityPolicies,
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.security_policies) {
+                return { error: "获取安全策略组列表失败" };
+            }
+            return { data: resp.data.security_policies };
+        });
+    }
+    /**
+     * 获取安全策略组详情
+     * @param policyID - 策略组ID
+     * @returns 安全策略组详情
+     */
+    getSecurityPolicy(policyID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.GetSecurityPolicy,
+                get_security_policy: { id: policyID },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.security_policy) {
+                return { error: "安全策略组不存在" };
+            }
+            return { data: resp.data.security_policy };
+        });
+    }
+    /**
+     * 修改安全策略组
+     * @param id - 策略组ID
+     * @param name - 策略组名称
+     * @param description - 描述
+     * @param isDefault - 是否默认策略组
+     * @param externalRules - 外部网卡规则模板
+     * @param internalRules - 内部网卡规则模板
+     * @returns 任务ID
+     */
+    tryModifySecurityPolicy(id, name, description, isDefault, externalRules, internalRules) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.ModifySecurityPolicy,
+                modify_security_policy: {
+                    id,
+                    name,
+                    description,
+                    is_default: isDefault,
+                    external_rules: externalRules,
+                    internal_rules: internalRules,
+                },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.id) {
+                return { error: "修改安全策略组失败" };
+            }
+            return { data: resp.data.id };
+        });
+    }
+    /**
+     * 修改安全策略组并等待完成
+     * @param id - 策略组ID
+     * @param name - 策略组名称
+     * @param description - 描述
+     * @param isDefault - 是否默认策略组
+     * @param externalRules - 外部网卡规则模板
+     * @param internalRules - 内部网卡规则模板
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 操作结果
+     */
+    modifySecurityPolicy(id_1, name_1, description_1, isDefault_1, externalRules_1, internalRules_1) {
+        return __awaiter(this, arguments, void 0, function* (id, name, description, isDefault, externalRules, internalRules, timeoutSeconds = 300) {
+            const taskResult = yield this.tryModifySecurityPolicy(id, name, description, isDefault, externalRules, internalRules);
+            if (taskResult.error) {
+                return { error: taskResult.error };
+            }
+            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
+            if (taskData.error) {
+                return { error: taskData.error };
+            }
+            return {};
+        });
+    }
+    /**
+     * 删除安全策略组
+     * @param policyID - 策略组ID
+     * @returns 任务ID
+     */
+    tryDeleteSecurityPolicy(policyID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.DeleteSecurityPolicy,
+                delete_security_policy: { id: policyID },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.id) {
+                return { error: "删除安全策略组失败" };
+            }
+            return { data: resp.data.id };
+        });
+    }
+    /**
+     * 删除安全策略组并等待完成
+     * @param policyID - 策略组ID
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 操作结果
+     */
+    deleteSecurityPolicy(policyID_1) {
+        return __awaiter(this, arguments, void 0, function* (policyID, timeoutSeconds = 300) {
+            const taskResult = yield this.tryDeleteSecurityPolicy(policyID);
+            if (taskResult.error) {
+                return { error: taskResult.error };
+            }
+            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
+            if (taskData.error) {
+                return { error: taskData.error };
+            }
+            return {};
+        });
+    }
+    /**
+     * 复制安全策略组
+     * @param sourceID - 源策略组ID
+     * @param newID - 新策略组ID
+     * @param name - 新策略组名称
+     * @returns 任务ID
+     */
+    tryCopySecurityPolicy(sourceID, newID, name) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.CopySecurityPolicy,
+                copy_security_policy: {
+                    source_id: sourceID,
+                    new_id: newID,
+                    name,
+                },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.id) {
+                return { error: "复制安全策略组失败" };
+            }
+            return { data: resp.data.id };
+        });
+    }
+    /**
+     * 复制安全策略组并等待完成
+     * @param sourceID - 源策略组ID
+     * @param newID - 新策略组ID
+     * @param name - 新策略组名称
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 操作结果
+     */
+    copySecurityPolicy(sourceID_1, newID_1, name_1) {
+        return __awaiter(this, arguments, void 0, function* (sourceID, newID, name, timeoutSeconds = 300) {
+            const taskResult = yield this.tryCopySecurityPolicy(sourceID, newID, name);
+            if (taskResult.error) {
+                return { error: taskResult.error };
+            }
+            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
+            if (taskData.error) {
+                return { error: taskData.error };
+            }
+            return {};
+        });
+    }
+    /**
+     * 获取云主机安全策略
+     * @param guestID - 云主机ID
+     * @returns 云主机安全策略
+     */
+    getGuestSecurityPolicy(guestID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.GetGuestSecurityPolicy,
+                get_guest_security_policy: { guest: guestID },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.guest_security_policy) {
+                return { error: "获取云主机安全策略失败" };
+            }
+            return { data: resp.data.guest_security_policy };
+        });
+    }
+    /**
+     * 修改云主机安全策略
+     * @param guestID - 云主机ID
+     * @param macAddress - 目标网卡MAC地址
+     * @param rules - 新规则列表
+     * @returns 任务ID
+     */
+    tryModifyGuestSecurityPolicy(guestID, macAddress, rules) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.ModifyGuestSecurityPolicy,
+                modify_guest_security_policy: {
+                    guest: guestID,
+                    mac_address: macAddress,
+                    rules,
+                },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.id) {
+                return { error: "修改云主机安全策略失败" };
+            }
+            return { data: resp.data.id };
+        });
+    }
+    /**
+     * 修改云主机安全策略并等待完成
+     * @param guestID - 云主机ID
+     * @param macAddress - 目标网卡MAC地址
+     * @param rules - 新规则列表
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 操作结果
+     */
+    modifyGuestSecurityPolicy(guestID_1, macAddress_1, rules_1) {
+        return __awaiter(this, arguments, void 0, function* (guestID, macAddress, rules, timeoutSeconds = 300) {
+            const taskResult = yield this.tryModifyGuestSecurityPolicy(guestID, macAddress, rules);
+            if (taskResult.error) {
+                return { error: taskResult.error };
+            }
+            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
+            if (taskData.error) {
+                return { error: taskData.error };
+            }
+            return {};
+        });
+    }
+    /**
+     * 重置云主机安全策略
+     * @param guestID - 云主机ID
+     * @param macAddress - 目标网卡MAC地址
+     * @returns 任务ID
+     */
+    tryResetGuestSecurityPolicy(guestID, macAddress) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.ResetGuestSecurityPolicy,
+                reset_guest_security_policy: {
+                    guest: guestID,
+                    mac_address: macAddress,
+                },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.id) {
+                return { error: "重置云主机安全策略失败" };
+            }
+            return { data: resp.data.id };
+        });
+    }
+    /**
+     * 重置云主机安全策略并等待完成
+     * @param guestID - 云主机ID
+     * @param macAddress - 目标网卡MAC地址
+     * @param timeoutSeconds - 超时时间（秒），默认300秒
+     * @returns 操作结果
+     */
+    resetGuestSecurityPolicy(guestID_1, macAddress_1) {
+        return __awaiter(this, arguments, void 0, function* (guestID, macAddress, timeoutSeconds = 300) {
+            const taskResult = yield this.tryResetGuestSecurityPolicy(guestID, macAddress);
+            if (taskResult.error) {
+                return { error: taskResult.error };
+            }
+            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
+            if (taskData.error) {
+                return { error: taskData.error };
+            }
+            return {};
         });
     }
 }

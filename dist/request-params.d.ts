@@ -1,7 +1,7 @@
 /**
  * 向API服务发送请求的数据结构定义
  */
-import { TaskData, ClusterNodeData, ComputePoolStatus, StoragePool, StoragePoolListRecord, AddressPool, AddressPoolRecord, GuestView, FileStatus, FileView, DataStore, SnapshotRecord, SnapshotTreeNode, GuestResourceUsageRecord, NodeResourceSnapshotRecord, PoolResourceSnapshotRecord, ClusterResourceSnapshotRecord, GuestSystemView, WarningRecord, ConsoleEvent, NodeConfigStatus, SSHKeyView, License, LicenseRecord, ClusterStatus, NetworkGraphNode, ResourceMonitorConfig, ImportSource, ImportTarget, UserGroupRecord, UserCredentialRecord, UserToken, PrivateKey, UserAccessRecord, SystemStatus, ResourcePermissions, ClusterNode, ComputePoolConfig, GuestConfig, VolumeSpec, FileSpec, VolumeContainer, GuestFilter, NodeConfig, GuestSystemSpec, UserGroup } from "./data-defines";
+import { TaskData, ClusterNodeData, ComputePoolStatus, StoragePool, StoragePoolListRecord, AddressPool, AddressPoolRecord, AddressPoolConfig, AddressPoolDetail, SecurityPolicyGroup, GuestSecurityPolicy, GuestView, FileStatus, FileView, DataStore, SnapshotRecord, SnapshotTreeNode, GuestResourceUsageRecord, NodeResourceSnapshotRecord, PoolResourceSnapshotRecord, ClusterResourceSnapshotRecord, GuestSystemView, WarningRecord, ConsoleEvent, NodeConfigStatus, SSHKeyView, License, LicenseRecord, ClusterStatus, NetworkGraphNode, ResourceMonitorConfig, ImportSource, ImportTarget, UserGroupRecord, UserCredentialRecord, UserToken, PrivateKey, UserAccessRecord, SystemStatus, ResourcePermissions, ClusterNode, ComputePoolConfig, GuestConfig, VolumeSpec, FileSpec, VolumeContainer, GuestFilter, NodeConfig, GuestSystemSpec, UserGroup, SecurityRule } from "./data-defines";
 import { UserRole, controlCommandEnum, StorageType, VolumeContainerStrategy, InterfaceMode, StatisticRange, ComputePoolStrategy, ConsoleEventLevel, ImportVendor, ResourceType, SignatureAlgorithm, ResourceAccessLevel } from "./enums";
 export interface ControlCommandResponse {
     id?: string;
@@ -55,6 +55,11 @@ export interface ControlCommandResponse {
     system_status?: SystemStatus;
     resource_permissions?: ResourcePermissions;
     white_list?: string[];
+    address_pool_configs?: AddressPoolConfig[];
+    address_pool_detail?: AddressPoolDetail;
+    security_policies?: SecurityPolicyGroup[];
+    security_policy?: SecurityPolicyGroup;
+    guest_security_policy?: GuestSecurityPolicy;
 }
 export interface ControlCommandRequest {
     type: controlCommandEnum;
@@ -99,6 +104,10 @@ export interface ControlCommandRequest {
     modify_address_pool?: ControlAddressPoolParams;
     remove_address_pool?: ControlRemoveAddressPoolParams;
     address_range?: ControlAddressRangeParams;
+    create_address_pool?: ControlCreateAddressPoolParams;
+    modify_address_pool_v2?: ControlModifyAddressPoolV2Params;
+    add_address_range?: ControlAddressRangeV2Params;
+    remove_address_range?: ControlRemoveAddressRangeV2Params;
     query_guests?: ControlQueryGuestsParams;
     get_guest?: ControlGetGuestParams;
     create_iso?: CreateFileParams;
@@ -196,6 +205,15 @@ export interface ControlCommandRequest {
     update_white_list?: ControlUpdateWhiteListParams;
     query_white_list?: ControlQueryWhiteListParams;
     query_devices?: ControlQueryDevicesParams;
+    create_security_policy?: ControlCreateSecurityPolicyParams;
+    query_security_policies?: ControlQuerySecurityPoliciesParams;
+    get_security_policy?: ControlGetSecurityPolicyParams;
+    modify_security_policy?: ControlModifySecurityPolicyParams;
+    delete_security_policy?: ControlDeleteSecurityPolicyParams;
+    copy_security_policy?: ControlCopySecurityPolicyParams;
+    get_guest_security_policy?: ControlGetGuestSecurityPolicyParams;
+    modify_guest_security_policy?: ControlModifyGuestSecurityPolicyParams;
+    reset_guest_security_policy?: ControlResetGuestSecurityPolicyParams;
 }
 export interface ControlResponse {
     error?: string;
@@ -361,6 +379,7 @@ export interface ControlResetMonitorParams {
 export interface ControlStartGuestParams {
     guest: string;
     media?: string;
+    expect_epoch?: number;
 }
 /**
  * 云主机停止请求参数
@@ -635,6 +654,74 @@ export interface ControlAddressPoolParams {
 }
 export interface ControlRemoveAddressPoolParams {
     id: string;
+}
+/**
+ * 新版地址池创建请求参数
+ * @interface
+ * @property id - 地址池ID
+ * @property mode - 模式 (address/port)
+ * @property description - 描述
+ * @property gateway_v4 - IPv4网关地址
+ * @property gateway_v6 - IPv6网关地址
+ * @property dns - DNS服务器列表
+ * @property upstream_gateway - 上游网关地址
+ */
+export interface ControlCreateAddressPoolParams {
+    id: string;
+    mode: string;
+    description?: string;
+    gateway_v4?: string;
+    gateway_v6?: string;
+    dns?: string[];
+    upstream_gateway?: string;
+}
+/**
+ * 新版地址池修改请求参数
+ * @interface
+ * @property id - 地址池ID
+ * @property description - 描述
+ * @property gateway_v4 - IPv4网关地址
+ * @property gateway_v6 - IPv6网关地址
+ * @property dns - DNS服务器列表
+ * @property upstream_gateway - 上游网关地址
+ */
+export interface ControlModifyAddressPoolV2Params {
+    id: string;
+    description?: string;
+    gateway_v4?: string;
+    gateway_v6?: string;
+    dns?: string[];
+    upstream_gateway?: string;
+}
+/**
+ * 新版地址范围操作请求参数
+ * @interface
+ * @property pool - 地址池ID
+ * @property set_type - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
+ * @property begin - 起始地址
+ * @property end - 结束地址
+ * @property cidr - CIDR格式
+ */
+export interface ControlAddressRangeV2Params {
+    pool: string;
+    set_type: string;
+    begin?: string;
+    end?: string;
+    cidr?: string;
+}
+/**
+ * 新版删除地址范围请求参数
+ * @interface
+ * @property pool - 地址池ID
+ * @property set_type - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
+ * @property begin - 起始地址
+ * @property end - 结束地址
+ */
+export interface ControlRemoveAddressRangeV2Params {
+    pool: string;
+    set_type: string;
+    begin: string;
+    end: string;
 }
 export interface ControlAddressRangeParams {
     pool: string;
@@ -1503,4 +1590,106 @@ export interface ControlQueryAccessesParams {
 export interface ControlQueryDevicesParams {
     offset: number;
     limit: number;
+}
+/**
+ * 创建安全策略组请求参数
+ * @interface
+ * @property id - 策略组ID
+ * @property name - 策略组名称
+ * @property description - 描述
+ * @property is_default - 是否默认策略组
+ * @property external_rules - 外部网卡规则模板
+ * @property internal_rules - 内部网卡规则模板
+ */
+export interface ControlCreateSecurityPolicyParams {
+    id: string;
+    name: string;
+    description?: string;
+    is_default?: boolean;
+    external_rules: SecurityRule[];
+    internal_rules: SecurityRule[];
+}
+/**
+ * 查询安全策略组列表请求参数
+ * @interface
+ */
+export interface ControlQuerySecurityPoliciesParams {
+    offset?: number;
+    page_size?: number;
+}
+/**
+ * 获取安全策略组详情请求参数
+ * @interface
+ * @property id - 策略组ID
+ */
+export interface ControlGetSecurityPolicyParams {
+    id: string;
+}
+/**
+ * 修改安全策略组请求参数
+ * @interface
+ * @property id - 策略组ID
+ * @property name - 策略组名称
+ * @property description - 描述
+ * @property is_default - 是否默认策略组
+ * @property external_rules - 外部网卡规则模板
+ * @property internal_rules - 内部网卡规则模板
+ */
+export interface ControlModifySecurityPolicyParams {
+    id: string;
+    name?: string;
+    description?: string;
+    is_default?: boolean;
+    external_rules?: SecurityRule[];
+    internal_rules?: SecurityRule[];
+}
+/**
+ * 删除安全策略组请求参数
+ * @interface
+ * @property id - 策略组ID
+ */
+export interface ControlDeleteSecurityPolicyParams {
+    id: string;
+}
+/**
+ * 复制安全策略组请求参数
+ * @interface
+ * @property source_id - 源策略组ID
+ * @property new_id - 新策略组ID
+ * @property name - 新策略组名称
+ */
+export interface ControlCopySecurityPolicyParams {
+    source_id: string;
+    new_id: string;
+    name: string;
+}
+/**
+ * 获取云主机安全策略请求参数
+ * @interface
+ * @property guest - 云主机ID
+ */
+export interface ControlGetGuestSecurityPolicyParams {
+    guest: string;
+}
+/**
+ * 修改云主机安全策略请求参数
+ * @interface
+ * @property guest - 云主机ID
+ * @property mac_address - 目标网卡MAC地址
+ * @property rules - 新规则列表
+ */
+export interface ControlModifyGuestSecurityPolicyParams {
+    guest: string;
+    mac_address: string;
+    rules: SecurityRule[];
+}
+/**
+ * 重置云主机安全策略请求参数
+ * @interface
+ * @property guest - 云主机ID
+ * @property mac_address - 目标网卡MAC地址
+ */
+export interface ControlResetGuestSecurityPolicyParams {
+    guest: string;
+    mac_address: string;
 }

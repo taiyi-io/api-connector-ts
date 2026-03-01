@@ -17,7 +17,7 @@ This specification defines the security policy management functionality in the T
   - `is_default`: boolean (optional) - Whether to set as default policy group
   - `external_rules`: SecurityRule[] (required) - External network card rule template
   - `internal_rules`: SecurityRule[] (required) - Internal network card rule template
-- **Returns**: `BackendResult<string>` (task ID)
+- **Returns**: `BackendResult` (同步返回，不返回任务ID)
 
 #### `querySecurityPolicies`
 - **Description**: Query security policy group list
@@ -39,13 +39,13 @@ This specification defines the security policy management functionality in the T
   - `is_default`: boolean (optional) - Whether to set as default policy group
   - `external_rules`: SecurityRule[] (optional) - External network card rule template
   - `internal_rules`: SecurityRule[] (optional) - Internal network card rule template
-- **Returns**: `BackendResult<string>` (task ID)
+- **Returns**: `BackendResult` (同步返回，不返回任务ID)
 
 #### `deleteSecurityPolicy`
 - **Description**: Delete security policy group
 - **Parameters**: 
   - `id`: string (required) - Policy group ID
-- **Returns**: `BackendResult<string>` (task ID)
+- **Returns**: `BackendResult` (同步返回，不返回任务ID)
 
 #### `copySecurityPolicy`
 - **Description**: Copy security policy group
@@ -53,7 +53,7 @@ This specification defines the security policy management functionality in the T
   - `source_id`: string (required) - Source policy group ID
   - `new_id`: string (required) - New policy group ID
   - `name`: string (required) - New policy group name
-- **Returns**: `BackendResult<string>` (task ID)
+- **Returns**: `BackendResult` (同步返回，不返回任务ID)
 
 ### 2. Cloud Host Security Policy Management
 
@@ -69,14 +69,14 @@ This specification defines the security policy management functionality in the T
   - `guest`: string (required) - Cloud host ID
   - `mac_address`: string (required) - Target network card MAC address
   - `rules`: SecurityRule[] (required) - New rule list
-- **Returns**: `BackendResult<string>` (task ID)
+- **Returns**: `BackendResult` (同步返回，不返回任务ID)
 
 #### `resetGuestSecurityPolicy`
 - **Description**: Reset cloud host security policy
 - **Parameters**: 
   - `guest`: string (required) - Cloud host ID
   - `mac_address`: string (required) - Target network card MAC address
-- **Returns**: `BackendResult<string>` (task ID)
+- **Returns**: `BackendResult` (同步返回，不返回任务ID)
 
 ## Data Structures
 

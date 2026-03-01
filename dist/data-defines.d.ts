@@ -989,20 +989,6 @@ export interface SnapshotTreeNode {
     root?: string;
     leafs?: string[];
 }
-export interface AddressPoolRecord {
-    id: string;
-    mode: InterfaceMode;
-    is_v6?: boolean;
-    description?: string;
-}
-export interface AddressPool {
-    id: string;
-    mode: InterfaceMode;
-    is_v6?: boolean;
-    description?: string;
-    internal?: AddressRanges;
-    external?: AddressRanges;
-}
 /**
  * 资源节点容量
  * @interface
@@ -1562,21 +1548,8 @@ export interface FoundAdminSecret {
     admin?: string;
     secret?: string;
 }
-export interface AllocatedAddress {
-    owner: string;
-    used: boolean;
-    interfaces?: NetworkInterface[];
-}
-export interface AddressRange {
-    begin: string;
-    end: string;
-}
-export interface AddressRanges {
-    ranges?: AddressRange[];
-    allocated?: AllocatedAddress[];
-}
 /**
- * 地址池配置（新版四集合模型）
+ * 地址池配置
  * @interface
  * @property id - 地址池ID
  * @property mode - 模式 (address/port)
@@ -1596,7 +1569,7 @@ export interface AddressPoolConfig {
     upstream_gateway: string;
 }
 /**
- * 地址池详情（新版四集合模型）
+ * 地址池详情
  * @interface
  * @property config - 地址池配置
  * @property external_v4 - 外部IPv4地址集
@@ -1622,7 +1595,7 @@ export interface AddressSet {
     allocations: AddressAllocation[];
 }
 /**
- * 地址范围（新版）
+ * 地址范围
  * @interface
  * @property begin - 起始地址
  * @property end - 结束地址
@@ -1682,6 +1655,8 @@ export interface SecurityPolicyGroup {
     is_default: boolean;
     external_rules: SecurityRule[];
     internal_rules: SecurityRule[];
+    external_rules_count?: number;
+    internal_rules_count?: number;
 }
 /**
  * 云主机安全策略

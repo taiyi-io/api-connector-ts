@@ -64,20 +64,14 @@ describe("Security Policy Tests", () => {
   });
 
   test("should have security policy methods", async function () {
-    expect(connector.tryCreateSecurityPolicy).toBeDefined();
     expect(connector.createSecurityPolicy).toBeDefined();
     expect(connector.querySecurityPolicies).toBeDefined();
     expect(connector.getSecurityPolicy).toBeDefined();
-    expect(connector.tryModifySecurityPolicy).toBeDefined();
     expect(connector.modifySecurityPolicy).toBeDefined();
-    expect(connector.tryDeleteSecurityPolicy).toBeDefined();
     expect(connector.deleteSecurityPolicy).toBeDefined();
-    expect(connector.tryCopySecurityPolicy).toBeDefined();
     expect(connector.copySecurityPolicy).toBeDefined();
     expect(connector.getGuestSecurityPolicy).toBeDefined();
-    expect(connector.tryModifyGuestSecurityPolicy).toBeDefined();
     expect(connector.modifyGuestSecurityPolicy).toBeDefined();
-    expect(connector.tryResetGuestSecurityPolicy).toBeDefined();
     expect(connector.resetGuestSecurityPolicy).toBeDefined();
   });
 

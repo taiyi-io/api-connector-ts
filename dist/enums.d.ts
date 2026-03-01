@@ -167,24 +167,6 @@ export declare enum controlCommandEnum {
     RemoveRemoteContainer = "remove_remote_container",
     /** 改变远程容器标志 */
     ChangeRemoteContainerFlag = "change_remote_container_flag",
-    /** 查询地址池列表 */
-    QueryAddressPools = "query_address_pools",
-    /** 获取地址池详情 */
-    GetAddressPool = "get_address_pool",
-    /** 添加地址池 */
-    AddAddressPool = "add_address_pool",
-    /** 修改地址池 */
-    ModifyAddressPool = "modify_address_pool",
-    /** 删除地址池 */
-    RemoveAddressPool = "remove_address_pool",
-    /** 添加外部地址范围 */
-    AddExternalAddressRange = "add_external_address_range",
-    /** 删除外部地址范围 */
-    RemoveExternalAddressRange = "remove_external_address_range",
-    /** 添加内部地址范围 */
-    AddInternalAddressRange = "add_internal_address_range",
-    /** 删除内部地址范围 */
-    RemoveInternalAddressRange = "remove_internal_address_range",
     /** 查询云主机列表 */
     QueryGuests = "query_guests",
     /** 获取云主机详情 */
@@ -541,19 +523,19 @@ export declare enum controlCommandEnum {
     ModifyGuestSecurityPolicy = "modify_guest_security_policy",
     /** 重置云主机安全策略 */
     ResetGuestSecurityPolicy = "reset_guest_security_policy",
-    /** 创建地址池（新版） */
+    /** 创建地址池 */
     CreateAddressPool = "create_address_pool",
-    /** 修改地址池（新版） */
-    ModifyAddressPoolV2 = "modify_address_pool_v2",
-    /** 添加地址范围（新版） */
+    /** 修改地址池 */
+    ModifyAddressPool = "modify_address_pool",
+    /** 添加地址范围 */
     AddAddressRange = "add_address_range",
-    /** 删除地址范围（新版） */
+    /** 删除地址范围 */
     RemoveAddressRange = "remove_address_range",
-    /** 查询地址池配置列表（新版） */
+    /** 查询地址池配置列表 */
     QueryAddressPoolConfigs = "query_address_pool_configs",
-    /** 获取地址池详情（新版） */
+    /** 获取地址池详情 */
     GetAddressPoolDetail = "get_address_pool_detail",
-    /** 删除地址池（新版） */
+    /** 删除地址池 */
     DeleteAddressPool = "delete_address_pool"
 }
 /**
@@ -1864,8 +1846,6 @@ export declare enum LicenseFeature {
     Migration = "migration",
     /** 地址池 */
     AddressPool = "address_pool",
-    /** 安全策略 */
-    SecurityPolicy = "security_policy",
     /** 内存合并 */
     MemoryMerge = "memory_merge"
 }

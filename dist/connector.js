@@ -2134,205 +2134,6 @@ class TaiyiConnector {
             return {};
         });
     }
-    // Address Pool Management Methods
-    /**
-     * 查询地址池列表
-     * @param offset - 起始位置
-     * @param limit - 限制数量
-     * @returns 地址池列表
-     * @deprecated 地址池相关接口全部会重新设计
-     */
-    queryAddressPools(offset, limit) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const cmd = {
-                type: enums_1.controlCommandEnum.QueryAddressPools,
-                query_address_pools: {
-                    offset: offset,
-                    page_size: limit,
-                },
-            };
-            const resp = yield this.requestCommandResponse(cmd);
-            if (resp.error) {
-                return { error: resp.error };
-            }
-            if (!resp.data ||
-                !resp.data.address_pools ||
-                resp.data.total === undefined) {
-                return { error: "获取地址池列表失败" };
-            }
-            return {
-                data: {
-                    records: resp.data.address_pools,
-                    total: resp.data.total,
-                },
-            };
-        });
-    }
-    /**
-     * 获取地址池详情
-     * @param poolID - 地址池ID
-     * @returns 地址池详情
-     * @deprecated 地址池相关接口全部会重新设计
-     */
-    getAddressPool(poolID) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const cmd = {
-                type: enums_1.controlCommandEnum.GetAddressPool,
-                get_address_pool: { id: poolID },
-            };
-            const resp = yield this.requestCommandResponse(cmd);
-            if (resp.error) {
-                return { error: resp.error };
-            }
-            if (!resp.data || !resp.data.address_pool) {
-                return { error: "地址池不存在" };
-            }
-            return { data: resp.data.address_pool };
-        });
-    }
-    /**
-     * 添加地址池
-     * @param id - 地址池ID
-     * @param mode - 接口模式
-     * @param isV6 - 是否为IPv6
-     * @param description - 描述
-     * @returns 操作结果
-     * @deprecated 地址池相关接口全部会重新设计
-     */
-    addAddressPool(id, mode, isV6, description) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const cmd = {
-                type: enums_1.controlCommandEnum.AddAddressPool,
-                add_address_pool: {
-                    id,
-                    mode,
-                    is_v6: isV6,
-                    description,
-                },
-            };
-            return yield this.sendCommand(cmd);
-        });
-    }
-    /**
-     * 修改地址池
-     * @param id - 地址池ID
-     * @param mode - 接口模式
-     * @param description - 描述
-     * @returns 操作结果
-     * @deprecated 地址池相关接口全部会重新设计
-     */
-    modifyAddressPool(id, mode, description) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const cmd = {
-                type: enums_1.controlCommandEnum.ModifyAddressPool,
-                modify_address_pool: {
-                    id,
-                    mode,
-                    description,
-                },
-            };
-            return yield this.sendCommand(cmd);
-        });
-    }
-    /**
-     * 删除地址池
-     * @param poolID - 地址池ID
-     * @returns 操作结果
-     * @deprecated 地址池相关接口全部会重新设计
-     */
-    removeAddressPool(poolID) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const cmd = {
-                type: enums_1.controlCommandEnum.RemoveAddressPool,
-                remove_address_pool: { id: poolID },
-            };
-            return yield this.sendCommand(cmd);
-        });
-    }
-    /**
-     * 添加外部地址范围
-     * @param poolID - 地址池ID
-     * @param beginAddress - 起始地址
-     * @param endAddress - 结束地址
-     * @returns 操作结果
-     * @deprecated 地址池相关接口全部会重新设计
-     */
-    addExternalAddressRange(poolID, beginAddress, endAddress) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const cmd = {
-                type: enums_1.controlCommandEnum.AddExternalAddressRange,
-                address_range: {
-                    pool: poolID,
-                    begin: beginAddress,
-                    end: endAddress,
-                },
-            };
-            return yield this.sendCommand(cmd);
-        });
-    }
-    /**
-     * 添加内部地址范围
-     * @param poolID - 地址池ID
-     * @param beginAddress - 起始地址
-     * @param endAddress - 结束地址
-     * @returns 操作结果
-     * @deprecated 地址池相关接口全部会重新设计
-     */
-    addInternalAddressRange(poolID, beginAddress, endAddress) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const cmd = {
-                type: enums_1.controlCommandEnum.AddInternalAddressRange,
-                address_range: {
-                    pool: poolID,
-                    begin: beginAddress,
-                    end: endAddress,
-                },
-            };
-            return yield this.sendCommand(cmd);
-        });
-    }
-    /**
-     * 删除外部地址范围
-     * @param poolID - 地址池ID
-     * @param beginAddress - 起始地址
-     * @param endAddress - 结束地址
-     * @returns 操作结果
-     * @deprecated 地址池相关接口全部会重新设计
-     */
-    removeExternalAddressRange(poolID, beginAddress, endAddress) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const cmd = {
-                type: enums_1.controlCommandEnum.RemoveExternalAddressRange,
-                address_range: {
-                    pool: poolID,
-                    begin: beginAddress,
-                    end: endAddress,
-                },
-            };
-            return yield this.sendCommand(cmd);
-        });
-    }
-    /**
-     * 删除内部地址范围
-     * @param poolID - 地址池ID
-     * @param beginAddress - 起始地址
-     * @param endAddress - 结束地址
-     * @returns 操作结果
-     * @deprecated 地址池相关接口全部会重新设计
-     */
-    removeInternalAddressRange(poolID, beginAddress, endAddress) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const cmd = {
-                type: enums_1.controlCommandEnum.RemoveInternalAddressRange,
-                address_range: {
-                    pool: poolID,
-                    begin: beginAddress,
-                    end: endAddress,
-                },
-            };
-            return yield this.sendCommand(cmd);
-        });
-    }
     // ISO File Management Methods
     /**
      * 创建ISO文件
@@ -5014,9 +4815,9 @@ class TaiyiConnector {
             };
         });
     }
-    // ==================== 新版地址池管理 ====================
+    // ==================== 地址池管理 ====================
     /**
-     * 创建地址池（新版四集合模型）
+     * 创建地址池
      * @param id - 地址池ID
      * @param mode - 模式 (address/port)
      * @param description - 描述
@@ -5062,25 +4863,30 @@ class TaiyiConnector {
      * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
-    createAddressPool(id_1, mode_1, description_1, gatewayV4_1, gatewayV6_1, dns_1, upstreamGateway_1) {
-        return __awaiter(this, arguments, void 0, function* (id, mode, description, gatewayV4, gatewayV6, dns, upstreamGateway, timeoutSeconds = 300) {
-            const taskResult = yield this.tryCreateAddressPool(id, mode, description, gatewayV4, gatewayV6, dns, upstreamGateway);
-            if (taskResult.error) {
-                return { error: taskResult.error };
-            }
-            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
-            if (taskData.error) {
-                return { error: taskData.error };
-            }
-            return {};
+    createAddressPool(id, mode, description, gatewayV4, gatewayV6, dns, upstreamGateway) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.CreateAddressPool,
+                create_address_pool: {
+                    id,
+                    mode,
+                    description,
+                    gateway_v4: gatewayV4,
+                    gateway_v6: gatewayV6,
+                    dns,
+                    upstream_gateway: upstreamGateway,
+                },
+            };
+            return yield this.sendCommand(cmd);
         });
     }
     /**
-     * 查询地址池配置列表（新版）
+     * 查询地址池配置列表
      * @returns 地址池配置列表
      */
     queryAddressPoolConfigs() {
         return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
             const cmd = {
                 type: enums_1.controlCommandEnum.QueryAddressPoolConfigs,
             };
@@ -5088,14 +4894,11 @@ class TaiyiConnector {
             if (resp.error) {
                 return { error: resp.error };
             }
-            if (!resp.data || !resp.data.address_pool_configs) {
-                return { error: "获取地址池列表失败" };
-            }
-            return { data: resp.data.address_pool_configs };
+            return { data: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.address_pool_configs) !== null && _b !== void 0 ? _b : [] };
         });
     }
     /**
-     * 获取地址池详情（新版四集合模型）
+     * 获取地址池详情
      * @param poolID - 地址池ID
      * @returns 地址池详情
      */
@@ -5103,7 +4906,7 @@ class TaiyiConnector {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.GetAddressPoolDetail,
-                get_address_pool: { id: poolID },
+                get_address_pool_detail: { id: poolID },
             };
             const resp = yield this.requestCommandResponse(cmd);
             if (resp.error) {
@@ -5116,7 +4919,7 @@ class TaiyiConnector {
         });
     }
     /**
-     * 修改地址池（新版）
+     * 修改地址池
      * @param id - 地址池ID
      * @param description - 描述
      * @param gatewayV4 - IPv4网关地址
@@ -5125,11 +4928,11 @@ class TaiyiConnector {
      * @param upstreamGateway - 上游网关地址
      * @returns 任务ID
      */
-    tryModifyAddressPoolV2(id, description, gatewayV4, gatewayV6, dns, upstreamGateway) {
+    tryModifyAddressPool(id, description, gatewayV4, gatewayV6, dns, upstreamGateway) {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
-                type: enums_1.controlCommandEnum.ModifyAddressPoolV2,
-                modify_address_pool_v2: {
+                type: enums_1.controlCommandEnum.ModifyAddressPool,
+                modify_address_pool: {
                     id,
                     description,
                     gateway_v4: gatewayV4,
@@ -5149,31 +4952,33 @@ class TaiyiConnector {
         });
     }
     /**
-     * 修改地址池并等待完成（新版）
+     * 修改地址池并等待完成
      * @param id - 地址池ID
      * @param description - 描述
      * @param gatewayV4 - IPv4网关地址
      * @param gatewayV6 - IPv6网关地址
      * @param dns - DNS服务器列表
      * @param upstreamGateway - 上游网关地址
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
-    modifyAddressPoolV2(id_1, description_1, gatewayV4_1, gatewayV6_1, dns_1, upstreamGateway_1) {
-        return __awaiter(this, arguments, void 0, function* (id, description, gatewayV4, gatewayV6, dns, upstreamGateway, timeoutSeconds = 300) {
-            const taskResult = yield this.tryModifyAddressPoolV2(id, description, gatewayV4, gatewayV6, dns, upstreamGateway);
-            if (taskResult.error) {
-                return { error: taskResult.error };
-            }
-            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
-            if (taskData.error) {
-                return { error: taskData.error };
-            }
-            return {};
+    modifyAddressPool(id, description, gatewayV4, gatewayV6, dns, upstreamGateway) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.ModifyAddressPool,
+                modify_address_pool: {
+                    id,
+                    description,
+                    gateway_v4: gatewayV4,
+                    gateway_v6: gatewayV6,
+                    dns,
+                    upstream_gateway: upstreamGateway,
+                },
+            };
+            return yield this.sendCommand(cmd);
         });
     }
     /**
-     * 删除地址池（新版）
+     * 删除地址池
      * @param poolID - 地址池ID
      * @returns 任务ID
      */
@@ -5181,7 +4986,7 @@ class TaiyiConnector {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.DeleteAddressPool,
-                remove_address_pool: { id: poolID },
+                delete_address_pool: { id: poolID },
             };
             const resp = yield this.requestCommandResponse(cmd);
             if (resp.error) {
@@ -5194,26 +4999,21 @@ class TaiyiConnector {
         });
     }
     /**
-     * 删除地址池并等待完成（新版）
+     * 删除地址池并等待完成
      * @param poolID - 地址池ID
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
-    deleteAddressPool(poolID_1) {
-        return __awaiter(this, arguments, void 0, function* (poolID, timeoutSeconds = 300) {
-            const taskResult = yield this.tryDeleteAddressPool(poolID);
-            if (taskResult.error) {
-                return { error: taskResult.error };
-            }
-            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
-            if (taskData.error) {
-                return { error: taskData.error };
-            }
-            return {};
+    deleteAddressPool(poolID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.DeleteAddressPool,
+                delete_address_pool: { id: poolID },
+            };
+            return yield this.sendCommand(cmd);
         });
     }
     /**
-     * 添加地址范围到地址池（新版）
+     * 添加地址范围到地址池
      * @param pool - 地址池ID
      * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
      * @param begin - 起始地址
@@ -5244,7 +5044,7 @@ class TaiyiConnector {
         });
     }
     /**
-     * 添加地址范围并等待完成（新版）
+     * 添加地址范围并等待完成
      * @param pool - 地址池ID
      * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
      * @param begin - 起始地址
@@ -5253,21 +5053,23 @@ class TaiyiConnector {
      * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
-    addAddressRange(pool_1, setType_1, begin_1, end_1, cidr_1) {
-        return __awaiter(this, arguments, void 0, function* (pool, setType, begin, end, cidr, timeoutSeconds = 300) {
-            const taskResult = yield this.tryAddAddressRange(pool, setType, begin, end, cidr);
-            if (taskResult.error) {
-                return { error: taskResult.error };
-            }
-            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
-            if (taskData.error) {
-                return { error: taskData.error };
-            }
-            return {};
+    addAddressRange(pool, setType, begin, end, cidr) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.AddAddressRange,
+                add_address_range: {
+                    pool,
+                    set_type: setType,
+                    begin,
+                    end,
+                    cidr,
+                },
+            };
+            return yield this.sendCommand(cmd);
         });
     }
     /**
-     * 从地址池删除地址范围（新版）
+     * 从地址池删除地址范围
      * @param pool - 地址池ID
      * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
      * @param begin - 起始地址
@@ -5296,7 +5098,7 @@ class TaiyiConnector {
         });
     }
     /**
-     * 从地址池删除地址范围并等待完成（新版）
+     * 从地址池删除地址范围并等待完成
      * @param pool - 地址池ID
      * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
      * @param begin - 起始地址
@@ -5304,17 +5106,18 @@ class TaiyiConnector {
      * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
-    removeAddressRange(pool_1, setType_1, begin_1, end_1) {
-        return __awaiter(this, arguments, void 0, function* (pool, setType, begin, end, timeoutSeconds = 300) {
-            const taskResult = yield this.tryRemoveAddressRange(pool, setType, begin, end);
-            if (taskResult.error) {
-                return { error: taskResult.error };
-            }
-            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
-            if (taskData.error) {
-                return { error: taskData.error };
-            }
-            return {};
+    removeAddressRange(pool, setType, begin, end) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.RemoveAddressRange,
+                remove_address_range: {
+                    pool,
+                    set_type: setType,
+                    begin,
+                    end,
+                },
+            };
+            return yield this.sendCommand(cmd);
         });
     }
     // ==================== 安全策略管理 ====================
@@ -5326,9 +5129,9 @@ class TaiyiConnector {
      * @param internalRules - 内部网卡规则模板
      * @param description - 描述
      * @param isDefault - 是否默认策略组
-     * @returns 任务ID
+     * @returns 操作结果
      */
-    tryCreateSecurityPolicy(id, name, externalRules, internalRules, description, isDefault) {
+    createSecurityPolicy(id, name, externalRules, internalRules, description, isDefault) {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.CreateSecurityPolicy,
@@ -5341,38 +5144,7 @@ class TaiyiConnector {
                     is_default: isDefault,
                 },
             };
-            const resp = yield this.requestCommandResponse(cmd);
-            if (resp.error) {
-                return { error: resp.error };
-            }
-            if (!resp.data || !resp.data.id) {
-                return { error: "创建安全策略组失败" };
-            }
-            return { data: resp.data.id };
-        });
-    }
-    /**
-     * 创建安全策略组并等待完成
-     * @param id - 策略组ID
-     * @param name - 策略组名称
-     * @param externalRules - 外部网卡规则模板
-     * @param internalRules - 内部网卡规则模板
-     * @param description - 描述
-     * @param isDefault - 是否默认策略组
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
-     * @returns 操作结果
-     */
-    createSecurityPolicy(id_1, name_1, externalRules_1, internalRules_1, description_1, isDefault_1) {
-        return __awaiter(this, arguments, void 0, function* (id, name, externalRules, internalRules, description, isDefault, timeoutSeconds = 300) {
-            const taskResult = yield this.tryCreateSecurityPolicy(id, name, externalRules, internalRules, description, isDefault);
-            if (taskResult.error) {
-                return { error: taskResult.error };
-            }
-            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
-            if (taskData.error) {
-                return { error: taskData.error };
-            }
-            return {};
+            return yield this.sendCommand(cmd);
         });
     }
     /**
@@ -5381,17 +5153,16 @@ class TaiyiConnector {
      */
     querySecurityPolicies() {
         return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
             const cmd = {
                 type: enums_1.controlCommandEnum.QuerySecurityPolicies,
+                query_security_policies: {},
             };
             const resp = yield this.requestCommandResponse(cmd);
             if (resp.error) {
                 return { error: resp.error };
             }
-            if (!resp.data || !resp.data.security_policies) {
-                return { error: "获取安全策略组列表失败" };
-            }
-            return { data: resp.data.security_policies };
+            return { data: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.security_policies) !== null && _b !== void 0 ? _b : [] };
         });
     }
     /**
@@ -5423,9 +5194,9 @@ class TaiyiConnector {
      * @param isDefault - 是否默认策略组
      * @param externalRules - 外部网卡规则模板
      * @param internalRules - 内部网卡规则模板
-     * @returns 任务ID
+     * @returns 操作结果
      */
-    tryModifySecurityPolicy(id, name, description, isDefault, externalRules, internalRules) {
+    modifySecurityPolicy(id, name, description, isDefault, externalRules, internalRules) {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.ModifySecurityPolicy,
@@ -5438,78 +5209,21 @@ class TaiyiConnector {
                     internal_rules: internalRules,
                 },
             };
-            const resp = yield this.requestCommandResponse(cmd);
-            if (resp.error) {
-                return { error: resp.error };
-            }
-            if (!resp.data || !resp.data.id) {
-                return { error: "修改安全策略组失败" };
-            }
-            return { data: resp.data.id };
-        });
-    }
-    /**
-     * 修改安全策略组并等待完成
-     * @param id - 策略组ID
-     * @param name - 策略组名称
-     * @param description - 描述
-     * @param isDefault - 是否默认策略组
-     * @param externalRules - 外部网卡规则模板
-     * @param internalRules - 内部网卡规则模板
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
-     * @returns 操作结果
-     */
-    modifySecurityPolicy(id_1, name_1, description_1, isDefault_1, externalRules_1, internalRules_1) {
-        return __awaiter(this, arguments, void 0, function* (id, name, description, isDefault, externalRules, internalRules, timeoutSeconds = 300) {
-            const taskResult = yield this.tryModifySecurityPolicy(id, name, description, isDefault, externalRules, internalRules);
-            if (taskResult.error) {
-                return { error: taskResult.error };
-            }
-            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
-            if (taskData.error) {
-                return { error: taskData.error };
-            }
-            return {};
+            return yield this.sendCommand(cmd);
         });
     }
     /**
      * 删除安全策略组
      * @param policyID - 策略组ID
-     * @returns 任务ID
+     * @returns 操作结果
      */
-    tryDeleteSecurityPolicy(policyID) {
+    deleteSecurityPolicy(policyID) {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.DeleteSecurityPolicy,
                 delete_security_policy: { id: policyID },
             };
-            const resp = yield this.requestCommandResponse(cmd);
-            if (resp.error) {
-                return { error: resp.error };
-            }
-            if (!resp.data || !resp.data.id) {
-                return { error: "删除安全策略组失败" };
-            }
-            return { data: resp.data.id };
-        });
-    }
-    /**
-     * 删除安全策略组并等待完成
-     * @param policyID - 策略组ID
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
-     * @returns 操作结果
-     */
-    deleteSecurityPolicy(policyID_1) {
-        return __awaiter(this, arguments, void 0, function* (policyID, timeoutSeconds = 300) {
-            const taskResult = yield this.tryDeleteSecurityPolicy(policyID);
-            if (taskResult.error) {
-                return { error: taskResult.error };
-            }
-            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
-            if (taskData.error) {
-                return { error: taskData.error };
-            }
-            return {};
+            return yield this.sendCommand(cmd);
         });
     }
     /**
@@ -5517,47 +5231,19 @@ class TaiyiConnector {
      * @param sourceID - 源策略组ID
      * @param newID - 新策略组ID
      * @param name - 新策略组名称
-     * @returns 任务ID
+     * @returns 操作结果
      */
-    tryCopySecurityPolicy(sourceID, newID, name) {
+    copySecurityPolicy(sourceID, newID, name) {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.CopySecurityPolicy,
                 copy_security_policy: {
                     source_id: sourceID,
-                    new_id: newID,
+                    target_id: newID,
                     name,
                 },
             };
-            const resp = yield this.requestCommandResponse(cmd);
-            if (resp.error) {
-                return { error: resp.error };
-            }
-            if (!resp.data || !resp.data.id) {
-                return { error: "复制安全策略组失败" };
-            }
-            return { data: resp.data.id };
-        });
-    }
-    /**
-     * 复制安全策略组并等待完成
-     * @param sourceID - 源策略组ID
-     * @param newID - 新策略组ID
-     * @param name - 新策略组名称
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
-     * @returns 操作结果
-     */
-    copySecurityPolicy(sourceID_1, newID_1, name_1) {
-        return __awaiter(this, arguments, void 0, function* (sourceID, newID, name, timeoutSeconds = 300) {
-            const taskResult = yield this.tryCopySecurityPolicy(sourceID, newID, name);
-            if (taskResult.error) {
-                return { error: taskResult.error };
-            }
-            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
-            if (taskData.error) {
-                return { error: taskData.error };
-            }
-            return {};
+            return yield this.sendCommand(cmd);
         });
     }
     /**
@@ -5569,7 +5255,7 @@ class TaiyiConnector {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.GetGuestSecurityPolicy,
-                get_guest_security_policy: { guest: guestID },
+                get_guest_security_policy: { guest_id: guestID },
             };
             const resp = yield this.requestCommandResponse(cmd);
             if (resp.error) {
@@ -5593,7 +5279,7 @@ class TaiyiConnector {
             const cmd = {
                 type: enums_1.controlCommandEnum.ModifyGuestSecurityPolicy,
                 modify_guest_security_policy: {
-                    guest: guestID,
+                    guest_id: guestID,
                     mac_address: macAddress,
                     rules,
                 },
@@ -5640,7 +5326,7 @@ class TaiyiConnector {
             const cmd = {
                 type: enums_1.controlCommandEnum.ResetGuestSecurityPolicy,
                 reset_guest_security_policy: {
-                    guest: guestID,
+                    guest_id: guestID,
                     mac_address: macAddress,
                 },
             };

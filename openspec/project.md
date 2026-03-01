@@ -57,7 +57,8 @@
 
 - 所有 API 方法返回 `BackendResult<T>` 包装结果
 - 使用 `async/await` 进行异步操作
-- 长时间运行操作使用 `tryXXX` + `waitTask` 异步任务模式
+- **异步 API**: 长时间运行操作（如创建云主机）控制节点会返回 Task ID。TypeScript 中应提供 `tryXXX` 返回任务 ID，并提供封装了 `waitTask` 的高级方法。
+- **同步 API**: 对立刻完成的操作（如删除安全策略组、修改地址池），控制节点同步返回操作结果。TypeScript 中**严禁**使用 `tryXXX` 模式，应直接调用 `sendCommand` 或 `requestCommandResponse`，避免因把对象 `ID` 误当成 `Task ID` 送去 `waitTask` 导致超时或报错。
 - 令牌存储与连接器解耦，调用者需实现 `SetTokenHandler` 和 `GetTokenHandler`
 
 ### 测试策略

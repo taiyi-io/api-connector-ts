@@ -1,8 +1,8 @@
 /**
  * 向API服务发送请求的数据结构定义
  */
-import { TaskData, ClusterNodeData, ComputePoolStatus, StoragePool, StoragePoolListRecord, AddressPool, AddressPoolRecord, AddressPoolConfig, AddressPoolDetail, SecurityPolicyGroup, GuestSecurityPolicy, GuestView, FileStatus, FileView, DataStore, SnapshotRecord, SnapshotTreeNode, GuestResourceUsageRecord, NodeResourceSnapshotRecord, PoolResourceSnapshotRecord, ClusterResourceSnapshotRecord, GuestSystemView, WarningRecord, ConsoleEvent, NodeConfigStatus, SSHKeyView, License, LicenseRecord, ClusterStatus, NetworkGraphNode, ResourceMonitorConfig, ImportSource, ImportTarget, UserGroupRecord, UserCredentialRecord, UserToken, PrivateKey, UserAccessRecord, SystemStatus, ResourcePermissions, ClusterNode, ComputePoolConfig, GuestConfig, VolumeSpec, FileSpec, VolumeContainer, GuestFilter, NodeConfig, GuestSystemSpec, UserGroup, SecurityRule } from "./data-defines";
-import { UserRole, controlCommandEnum, StorageType, VolumeContainerStrategy, InterfaceMode, StatisticRange, ComputePoolStrategy, ConsoleEventLevel, ImportVendor, ResourceType, SignatureAlgorithm, ResourceAccessLevel } from "./enums";
+import { TaskData, ClusterNodeData, ComputePoolStatus, StoragePool, StoragePoolListRecord, AddressPoolConfig, AddressPoolDetail, SecurityPolicyGroup, GuestSecurityPolicy, GuestView, FileStatus, FileView, DataStore, SnapshotRecord, SnapshotTreeNode, GuestResourceUsageRecord, NodeResourceSnapshotRecord, PoolResourceSnapshotRecord, ClusterResourceSnapshotRecord, GuestSystemView, WarningRecord, ConsoleEvent, NodeConfigStatus, SSHKeyView, License, LicenseRecord, ClusterStatus, NetworkGraphNode, ResourceMonitorConfig, ImportSource, ImportTarget, UserGroupRecord, UserCredentialRecord, UserToken, PrivateKey, UserAccessRecord, SystemStatus, ResourcePermissions, ClusterNode, ComputePoolConfig, GuestConfig, VolumeSpec, FileSpec, VolumeContainer, GuestFilter, NodeConfig, GuestSystemSpec, UserGroup, SecurityRule } from "./data-defines";
+import { UserRole, controlCommandEnum, StorageType, VolumeContainerStrategy, StatisticRange, ComputePoolStrategy, ConsoleEventLevel, ImportVendor, ResourceType, SignatureAlgorithm, ResourceAccessLevel } from "./enums";
 export interface ControlCommandResponse {
     id?: string;
     total?: number;
@@ -14,8 +14,6 @@ export interface ControlCommandResponse {
     compute_pools?: ComputePoolStatus[];
     storage_pool?: StoragePool;
     storage_pools?: StoragePoolListRecord[];
-    address_pool?: AddressPool;
-    address_pools?: AddressPoolRecord[];
     guests?: GuestView[];
     guest?: GuestView;
     file?: FileStatus;
@@ -98,16 +96,12 @@ export interface ControlCommandRequest {
     modify_remote_container?: ControlModifyRemoteContainerParams;
     remove_remote_container?: ControlRemoveRemoteContainerParams;
     change_remote_container_flag?: ControlChangeRemoteContainerFlagParams;
-    query_address_pools?: ControlQueryAddressPoolsParams;
-    get_address_pool?: ControlGetAddressPoolParams;
-    add_address_pool?: ControlAddressPoolParams;
-    modify_address_pool?: ControlAddressPoolParams;
-    remove_address_pool?: ControlRemoveAddressPoolParams;
-    address_range?: ControlAddressRangeParams;
     create_address_pool?: ControlCreateAddressPoolParams;
-    modify_address_pool_v2?: ControlModifyAddressPoolV2Params;
-    add_address_range?: ControlAddressRangeV2Params;
-    remove_address_range?: ControlRemoveAddressRangeV2Params;
+    modify_address_pool?: ControlModifyAddressPoolParams;
+    delete_address_pool?: ControlDeleteAddressPoolParams;
+    get_address_pool_detail?: ControlGetAddressPoolDetailParams;
+    add_address_range?: ControlAddAddressRangeParams;
+    remove_address_range?: ControlRemoveAddressRangeParams;
     query_guests?: ControlQueryGuestsParams;
     get_guest?: ControlGetGuestParams;
     create_iso?: CreateFileParams;
@@ -639,24 +633,8 @@ export interface ControlChangeRemoteContainerFlagParams {
     index: number;
     enabled: boolean;
 }
-export interface ControlQueryAddressPoolsParams {
-    offset?: number;
-    page_size?: number;
-}
-export interface ControlGetAddressPoolParams {
-    id: string;
-}
-export interface ControlAddressPoolParams {
-    id?: string;
-    mode: InterfaceMode;
-    description?: string;
-    is_v6?: boolean;
-}
-export interface ControlRemoveAddressPoolParams {
-    id: string;
-}
 /**
- * 新版地址池创建请求参数
+ * 地址池创建请求参数
  * @interface
  * @property id - 地址池ID
  * @property mode - 模式 (address/port)
@@ -676,7 +654,7 @@ export interface ControlCreateAddressPoolParams {
     upstream_gateway?: string;
 }
 /**
- * 新版地址池修改请求参数
+ * 地址池修改请求参数
  * @interface
  * @property id - 地址池ID
  * @property description - 描述
@@ -685,7 +663,7 @@ export interface ControlCreateAddressPoolParams {
  * @property dns - DNS服务器列表
  * @property upstream_gateway - 上游网关地址
  */
-export interface ControlModifyAddressPoolV2Params {
+export interface ControlModifyAddressPoolParams {
     id: string;
     description?: string;
     gateway_v4?: string;
@@ -693,8 +671,14 @@ export interface ControlModifyAddressPoolV2Params {
     dns?: string[];
     upstream_gateway?: string;
 }
+export interface ControlDeleteAddressPoolParams {
+    id: string;
+}
+export interface ControlGetAddressPoolDetailParams {
+    id: string;
+}
 /**
- * 新版地址范围操作请求参数
+ * 添加地址范围请求参数
  * @interface
  * @property pool - 地址池ID
  * @property set_type - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
@@ -702,7 +686,7 @@ export interface ControlModifyAddressPoolV2Params {
  * @property end - 结束地址
  * @property cidr - CIDR格式
  */
-export interface ControlAddressRangeV2Params {
+export interface ControlAddAddressRangeParams {
     pool: string;
     set_type: string;
     begin?: string;
@@ -710,21 +694,16 @@ export interface ControlAddressRangeV2Params {
     cidr?: string;
 }
 /**
- * 新版删除地址范围请求参数
+ * 删除地址范围请求参数
  * @interface
  * @property pool - 地址池ID
  * @property set_type - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
  * @property begin - 起始地址
  * @property end - 结束地址
  */
-export interface ControlRemoveAddressRangeV2Params {
+export interface ControlRemoveAddressRangeParams {
     pool: string;
     set_type: string;
-    begin: string;
-    end: string;
-}
-export interface ControlAddressRangeParams {
-    pool: string;
     begin: string;
     end: string;
 }
@@ -1660,36 +1639,36 @@ export interface ControlDeleteSecurityPolicyParams {
  */
 export interface ControlCopySecurityPolicyParams {
     source_id: string;
-    new_id: string;
+    target_id: string;
     name: string;
 }
 /**
  * 获取云主机安全策略请求参数
  * @interface
- * @property guest - 云主机ID
+ * @property guest_id - 云主机ID
  */
 export interface ControlGetGuestSecurityPolicyParams {
-    guest: string;
+    guest_id: string;
 }
 /**
  * 修改云主机安全策略请求参数
  * @interface
- * @property guest - 云主机ID
+ * @property guest_id - 云主机ID
  * @property mac_address - 目标网卡MAC地址
  * @property rules - 新规则列表
  */
 export interface ControlModifyGuestSecurityPolicyParams {
-    guest: string;
+    guest_id: string;
     mac_address: string;
     rules: SecurityRule[];
 }
 /**
  * 重置云主机安全策略请求参数
  * @interface
- * @property guest - 云主机ID
+ * @property guest_id - 云主机ID
  * @property mac_address - 目标网卡MAC地址
  */
 export interface ControlResetGuestSecurityPolicyParams {
-    guest: string;
+    guest_id: string;
     mac_address: string;
 }

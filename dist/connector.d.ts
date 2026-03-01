@@ -1,9 +1,9 @@
 /**
  * 核心文件，定义用于访问平台服务的TaiyiConnector
  */
-import { ConsoleEventLevel, ImportVendor, ComputePoolStrategy, InterfaceMode, UserRole, VolumeContainerStrategy, StatisticRange, ResourceType, ResourceAccessLevel, LicenseFeature } from "./enums";
+import { ConsoleEventLevel, ImportVendor, ComputePoolStrategy, UserRole, VolumeContainerStrategy, StatisticRange, ResourceType, ResourceAccessLevel, LicenseFeature } from "./enums";
 import { ControlCommandRequest } from "./request-params";
-import { AddressPool, AddressPoolRecord, AddressPoolConfig, AddressPoolDetail, SecurityPolicyGroup, GuestSecurityPolicy, SecurityRule, AllocatedTokens, BackendResult, ClusterNode, ClusterNodeData, ClusterStatus, ComputePoolConfig, ComputePoolStatus, ConsoleEvent, FileSpec, FileStatus, FileView, GuestConfig, GuestFilter, GuestView, ImportSource, ImportTarget, License, LicenseRecord, NetworkGraphNode, NodeConfig, NodeConfigStatus, PaginationResult, ResourceMonitorConfig, SSHKeyView, StoragePool, StoragePoolConfig, StoragePoolListRecord, SystemStatus, TaskData, UserAccessRecord, UserCredentialRecord, UserGroup, UserGroupRecord, UserToken, VolumeContainer, VolumeSpec, MonitorResponse, SnapshotTreeNode, ResourcePermissions, SnapshotRecord, GuestResourceUsageData, ResourceStatisticUnit, NodeResourceSnapshot, PoolResourceSnapshot, ClusterResourceSnapshot, GuestSystemView, GuestSystemSpec, DataStore, WarningRecordSet, WarningStatistic } from "./data-defines";
+import { AddressPoolConfig, AddressPoolDetail, SecurityPolicyGroup, GuestSecurityPolicy, SecurityRule, AllocatedTokens, BackendResult, ClusterNode, ClusterNodeData, ClusterStatus, ComputePoolConfig, ComputePoolStatus, ConsoleEvent, FileSpec, FileStatus, FileView, GuestConfig, GuestFilter, GuestView, ImportSource, ImportTarget, License, LicenseRecord, NetworkGraphNode, NodeConfig, NodeConfigStatus, PaginationResult, ResourceMonitorConfig, SSHKeyView, StoragePool, StoragePoolConfig, StoragePoolListRecord, SystemStatus, TaskData, UserAccessRecord, UserCredentialRecord, UserGroup, UserGroupRecord, UserToken, VolumeContainer, VolumeSpec, MonitorResponse, SnapshotTreeNode, ResourcePermissions, SnapshotRecord, GuestResourceUsageData, ResourceStatisticUnit, NodeResourceSnapshot, PoolResourceSnapshot, ClusterResourceSnapshot, GuestSystemView, GuestSystemSpec, DataStore, WarningRecordSet, WarningStatistic } from "./data-defines";
 export type SetTokenHandler = (storeID: string, tokens: AllocatedTokens) => Promise<void>;
 export type GetTokenHandler = (storeID: string) => Promise<AllocatedTokens>;
 export type StateChangeHandler = (storeID: string, authenticated: boolean) => void;
@@ -668,83 +668,6 @@ export declare class TaiyiConnector {
      * @returns 操作结果
      */
     removeRemoteContainer(poolID: string, index: number, timeoutSeconds?: number): Promise<BackendResult>;
-    /**
-     * 查询地址池列表
-     * @param offset - 起始位置
-     * @param limit - 限制数量
-     * @returns 地址池列表
-     * @deprecated 地址池相关接口全部会重新设计
-     */
-    queryAddressPools(offset: number, limit: number): Promise<BackendResult<PaginationResult<AddressPoolRecord>>>;
-    /**
-     * 获取地址池详情
-     * @param poolID - 地址池ID
-     * @returns 地址池详情
-     * @deprecated 地址池相关接口全部会重新设计
-     */
-    getAddressPool(poolID: string): Promise<BackendResult<AddressPool>>;
-    /**
-     * 添加地址池
-     * @param id - 地址池ID
-     * @param mode - 接口模式
-     * @param isV6 - 是否为IPv6
-     * @param description - 描述
-     * @returns 操作结果
-     * @deprecated 地址池相关接口全部会重新设计
-     */
-    addAddressPool(id: string, mode: InterfaceMode, isV6: boolean, description?: string): Promise<BackendResult>;
-    /**
-     * 修改地址池
-     * @param id - 地址池ID
-     * @param mode - 接口模式
-     * @param description - 描述
-     * @returns 操作结果
-     * @deprecated 地址池相关接口全部会重新设计
-     */
-    modifyAddressPool(id: string, mode: InterfaceMode, description?: string): Promise<BackendResult>;
-    /**
-     * 删除地址池
-     * @param poolID - 地址池ID
-     * @returns 操作结果
-     * @deprecated 地址池相关接口全部会重新设计
-     */
-    removeAddressPool(poolID: string): Promise<BackendResult>;
-    /**
-     * 添加外部地址范围
-     * @param poolID - 地址池ID
-     * @param beginAddress - 起始地址
-     * @param endAddress - 结束地址
-     * @returns 操作结果
-     * @deprecated 地址池相关接口全部会重新设计
-     */
-    addExternalAddressRange(poolID: string, beginAddress: string, endAddress: string): Promise<BackendResult>;
-    /**
-     * 添加内部地址范围
-     * @param poolID - 地址池ID
-     * @param beginAddress - 起始地址
-     * @param endAddress - 结束地址
-     * @returns 操作结果
-     * @deprecated 地址池相关接口全部会重新设计
-     */
-    addInternalAddressRange(poolID: string, beginAddress: string, endAddress: string): Promise<BackendResult>;
-    /**
-     * 删除外部地址范围
-     * @param poolID - 地址池ID
-     * @param beginAddress - 起始地址
-     * @param endAddress - 结束地址
-     * @returns 操作结果
-     * @deprecated 地址池相关接口全部会重新设计
-     */
-    removeExternalAddressRange(poolID: string, beginAddress: string, endAddress: string): Promise<BackendResult>;
-    /**
-     * 删除内部地址范围
-     * @param poolID - 地址池ID
-     * @param beginAddress - 起始地址
-     * @param endAddress - 结束地址
-     * @returns 操作结果
-     * @deprecated 地址池相关接口全部会重新设计
-     */
-    removeInternalAddressRange(poolID: string, beginAddress: string, endAddress: string): Promise<BackendResult>;
     /**
      * 创建ISO文件
      * @param spec - 文件规格
@@ -1562,7 +1485,7 @@ export declare class TaiyiConnector {
      */
     queryDevices(offset: number, limit: number): Promise<BackendResult<PaginationResult<UserAccessRecord>>>;
     /**
-     * 创建地址池（新版四集合模型）
+     * 创建地址池
      * @param id - 地址池ID
      * @param mode - 模式 (address/port)
      * @param description - 描述
@@ -1585,20 +1508,20 @@ export declare class TaiyiConnector {
      * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
-    createAddressPool(id: string, mode: string, description?: string, gatewayV4?: string, gatewayV6?: string, dns?: string[], upstreamGateway?: string, timeoutSeconds?: number): Promise<BackendResult>;
+    createAddressPool(id: string, mode: string, description?: string, gatewayV4?: string, gatewayV6?: string, dns?: string[], upstreamGateway?: string): Promise<BackendResult>;
     /**
-     * 查询地址池配置列表（新版）
+     * 查询地址池配置列表
      * @returns 地址池配置列表
      */
     queryAddressPoolConfigs(): Promise<BackendResult<AddressPoolConfig[]>>;
     /**
-     * 获取地址池详情（新版四集合模型）
+     * 获取地址池详情
      * @param poolID - 地址池ID
      * @returns 地址池详情
      */
     getAddressPoolDetail(poolID: string): Promise<BackendResult<AddressPoolDetail>>;
     /**
-     * 修改地址池（新版）
+     * 修改地址池
      * @param id - 地址池ID
      * @param description - 描述
      * @param gatewayV4 - IPv4网关地址
@@ -1607,34 +1530,32 @@ export declare class TaiyiConnector {
      * @param upstreamGateway - 上游网关地址
      * @returns 任务ID
      */
-    tryModifyAddressPoolV2(id: string, description?: string, gatewayV4?: string, gatewayV6?: string, dns?: string[], upstreamGateway?: string): Promise<BackendResult<string>>;
+    tryModifyAddressPool(id: string, description?: string, gatewayV4?: string, gatewayV6?: string, dns?: string[], upstreamGateway?: string): Promise<BackendResult<string>>;
     /**
-     * 修改地址池并等待完成（新版）
+     * 修改地址池并等待完成
      * @param id - 地址池ID
      * @param description - 描述
      * @param gatewayV4 - IPv4网关地址
      * @param gatewayV6 - IPv6网关地址
      * @param dns - DNS服务器列表
      * @param upstreamGateway - 上游网关地址
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
-    modifyAddressPoolV2(id: string, description?: string, gatewayV4?: string, gatewayV6?: string, dns?: string[], upstreamGateway?: string, timeoutSeconds?: number): Promise<BackendResult>;
+    modifyAddressPool(id: string, description?: string, gatewayV4?: string, gatewayV6?: string, dns?: string[], upstreamGateway?: string): Promise<BackendResult>;
     /**
-     * 删除地址池（新版）
+     * 删除地址池
      * @param poolID - 地址池ID
      * @returns 任务ID
      */
     tryDeleteAddressPool(poolID: string): Promise<BackendResult<string>>;
     /**
-     * 删除地址池并等待完成（新版）
+     * 删除地址池并等待完成
      * @param poolID - 地址池ID
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
-    deleteAddressPool(poolID: string, timeoutSeconds?: number): Promise<BackendResult>;
+    deleteAddressPool(poolID: string): Promise<BackendResult>;
     /**
-     * 添加地址范围到地址池（新版）
+     * 添加地址范围到地址池
      * @param pool - 地址池ID
      * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
      * @param begin - 起始地址
@@ -1644,7 +1565,7 @@ export declare class TaiyiConnector {
      */
     tryAddAddressRange(pool: string, setType: string, begin?: string, end?: string, cidr?: string): Promise<BackendResult<string>>;
     /**
-     * 添加地址范围并等待完成（新版）
+     * 添加地址范围并等待完成
      * @param pool - 地址池ID
      * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
      * @param begin - 起始地址
@@ -1653,9 +1574,9 @@ export declare class TaiyiConnector {
      * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
-    addAddressRange(pool: string, setType: string, begin?: string, end?: string, cidr?: string, timeoutSeconds?: number): Promise<BackendResult>;
+    addAddressRange(pool: string, setType: string, begin?: string, end?: string, cidr?: string): Promise<BackendResult>;
     /**
-     * 从地址池删除地址范围（新版）
+     * 从地址池删除地址范围
      * @param pool - 地址池ID
      * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
      * @param begin - 起始地址
@@ -1664,7 +1585,7 @@ export declare class TaiyiConnector {
      */
     tryRemoveAddressRange(pool: string, setType: string, begin: string, end: string): Promise<BackendResult<string>>;
     /**
-     * 从地址池删除地址范围并等待完成（新版）
+     * 从地址池删除地址范围并等待完成
      * @param pool - 地址池ID
      * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
      * @param begin - 起始地址
@@ -1672,7 +1593,7 @@ export declare class TaiyiConnector {
      * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
-    removeAddressRange(pool: string, setType: string, begin: string, end: string, timeoutSeconds?: number): Promise<BackendResult>;
+    removeAddressRange(pool: string, setType: string, begin: string, end: string): Promise<BackendResult>;
     /**
      * 创建安全策略组
      * @param id - 策略组ID
@@ -1681,21 +1602,9 @@ export declare class TaiyiConnector {
      * @param internalRules - 内部网卡规则模板
      * @param description - 描述
      * @param isDefault - 是否默认策略组
-     * @returns 任务ID
-     */
-    tryCreateSecurityPolicy(id: string, name: string, externalRules: SecurityRule[], internalRules: SecurityRule[], description?: string, isDefault?: boolean): Promise<BackendResult<string>>;
-    /**
-     * 创建安全策略组并等待完成
-     * @param id - 策略组ID
-     * @param name - 策略组名称
-     * @param externalRules - 外部网卡规则模板
-     * @param internalRules - 内部网卡规则模板
-     * @param description - 描述
-     * @param isDefault - 是否默认策略组
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
-    createSecurityPolicy(id: string, name: string, externalRules: SecurityRule[], internalRules: SecurityRule[], description?: string, isDefault?: boolean, timeoutSeconds?: number): Promise<BackendResult>;
+    createSecurityPolicy(id: string, name: string, externalRules: SecurityRule[], internalRules: SecurityRule[], description?: string, isDefault?: boolean): Promise<BackendResult>;
     /**
      * 查询安全策略组列表
      * @returns 安全策略组列表
@@ -1715,51 +1624,23 @@ export declare class TaiyiConnector {
      * @param isDefault - 是否默认策略组
      * @param externalRules - 外部网卡规则模板
      * @param internalRules - 内部网卡规则模板
-     * @returns 任务ID
-     */
-    tryModifySecurityPolicy(id: string, name?: string, description?: string, isDefault?: boolean, externalRules?: SecurityRule[], internalRules?: SecurityRule[]): Promise<BackendResult<string>>;
-    /**
-     * 修改安全策略组并等待完成
-     * @param id - 策略组ID
-     * @param name - 策略组名称
-     * @param description - 描述
-     * @param isDefault - 是否默认策略组
-     * @param externalRules - 外部网卡规则模板
-     * @param internalRules - 内部网卡规则模板
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
-    modifySecurityPolicy(id: string, name?: string, description?: string, isDefault?: boolean, externalRules?: SecurityRule[], internalRules?: SecurityRule[], timeoutSeconds?: number): Promise<BackendResult>;
+    modifySecurityPolicy(id: string, name?: string, description?: string, isDefault?: boolean, externalRules?: SecurityRule[], internalRules?: SecurityRule[]): Promise<BackendResult>;
     /**
      * 删除安全策略组
      * @param policyID - 策略组ID
-     * @returns 任务ID
-     */
-    tryDeleteSecurityPolicy(policyID: string): Promise<BackendResult<string>>;
-    /**
-     * 删除安全策略组并等待完成
-     * @param policyID - 策略组ID
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
-    deleteSecurityPolicy(policyID: string, timeoutSeconds?: number): Promise<BackendResult>;
+    deleteSecurityPolicy(policyID: string): Promise<BackendResult>;
     /**
      * 复制安全策略组
      * @param sourceID - 源策略组ID
      * @param newID - 新策略组ID
      * @param name - 新策略组名称
-     * @returns 任务ID
-     */
-    tryCopySecurityPolicy(sourceID: string, newID: string, name: string): Promise<BackendResult<string>>;
-    /**
-     * 复制安全策略组并等待完成
-     * @param sourceID - 源策略组ID
-     * @param newID - 新策略组ID
-     * @param name - 新策略组名称
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
-    copySecurityPolicy(sourceID: string, newID: string, name: string, timeoutSeconds?: number): Promise<BackendResult>;
+    copySecurityPolicy(sourceID: string, newID: string, name: string): Promise<BackendResult>;
     /**
      * 获取云主机安全策略
      * @param guestID - 云主机ID

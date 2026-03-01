@@ -174,24 +174,6 @@ var controlCommandEnum;
     controlCommandEnum["RemoveRemoteContainer"] = "remove_remote_container";
     /** 改变远程容器标志 */
     controlCommandEnum["ChangeRemoteContainerFlag"] = "change_remote_container_flag";
-    /** 查询地址池列表 */
-    controlCommandEnum["QueryAddressPools"] = "query_address_pools";
-    /** 获取地址池详情 */
-    controlCommandEnum["GetAddressPool"] = "get_address_pool";
-    /** 添加地址池 */
-    controlCommandEnum["AddAddressPool"] = "add_address_pool";
-    /** 修改地址池 */
-    controlCommandEnum["ModifyAddressPool"] = "modify_address_pool";
-    /** 删除地址池 */
-    controlCommandEnum["RemoveAddressPool"] = "remove_address_pool";
-    /** 添加外部地址范围 */
-    controlCommandEnum["AddExternalAddressRange"] = "add_external_address_range";
-    /** 删除外部地址范围 */
-    controlCommandEnum["RemoveExternalAddressRange"] = "remove_external_address_range";
-    /** 添加内部地址范围 */
-    controlCommandEnum["AddInternalAddressRange"] = "add_internal_address_range";
-    /** 删除内部地址范围 */
-    controlCommandEnum["RemoveInternalAddressRange"] = "remove_internal_address_range";
     /** 查询云主机列表 */
     controlCommandEnum["QueryGuests"] = "query_guests";
     /** 获取云主机详情 */
@@ -548,19 +530,19 @@ var controlCommandEnum;
     controlCommandEnum["ModifyGuestSecurityPolicy"] = "modify_guest_security_policy";
     /** 重置云主机安全策略 */
     controlCommandEnum["ResetGuestSecurityPolicy"] = "reset_guest_security_policy";
-    /** 创建地址池（新版） */
+    /** 创建地址池 */
     controlCommandEnum["CreateAddressPool"] = "create_address_pool";
-    /** 修改地址池（新版） */
-    controlCommandEnum["ModifyAddressPoolV2"] = "modify_address_pool_v2";
-    /** 添加地址范围（新版） */
+    /** 修改地址池 */
+    controlCommandEnum["ModifyAddressPool"] = "modify_address_pool";
+    /** 添加地址范围 */
     controlCommandEnum["AddAddressRange"] = "add_address_range";
-    /** 删除地址范围（新版） */
+    /** 删除地址范围 */
     controlCommandEnum["RemoveAddressRange"] = "remove_address_range";
-    /** 查询地址池配置列表（新版） */
+    /** 查询地址池配置列表 */
     controlCommandEnum["QueryAddressPoolConfigs"] = "query_address_pool_configs";
-    /** 获取地址池详情（新版） */
+    /** 获取地址池详情 */
     controlCommandEnum["GetAddressPoolDetail"] = "get_address_pool_detail";
-    /** 删除地址池（新版） */
+    /** 删除地址池 */
     controlCommandEnum["DeleteAddressPool"] = "delete_address_pool";
 })(controlCommandEnum || (exports.controlCommandEnum = controlCommandEnum = {}));
 /**
@@ -1903,8 +1885,6 @@ var LicenseFeature;
     LicenseFeature["Migration"] = "migration";
     /** 地址池 */
     LicenseFeature["AddressPool"] = "address_pool";
-    /** 安全策略 */
-    LicenseFeature["SecurityPolicy"] = "security_policy";
     /** 内存合并 */
     LicenseFeature["MemoryMerge"] = "memory_merge";
 })(LicenseFeature || (exports.LicenseFeature = LicenseFeature = {}));

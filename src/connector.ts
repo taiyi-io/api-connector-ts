@@ -34,8 +34,6 @@ import {
   ControlCommandResponse,
 } from "./request-params";
 import {
-  AddressPool,
-  AddressPoolRecord,
   AddressPoolConfig,
   AddressPoolDetail,
   SecurityPolicyGroup,
@@ -2407,228 +2405,6 @@ export class TaiyiConnector {
       return { error: taskData.error };
     }
     return {};
-  }
-
-  // Address Pool Management Methods
-  /**
-   * 查询地址池列表
-   * @param offset - 起始位置
-   * @param limit - 限制数量
-   * @returns 地址池列表
-   * @deprecated 地址池相关接口全部会重新设计
-   */
-  public async queryAddressPools(
-    offset: number,
-    limit: number
-  ): Promise<BackendResult<PaginationResult<AddressPoolRecord>>> {
-    const cmd: ControlCommandRequest = {
-      type: controlCommandEnum.QueryAddressPools,
-      query_address_pools: {
-        offset: offset,
-        page_size: limit,
-      },
-    };
-    const resp = await this.requestCommandResponse(cmd);
-    if (resp.error) {
-      return { error: resp.error };
-    }
-    if (
-      !resp.data ||
-      !resp.data.address_pools ||
-      resp.data.total === undefined
-    ) {
-      return { error: "获取地址池列表失败" };
-    }
-    return {
-      data: {
-        records: resp.data.address_pools,
-        total: resp.data.total,
-      },
-    };
-  }
-
-  /**
-   * 获取地址池详情
-   * @param poolID - 地址池ID
-   * @returns 地址池详情
-   * @deprecated 地址池相关接口全部会重新设计
-   */
-  public async getAddressPool(
-    poolID: string
-  ): Promise<BackendResult<AddressPool>> {
-    const cmd: ControlCommandRequest = {
-      type: controlCommandEnum.GetAddressPool,
-      get_address_pool: { id: poolID },
-    };
-    const resp = await this.requestCommandResponse(cmd);
-    if (resp.error) {
-      return { error: resp.error };
-    }
-    if (!resp.data || !resp.data.address_pool) {
-      return { error: "地址池不存在" };
-    }
-    return { data: resp.data.address_pool };
-  }
-
-  /**
-   * 添加地址池
-   * @param id - 地址池ID
-   * @param mode - 接口模式
-   * @param isV6 - 是否为IPv6
-   * @param description - 描述
-   * @returns 操作结果
-   * @deprecated 地址池相关接口全部会重新设计
-   */
-  public async addAddressPool(
-    id: string,
-    mode: InterfaceMode,
-    isV6: boolean,
-    description?: string
-  ): Promise<BackendResult> {
-    const cmd: ControlCommandRequest = {
-      type: controlCommandEnum.AddAddressPool,
-      add_address_pool: {
-        id,
-        mode,
-        is_v6: isV6,
-        description,
-      },
-    };
-    return await this.sendCommand(cmd);
-  }
-
-  /**
-   * 修改地址池
-   * @param id - 地址池ID
-   * @param mode - 接口模式
-   * @param description - 描述
-   * @returns 操作结果
-   * @deprecated 地址池相关接口全部会重新设计
-   */
-  public async modifyAddressPool(
-    id: string,
-    mode: InterfaceMode,
-    description?: string
-  ): Promise<BackendResult> {
-    const cmd: ControlCommandRequest = {
-      type: controlCommandEnum.ModifyAddressPool,
-      modify_address_pool: {
-        id,
-        mode,
-        description,
-      },
-    };
-    return await this.sendCommand(cmd);
-  }
-
-  /**
-   * 删除地址池
-   * @param poolID - 地址池ID
-   * @returns 操作结果
-   * @deprecated 地址池相关接口全部会重新设计
-   */
-  public async removeAddressPool(poolID: string): Promise<BackendResult> {
-    const cmd: ControlCommandRequest = {
-      type: controlCommandEnum.RemoveAddressPool,
-      remove_address_pool: { id: poolID },
-    };
-    return await this.sendCommand(cmd);
-  }
-
-  /**
-   * 添加外部地址范围
-   * @param poolID - 地址池ID
-   * @param beginAddress - 起始地址
-   * @param endAddress - 结束地址
-   * @returns 操作结果
-   * @deprecated 地址池相关接口全部会重新设计
-   */
-  public async addExternalAddressRange(
-    poolID: string,
-    beginAddress: string,
-    endAddress: string
-  ): Promise<BackendResult> {
-    const cmd: ControlCommandRequest = {
-      type: controlCommandEnum.AddExternalAddressRange,
-      address_range: {
-        pool: poolID,
-        begin: beginAddress,
-        end: endAddress,
-      },
-    };
-    return await this.sendCommand(cmd);
-  }
-
-  /**
-   * 添加内部地址范围
-   * @param poolID - 地址池ID
-   * @param beginAddress - 起始地址
-   * @param endAddress - 结束地址
-   * @returns 操作结果
-   * @deprecated 地址池相关接口全部会重新设计
-   */
-  public async addInternalAddressRange(
-    poolID: string,
-    beginAddress: string,
-    endAddress: string
-  ): Promise<BackendResult> {
-    const cmd: ControlCommandRequest = {
-      type: controlCommandEnum.AddInternalAddressRange,
-      address_range: {
-        pool: poolID,
-        begin: beginAddress,
-        end: endAddress,
-      },
-    };
-    return await this.sendCommand(cmd);
-  }
-
-  /**
-   * 删除外部地址范围
-   * @param poolID - 地址池ID
-   * @param beginAddress - 起始地址
-   * @param endAddress - 结束地址
-   * @returns 操作结果
-   * @deprecated 地址池相关接口全部会重新设计
-   */
-  public async removeExternalAddressRange(
-    poolID: string,
-    beginAddress: string,
-    endAddress: string
-  ): Promise<BackendResult> {
-    const cmd: ControlCommandRequest = {
-      type: controlCommandEnum.RemoveExternalAddressRange,
-      address_range: {
-        pool: poolID,
-        begin: beginAddress,
-        end: endAddress,
-      },
-    };
-    return await this.sendCommand(cmd);
-  }
-
-  /**
-   * 删除内部地址范围
-   * @param poolID - 地址池ID
-   * @param beginAddress - 起始地址
-   * @param endAddress - 结束地址
-   * @returns 操作结果
-   * @deprecated 地址池相关接口全部会重新设计
-   */
-  public async removeInternalAddressRange(
-    poolID: string,
-    beginAddress: string,
-    endAddress: string
-  ): Promise<BackendResult> {
-    const cmd: ControlCommandRequest = {
-      type: controlCommandEnum.RemoveInternalAddressRange,
-      address_range: {
-        pool: poolID,
-        begin: beginAddress,
-        end: endAddress,
-      },
-    };
-    return await this.sendCommand(cmd);
   }
 
   // ISO File Management Methods
@@ -5506,10 +5282,10 @@ export class TaiyiConnector {
     };
   }
 
-  // ==================== 新版地址池管理 ====================
+  // ==================== 地址池管理 ====================
 
   /**
-   * 创建地址池（新版四集合模型）
+   * 创建地址池
    * @param id - 地址池ID
    * @param mode - 模式 (address/port)
    * @param description - 描述
@@ -5569,30 +5345,25 @@ export class TaiyiConnector {
     gatewayV4?: string,
     gatewayV6?: string,
     dns?: string[],
-    upstreamGateway?: string,
-    timeoutSeconds: number = 300
+    upstreamGateway?: string
   ): Promise<BackendResult> {
-    const taskResult = await this.tryCreateAddressPool(
-      id,
-      mode,
-      description,
-      gatewayV4,
-      gatewayV6,
-      dns,
-      upstreamGateway
-    );
-    if (taskResult.error) {
-      return { error: taskResult.error };
-    }
-    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
-    if (taskData.error) {
-      return { error: taskData.error };
-    }
-    return {};
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.CreateAddressPool,
+      create_address_pool: {
+        id,
+        mode,
+        description,
+        gateway_v4: gatewayV4,
+        gateway_v6: gatewayV6,
+        dns,
+        upstream_gateway: upstreamGateway,
+      },
+    };
+    return await this.sendCommand(cmd);
   }
 
   /**
-   * 查询地址池配置列表（新版）
+   * 查询地址池配置列表
    * @returns 地址池配置列表
    */
   public async queryAddressPoolConfigs(): Promise<
@@ -5605,14 +5376,11 @@ export class TaiyiConnector {
     if (resp.error) {
       return { error: resp.error };
     }
-    if (!resp.data || !resp.data.address_pool_configs) {
-      return { error: "获取地址池列表失败" };
-    }
-    return { data: resp.data.address_pool_configs };
+    return { data: resp.data?.address_pool_configs ?? [] };
   }
 
   /**
-   * 获取地址池详情（新版四集合模型）
+   * 获取地址池详情
    * @param poolID - 地址池ID
    * @returns 地址池详情
    */
@@ -5621,7 +5389,7 @@ export class TaiyiConnector {
   ): Promise<BackendResult<AddressPoolDetail>> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.GetAddressPoolDetail,
-      get_address_pool: { id: poolID },
+      get_address_pool_detail: { id: poolID },
     };
     const resp = await this.requestCommandResponse(cmd);
     if (resp.error) {
@@ -5634,7 +5402,7 @@ export class TaiyiConnector {
   }
 
   /**
-   * 修改地址池（新版）
+   * 修改地址池
    * @param id - 地址池ID
    * @param description - 描述
    * @param gatewayV4 - IPv4网关地址
@@ -5643,7 +5411,7 @@ export class TaiyiConnector {
    * @param upstreamGateway - 上游网关地址
    * @returns 任务ID
    */
-  public async tryModifyAddressPoolV2(
+  public async tryModifyAddressPool(
     id: string,
     description?: string,
     gatewayV4?: string,
@@ -5652,8 +5420,8 @@ export class TaiyiConnector {
     upstreamGateway?: string
   ): Promise<BackendResult<string>> {
     const cmd: ControlCommandRequest = {
-      type: controlCommandEnum.ModifyAddressPoolV2,
-      modify_address_pool_v2: {
+      type: controlCommandEnum.ModifyAddressPool,
+      modify_address_pool: {
         id,
         description,
         gateway_v4: gatewayV4,
@@ -5673,45 +5441,39 @@ export class TaiyiConnector {
   }
 
   /**
-   * 修改地址池并等待完成（新版）
+   * 修改地址池并等待完成
    * @param id - 地址池ID
    * @param description - 描述
    * @param gatewayV4 - IPv4网关地址
    * @param gatewayV6 - IPv6网关地址
    * @param dns - DNS服务器列表
    * @param upstreamGateway - 上游网关地址
-   * @param timeoutSeconds - 超时时间（秒），默认300秒
    * @returns 操作结果
    */
-  public async modifyAddressPoolV2(
+  public async modifyAddressPool(
     id: string,
     description?: string,
     gatewayV4?: string,
     gatewayV6?: string,
     dns?: string[],
-    upstreamGateway?: string,
-    timeoutSeconds: number = 300
+    upstreamGateway?: string
   ): Promise<BackendResult> {
-    const taskResult = await this.tryModifyAddressPoolV2(
-      id,
-      description,
-      gatewayV4,
-      gatewayV6,
-      dns,
-      upstreamGateway
-    );
-    if (taskResult.error) {
-      return { error: taskResult.error };
-    }
-    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
-    if (taskData.error) {
-      return { error: taskData.error };
-    }
-    return {};
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.ModifyAddressPool,
+      modify_address_pool: {
+        id,
+        description,
+        gateway_v4: gatewayV4,
+        gateway_v6: gatewayV6,
+        dns,
+        upstream_gateway: upstreamGateway,
+      },
+    };
+    return await this.sendCommand(cmd);
   }
 
   /**
-   * 删除地址池（新版）
+   * 删除地址池
    * @param poolID - 地址池ID
    * @returns 任务ID
    */
@@ -5720,7 +5482,7 @@ export class TaiyiConnector {
   ): Promise<BackendResult<string>> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.DeleteAddressPool,
-      remove_address_pool: { id: poolID },
+      delete_address_pool: { id: poolID },
     };
     const resp = await this.requestCommandResponse(cmd);
     if (resp.error) {
@@ -5733,28 +5495,20 @@ export class TaiyiConnector {
   }
 
   /**
-   * 删除地址池并等待完成（新版）
+   * 删除地址池并等待完成
    * @param poolID - 地址池ID
-   * @param timeoutSeconds - 超时时间（秒），默认300秒
    * @returns 操作结果
    */
-  public async deleteAddressPool(
-    poolID: string,
-    timeoutSeconds: number = 300
-  ): Promise<BackendResult> {
-    const taskResult = await this.tryDeleteAddressPool(poolID);
-    if (taskResult.error) {
-      return { error: taskResult.error };
-    }
-    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
-    if (taskData.error) {
-      return { error: taskData.error };
-    }
-    return {};
+  public async deleteAddressPool(poolID: string): Promise<BackendResult> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.DeleteAddressPool,
+      delete_address_pool: { id: poolID },
+    };
+    return await this.sendCommand(cmd);
   }
 
   /**
-   * 添加地址范围到地址池（新版）
+   * 添加地址范围到地址池
    * @param pool - 地址池ID
    * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
    * @param begin - 起始地址
@@ -5790,7 +5544,7 @@ export class TaiyiConnector {
   }
 
   /**
-   * 添加地址范围并等待完成（新版）
+   * 添加地址范围并等待完成
    * @param pool - 地址池ID
    * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
    * @param begin - 起始地址
@@ -5804,28 +5558,23 @@ export class TaiyiConnector {
     setType: string,
     begin?: string,
     end?: string,
-    cidr?: string,
-    timeoutSeconds: number = 300
+    cidr?: string
   ): Promise<BackendResult> {
-    const taskResult = await this.tryAddAddressRange(
-      pool,
-      setType,
-      begin,
-      end,
-      cidr
-    );
-    if (taskResult.error) {
-      return { error: taskResult.error };
-    }
-    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
-    if (taskData.error) {
-      return { error: taskData.error };
-    }
-    return {};
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.AddAddressRange,
+      add_address_range: {
+        pool,
+        set_type: setType,
+        begin,
+        end,
+        cidr,
+      },
+    };
+    return await this.sendCommand(cmd);
   }
 
   /**
-   * 从地址池删除地址范围（新版）
+   * 从地址池删除地址范围
    * @param pool - 地址池ID
    * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
    * @param begin - 起始地址
@@ -5858,7 +5607,7 @@ export class TaiyiConnector {
   }
 
   /**
-   * 从地址池删除地址范围并等待完成（新版）
+   * 从地址池删除地址范围并等待完成
    * @param pool - 地址池ID
    * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
    * @param begin - 起始地址
@@ -5870,23 +5619,18 @@ export class TaiyiConnector {
     pool: string,
     setType: string,
     begin: string,
-    end: string,
-    timeoutSeconds: number = 300
+    end: string
   ): Promise<BackendResult> {
-    const taskResult = await this.tryRemoveAddressRange(
-      pool,
-      setType,
-      begin,
-      end
-    );
-    if (taskResult.error) {
-      return { error: taskResult.error };
-    }
-    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
-    if (taskData.error) {
-      return { error: taskData.error };
-    }
-    return {};
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.RemoveAddressRange,
+      remove_address_range: {
+        pool,
+        set_type: setType,
+        begin,
+        end,
+      },
+    };
+    return await this.sendCommand(cmd);
   }
 
   // ==================== 安全策略管理 ====================
@@ -5899,16 +5643,16 @@ export class TaiyiConnector {
    * @param internalRules - 内部网卡规则模板
    * @param description - 描述
    * @param isDefault - 是否默认策略组
-   * @returns 任务ID
+   * @returns 操作结果
    */
-  public async tryCreateSecurityPolicy(
+  public async createSecurityPolicy(
     id: string,
     name: string,
     externalRules: SecurityRule[],
     internalRules: SecurityRule[],
     description?: string,
     isDefault?: boolean
-  ): Promise<BackendResult<string>> {
+  ): Promise<BackendResult> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.CreateSecurityPolicy,
       create_security_policy: {
@@ -5920,52 +5664,7 @@ export class TaiyiConnector {
         is_default: isDefault,
       },
     };
-    const resp = await this.requestCommandResponse(cmd);
-    if (resp.error) {
-      return { error: resp.error };
-    }
-    if (!resp.data || !resp.data.id) {
-      return { error: "创建安全策略组失败" };
-    }
-    return { data: resp.data.id };
-  }
-
-  /**
-   * 创建安全策略组并等待完成
-   * @param id - 策略组ID
-   * @param name - 策略组名称
-   * @param externalRules - 外部网卡规则模板
-   * @param internalRules - 内部网卡规则模板
-   * @param description - 描述
-   * @param isDefault - 是否默认策略组
-   * @param timeoutSeconds - 超时时间（秒），默认300秒
-   * @returns 操作结果
-   */
-  public async createSecurityPolicy(
-    id: string,
-    name: string,
-    externalRules: SecurityRule[],
-    internalRules: SecurityRule[],
-    description?: string,
-    isDefault?: boolean,
-    timeoutSeconds: number = 300
-  ): Promise<BackendResult> {
-    const taskResult = await this.tryCreateSecurityPolicy(
-      id,
-      name,
-      externalRules,
-      internalRules,
-      description,
-      isDefault
-    );
-    if (taskResult.error) {
-      return { error: taskResult.error };
-    }
-    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
-    if (taskData.error) {
-      return { error: taskData.error };
-    }
-    return {};
+    return await this.sendCommand(cmd);
   }
 
   /**
@@ -5977,15 +5676,13 @@ export class TaiyiConnector {
   > {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.QuerySecurityPolicies,
+      query_security_policies: {},
     };
     const resp = await this.requestCommandResponse(cmd);
     if (resp.error) {
       return { error: resp.error };
     }
-    if (!resp.data || !resp.data.security_policies) {
-      return { error: "获取安全策略组列表失败" };
-    }
-    return { data: resp.data.security_policies };
+    return { data: resp.data?.security_policies ?? [] };
   }
 
   /**
@@ -6018,16 +5715,16 @@ export class TaiyiConnector {
    * @param isDefault - 是否默认策略组
    * @param externalRules - 外部网卡规则模板
    * @param internalRules - 内部网卡规则模板
-   * @returns 任务ID
+   * @returns 操作结果
    */
-  public async tryModifySecurityPolicy(
+  public async modifySecurityPolicy(
     id: string,
     name?: string,
     description?: string,
     isDefault?: boolean,
     externalRules?: SecurityRule[],
     internalRules?: SecurityRule[]
-  ): Promise<BackendResult<string>> {
+  ): Promise<BackendResult> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.ModifySecurityPolicy,
       modify_security_policy: {
@@ -6039,95 +5736,22 @@ export class TaiyiConnector {
         internal_rules: internalRules,
       },
     };
-    const resp = await this.requestCommandResponse(cmd);
-    if (resp.error) {
-      return { error: resp.error };
-    }
-    if (!resp.data || !resp.data.id) {
-      return { error: "修改安全策略组失败" };
-    }
-    return { data: resp.data.id };
-  }
-
-  /**
-   * 修改安全策略组并等待完成
-   * @param id - 策略组ID
-   * @param name - 策略组名称
-   * @param description - 描述
-   * @param isDefault - 是否默认策略组
-   * @param externalRules - 外部网卡规则模板
-   * @param internalRules - 内部网卡规则模板
-   * @param timeoutSeconds - 超时时间（秒），默认300秒
-   * @returns 操作结果
-   */
-  public async modifySecurityPolicy(
-    id: string,
-    name?: string,
-    description?: string,
-    isDefault?: boolean,
-    externalRules?: SecurityRule[],
-    internalRules?: SecurityRule[],
-    timeoutSeconds: number = 300
-  ): Promise<BackendResult> {
-    const taskResult = await this.tryModifySecurityPolicy(
-      id,
-      name,
-      description,
-      isDefault,
-      externalRules,
-      internalRules
-    );
-    if (taskResult.error) {
-      return { error: taskResult.error };
-    }
-    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
-    if (taskData.error) {
-      return { error: taskData.error };
-    }
-    return {};
+    return await this.sendCommand(cmd);
   }
 
   /**
    * 删除安全策略组
    * @param policyID - 策略组ID
-   * @returns 任务ID
+   * @returns 操作结果
    */
-  public async tryDeleteSecurityPolicy(
+  public async deleteSecurityPolicy(
     policyID: string
-  ): Promise<BackendResult<string>> {
+  ): Promise<BackendResult> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.DeleteSecurityPolicy,
       delete_security_policy: { id: policyID },
     };
-    const resp = await this.requestCommandResponse(cmd);
-    if (resp.error) {
-      return { error: resp.error };
-    }
-    if (!resp.data || !resp.data.id) {
-      return { error: "删除安全策略组失败" };
-    }
-    return { data: resp.data.id };
-  }
-
-  /**
-   * 删除安全策略组并等待完成
-   * @param policyID - 策略组ID
-   * @param timeoutSeconds - 超时时间（秒），默认300秒
-   * @returns 操作结果
-   */
-  public async deleteSecurityPolicy(
-    policyID: string,
-    timeoutSeconds: number = 300
-  ): Promise<BackendResult> {
-    const taskResult = await this.tryDeleteSecurityPolicy(policyID);
-    if (taskResult.error) {
-      return { error: taskResult.error };
-    }
-    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
-    if (taskData.error) {
-      return { error: taskData.error };
-    }
-    return {};
+    return await this.sendCommand(cmd);
   }
 
   /**
@@ -6135,54 +5759,22 @@ export class TaiyiConnector {
    * @param sourceID - 源策略组ID
    * @param newID - 新策略组ID
    * @param name - 新策略组名称
-   * @returns 任务ID
-   */
-  public async tryCopySecurityPolicy(
-    sourceID: string,
-    newID: string,
-    name: string
-  ): Promise<BackendResult<string>> {
-    const cmd: ControlCommandRequest = {
-      type: controlCommandEnum.CopySecurityPolicy,
-      copy_security_policy: {
-        source_id: sourceID,
-        new_id: newID,
-        name,
-      },
-    };
-    const resp = await this.requestCommandResponse(cmd);
-    if (resp.error) {
-      return { error: resp.error };
-    }
-    if (!resp.data || !resp.data.id) {
-      return { error: "复制安全策略组失败" };
-    }
-    return { data: resp.data.id };
-  }
-
-  /**
-   * 复制安全策略组并等待完成
-   * @param sourceID - 源策略组ID
-   * @param newID - 新策略组ID
-   * @param name - 新策略组名称
-   * @param timeoutSeconds - 超时时间（秒），默认300秒
    * @returns 操作结果
    */
   public async copySecurityPolicy(
     sourceID: string,
     newID: string,
-    name: string,
-    timeoutSeconds: number = 300
+    name: string
   ): Promise<BackendResult> {
-    const taskResult = await this.tryCopySecurityPolicy(sourceID, newID, name);
-    if (taskResult.error) {
-      return { error: taskResult.error };
-    }
-    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
-    if (taskData.error) {
-      return { error: taskData.error };
-    }
-    return {};
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.CopySecurityPolicy,
+      copy_security_policy: {
+        source_id: sourceID,
+        target_id: newID,
+        name,
+      },
+    };
+    return await this.sendCommand(cmd);
   }
 
   /**
@@ -6195,7 +5787,7 @@ export class TaiyiConnector {
   ): Promise<BackendResult<GuestSecurityPolicy>> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.GetGuestSecurityPolicy,
-      get_guest_security_policy: { guest: guestID },
+      get_guest_security_policy: { guest_id: guestID },
     };
     const resp = await this.requestCommandResponse(cmd);
     if (resp.error) {
@@ -6222,7 +5814,7 @@ export class TaiyiConnector {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.ModifyGuestSecurityPolicy,
       modify_guest_security_policy: {
-        guest: guestID,
+        guest_id: guestID,
         mac_address: macAddress,
         rules,
       },
@@ -6279,7 +5871,7 @@ export class TaiyiConnector {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.ResetGuestSecurityPolicy,
       reset_guest_security_policy: {
-        guest: guestID,
+        guest_id: guestID,
         mac_address: macAddress,
       },
     };

@@ -34,7 +34,7 @@
 
 **理由**: 保持API风格一致性，便于用户理解和使用。例如：
 - `tryCreateAddressPool` + `waitTask`
-- `tryCreateSecurityPolicy` + `waitTask`
+- `createSecurityPolicy` (同步，无任务ID)
 
 **替代方案**: 为新功能创建不同的命名模式，但这会增加学习成本和代码复杂度。
 

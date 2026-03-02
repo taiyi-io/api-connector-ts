@@ -727,7 +727,9 @@ export class TaiyiConnector {
     intervalSeconds: number = 1
   ): Promise<BackendResult<TaskData>> {
     const startTime = Date.now();
-    while (Date.now() - startTime < timeoutSeconds * 1000) {
+    const timeoutMs = timeoutSeconds * 1000;
+    
+    while (Date.now() - startTime < timeoutMs) {
       const resp = await this.getTask(taskID);
       if (resp.error) {
         return {
@@ -744,11 +746,18 @@ export class TaiyiConnector {
           data: resp.data,
         };
       }
+      if (resp.data && resp.data.status === TaskStatus.Failed) {
+        return {
+          error: resp.data.error || "任务执行失败",
+        };
+      }
 
-      // Wait for the interval before next check
-      await new Promise((resolve) =>
-        setTimeout(resolve, intervalSeconds * 1000)
-      );
+      // Calculate remaining time and wait for minimum of interval or remaining time
+      const remainingTime = timeoutMs - (Date.now() - startTime);
+      const waitTime = Math.min(intervalSeconds * 1000, remainingTime);
+      if (waitTime > 0) {
+        await new Promise((resolve) => setTimeout(resolve, waitTime));
+      }
     }
     throw new Error(`任务${taskID}等待超过${timeoutSeconds}秒`);
   }

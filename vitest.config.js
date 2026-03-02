@@ -2,6 +2,12 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
+    pool: 'forks', // 或 'threads'，取决于 Node.js 版本，forks 通常更稳健
+    poolOptions: {
+      forks: {
+        singleFork: true, // 确保串行运行，避免 Token 刷新冲突
+      }
+    },
     coverage: {
       provider: "v8",
       include: ["src/**/*.ts"],

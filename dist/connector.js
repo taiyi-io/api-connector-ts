@@ -602,6 +602,11 @@ class TaiyiConnector {
                         data: resp.data,
                     };
                 }
+                if (resp.data && resp.data.status === enums_1.TaskStatus.Failed) {
+                    return {
+                        error: resp.data.error || "任务执行失败",
+                    };
+                }
                 // Wait for the interval before next check
                 yield new Promise((resolve) => setTimeout(resolve, intervalSeconds * 1000));
             }

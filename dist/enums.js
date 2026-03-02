@@ -1691,10 +1691,19 @@ var TaskStatus;
      */
     TaskStatus["Running"] = "running";
     /**
+     * 处理中状态
+     */
+    TaskStatus["Processing"] = "processing";
+    /**
      * 已完成状态
-     * 任务已执行完成（包含成功和失败结果）
+     * 任务已执行完成（成功）
      */
     TaskStatus["Completed"] = "completed";
+    /**
+     * 失败状态
+     * 任务执行失败
+     */
+    TaskStatus["Failed"] = "failed";
 })(TaskStatus || (exports.TaskStatus = TaskStatus = {}));
 /**
  * 云主机状态

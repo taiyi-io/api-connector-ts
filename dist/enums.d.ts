@@ -1666,10 +1666,19 @@ export declare enum TaskStatus {
      */
     Running = "running",
     /**
-     * 已完成状态
-     * 任务已执行完成（包含成功和失败结果）
+     * 处理中状态
      */
-    Completed = "completed"
+    Processing = "processing",
+    /**
+     * 已完成状态
+     * 任务已执行完成（成功）
+     */
+    Completed = "completed",
+    /**
+     * 失败状态
+     * 任务执行失败
+     */
+    Failed = "failed"
 }
 /**
  * 云主机状态

@@ -172,6 +172,7 @@ export class TaiyiConnector {
   private _onAuthExpired: AuthExpiredEvent | undefined = undefined;
   private _roles: UserRole[] = [];
   private _keepAlive = false;
+  private _refreshPromise: Promise<BackendResult> | null = null;
   /**
    * 构造函数
    * @param backendHost - 后端Control服务地址
@@ -253,6 +254,15 @@ export class TaiyiConnector {
     return this._roles.includes(role);
   }
   /**
+   * 显式校验用户角色，并在校验失败时输出日志
+   * @param role - 所需角色
+   * @returns 是否满足要求
+   */
+  public requireRole(role: UserRole): boolean {
+    const has = this.hasRole(role);
+    return has;
+  }
+  /**
    * 密码认证
    * @param user - 用户标识
    * @param password - 密码
@@ -282,7 +292,7 @@ export class TaiyiConnector {
       };
     }
     const tokens = tokenResult.data;
-    const result = this.loadTokens(tokens);
+    const result = this.loadTokens(tokens, "密码认证");
     if (result.error) {
       return {
         error: result.error,
@@ -340,7 +350,7 @@ export class TaiyiConnector {
       };
     }
     const tokens = tokenResult.data;
-    const result = this.loadTokens(tokens);
+    const result = this.loadTokens(tokens, "令牌串认证");
     if (result.error) {
       return {
         error: result.error,
@@ -373,54 +383,72 @@ export class TaiyiConnector {
         error: "尚未认证",
       };
     }
-    const result = await refreshAccessToken(
-      this._backendURL,
-      this._user,
-      this._device,
-      this._authenticatedTokens.refresh_token
-    );
-    if (result.unauthenticated) {
-      this._authenticated = false;
-      return {
-        unauthenticated: result.unauthenticated,
-      };
-    } else if (result.error) {
-      return {
-        error: result.error,
-      };
-    } else if (!result.data) {
-      return {
-        error: "刷新令牌失败",
-      };
+    // 并发控制：如果正在刷新，则等待
+    if (this._refreshPromise) {
+      return this._refreshPromise;
     }
-    const tokens: AllocatedTokens = result.data;
-    const err = this.validateTokens(tokens);
-    if (err) {
-      return {
-        error: "无效令牌",
-      };
-    }
-    this._authenticatedTokens = tokens;
-    await this.onTokenUpdated(tokens);
-    return {};
+
+    this._refreshPromise = (async () => {
+      try {
+        // 在发起后端刷新前，先尝试同步，看看是否已有其他实例刷新了
+        const changed = await this.syncTokens();
+        if (changed) {
+          return {};
+        }
+
+        const result = await refreshAccessToken(
+          this._backendURL,
+          this._user,
+          this._device,
+          this._authenticatedTokens.refresh_token
+        );
+        if (result.unauthenticated) {
+          this._authenticated = false;
+          return {
+            unauthenticated: result.unauthenticated,
+          };
+        } else if (result.error) {
+          return {
+            error: result.error,
+          };
+        } else if (!result.data) {
+          return {
+            error: "刷新令牌失败",
+          };
+        }
+        const tokens: AllocatedTokens = result.data;
+        const loadResult = this.loadTokens(tokens, "自动刷新");
+        if (loadResult.error) {
+          return loadResult;
+        }
+        await this.onTokenUpdated(tokens);
+        return {};
+      } finally {
+        this._refreshPromise = null;
+      }
+    })();
+
+    return this._refreshPromise;
   }
   /**
    * 直接加载令牌，初始化校验状态
    * @param tokens - 令牌
+   * @param source - 令牌来源说明，默认为"外部加载"
    * @returns 加载结果
    */
-  public loadTokens(tokens: AllocatedTokens): BackendResult {
+  public loadTokens(
+    tokens: AllocatedTokens,
+    source: string = "外部加载"
+  ): BackendResult {
     const error = this.validateTokens(tokens);
     if (error) {
-      return {
-        error: "无效令牌",
-      };
+      return { error: "无效令牌" };
     }
     this._authenticated = true;
     this._authenticatedTokens = tokens;
     this._roles = tokens.roles;
-    //using qualified id
     this._user = tokens.user;
+
     return {};
   }
   /**
@@ -428,10 +456,15 @@ export class TaiyiConnector {
    */
   public startHeartBeat() {
     //access_expired_at根据RFC3339转换为时间，提前90秒，自动触发refreshToken
-    const expireTime =
+    const baseDelay =
       new Date(this._authenticatedTokens.access_expired_at).getTime() -
       Date.now() -
       90 * 1000;
+
+    // 增加 0-30 秒的随机抖动，避免多个实例同时刷新
+    const jitter = Math.floor(Math.random() * 30 * 1000);
+    const expireTime = Math.max(0, baseDelay + jitter);
+
     //延迟15秒用于测试
     // const expireTime = 15 * 1000;
     this.stopHeartBeat();
@@ -609,7 +642,7 @@ export class TaiyiConnector {
         currentAccessToken != updatedTokens.access_token
       ) {
         //令牌已更新
-        this._authenticatedTokens = updatedTokens;
+        this.loadTokens(updatedTokens, "存储同步");
         changed = true;
       }
     }
@@ -1986,6 +2019,7 @@ export class TaiyiConnector {
   public async enableNode(nodeID: string): Promise<BackendResult> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.EnableNode,
+      node_flag: { node_id: nodeID },
       enable_node: { node_id: nodeID },
     };
     return await this.sendCommand(cmd);
@@ -1999,6 +2033,7 @@ export class TaiyiConnector {
   public async disableNode(nodeID: string): Promise<BackendResult> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.DisableNode,
+      node_flag: { node_id: nodeID },
       disable_node: { node_id: nodeID },
     };
     return await this.sendCommand(cmd);
@@ -2135,6 +2170,10 @@ export class TaiyiConnector {
   ): Promise<BackendResult> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.ChangeComputePoolStrategy,
+      pool_strategy: {
+        pool_id: poolID,
+        strategy: strategy,
+      },
       change_pool_strategy: {
         pool_id: poolID,
         strategy: strategy,
@@ -3389,7 +3428,7 @@ export class TaiyiConnector {
   ): Promise<BackendResult<ClusterNodeData[]>> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.QueryComputeNodes,
-      query_compute_nodes: {
+      query_pool_nodes: {
         pool_id: poolID,
       },
     };
@@ -5302,49 +5341,6 @@ export class TaiyiConnector {
    * @param gatewayV6 - IPv6网关地址
    * @param dns - DNS服务器列表
    * @param upstreamGateway - 上游网关地址
-   * @returns 任务ID
-   */
-  public async tryCreateAddressPool(
-    id: string,
-    mode: string,
-    description?: string,
-    gatewayV4?: string,
-    gatewayV6?: string,
-    dns?: string[],
-    upstreamGateway?: string
-  ): Promise<BackendResult<string>> {
-    const cmd: ControlCommandRequest = {
-      type: controlCommandEnum.CreateAddressPool,
-      create_address_pool: {
-        id,
-        mode,
-        description,
-        gateway_v4: gatewayV4,
-        gateway_v6: gatewayV6,
-        dns,
-        upstream_gateway: upstreamGateway,
-      },
-    };
-    const resp = await this.requestCommandResponse(cmd);
-    if (resp.error) {
-      return { error: resp.error };
-    }
-    if (!resp.data || !resp.data.id) {
-      return { error: "创建地址池失败" };
-    }
-    return { data: resp.data.id };
-  }
-
-  /**
-   * 创建地址池并等待完成
-   * @param id - 地址池ID
-   * @param mode - 模式 (address/port)
-   * @param description - 描述
-   * @param gatewayV4 - IPv4网关地址
-   * @param gatewayV6 - IPv6网关地址
-   * @param dns - DNS服务器列表
-   * @param upstreamGateway - 上游网关地址
-   * @param timeoutSeconds - 超时时间（秒），默认300秒
    * @returns 操作结果
    */
   public async createAddressPool(
@@ -5418,45 +5414,6 @@ export class TaiyiConnector {
    * @param gatewayV6 - IPv6网关地址
    * @param dns - DNS服务器列表
    * @param upstreamGateway - 上游网关地址
-   * @returns 任务ID
-   */
-  public async tryModifyAddressPool(
-    id: string,
-    description?: string,
-    gatewayV4?: string,
-    gatewayV6?: string,
-    dns?: string[],
-    upstreamGateway?: string
-  ): Promise<BackendResult<string>> {
-    const cmd: ControlCommandRequest = {
-      type: controlCommandEnum.ModifyAddressPool,
-      modify_address_pool: {
-        id,
-        description,
-        gateway_v4: gatewayV4,
-        gateway_v6: gatewayV6,
-        dns,
-        upstream_gateway: upstreamGateway,
-      },
-    };
-    const resp = await this.requestCommandResponse(cmd);
-    if (resp.error) {
-      return { error: resp.error };
-    }
-    if (!resp.data || !resp.data.id) {
-      return { error: "修改地址池失败" };
-    }
-    return { data: resp.data.id };
-  }
-
-  /**
-   * 修改地址池并等待完成
-   * @param id - 地址池ID
-   * @param description - 描述
-   * @param gatewayV4 - IPv4网关地址
-   * @param gatewayV6 - IPv6网关地址
-   * @param dns - DNS服务器列表
-   * @param upstreamGateway - 上游网关地址
    * @returns 操作结果
    */
   public async modifyAddressPool(
@@ -5484,28 +5441,6 @@ export class TaiyiConnector {
   /**
    * 删除地址池
    * @param poolID - 地址池ID
-   * @returns 任务ID
-   */
-  public async tryDeleteAddressPool(
-    poolID: string
-  ): Promise<BackendResult<string>> {
-    const cmd: ControlCommandRequest = {
-      type: controlCommandEnum.DeleteAddressPool,
-      delete_address_pool: { id: poolID },
-    };
-    const resp = await this.requestCommandResponse(cmd);
-    if (resp.error) {
-      return { error: resp.error };
-    }
-    if (!resp.data || !resp.data.id) {
-      return { error: "删除地址池失败" };
-    }
-    return { data: resp.data.id };
-  }
-
-  /**
-   * 删除地址池并等待完成
-   * @param poolID - 地址池ID
    * @returns 操作结果
    */
   public async deleteAddressPool(poolID: string): Promise<BackendResult> {
@@ -5523,43 +5458,6 @@ export class TaiyiConnector {
    * @param begin - 起始地址
    * @param end - 结束地址
    * @param cidr - CIDR格式
-   * @returns 任务ID
-   */
-  public async tryAddAddressRange(
-    pool: string,
-    setType: string,
-    begin?: string,
-    end?: string,
-    cidr?: string
-  ): Promise<BackendResult<string>> {
-    const cmd: ControlCommandRequest = {
-      type: controlCommandEnum.AddAddressRange,
-      add_address_range: {
-        pool,
-        set_type: setType,
-        begin,
-        end,
-        cidr,
-      },
-    };
-    const resp = await this.requestCommandResponse(cmd);
-    if (resp.error) {
-      return { error: resp.error };
-    }
-    if (!resp.data || !resp.data.id) {
-      return { error: "添加地址范围失败" };
-    }
-    return { data: resp.data.id };
-  }
-
-  /**
-   * 添加地址范围并等待完成
-   * @param pool - 地址池ID
-   * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
-   * @param begin - 起始地址
-   * @param end - 结束地址
-   * @param cidr - CIDR格式
-   * @param timeoutSeconds - 超时时间（秒），默认300秒
    * @returns 操作结果
    */
   public async addAddressRange(
@@ -5588,40 +5486,6 @@ export class TaiyiConnector {
    * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
    * @param begin - 起始地址
    * @param end - 结束地址
-   * @returns 任务ID
-   */
-  public async tryRemoveAddressRange(
-    pool: string,
-    setType: string,
-    begin: string,
-    end: string
-  ): Promise<BackendResult<string>> {
-    const cmd: ControlCommandRequest = {
-      type: controlCommandEnum.RemoveAddressRange,
-      remove_address_range: {
-        pool,
-        set_type: setType,
-        begin,
-        end,
-      },
-    };
-    const resp = await this.requestCommandResponse(cmd);
-    if (resp.error) {
-      return { error: resp.error };
-    }
-    if (!resp.data || !resp.data.id) {
-      return { error: "删除地址范围失败" };
-    }
-    return { data: resp.data.id };
-  }
-
-  /**
-   * 从地址池删除地址范围并等待完成
-   * @param pool - 地址池ID
-   * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
-   * @param begin - 起始地址
-   * @param end - 结束地址
-   * @param timeoutSeconds - 超时时间（秒），默认300秒
    * @returns 操作结果
    */
   public async removeAddressRange(
@@ -5813,13 +5677,13 @@ export class TaiyiConnector {
    * @param guestID - 云主机ID
    * @param macAddress - 目标网卡MAC地址
    * @param rules - 新规则列表
-   * @returns 任务ID
+   * @returns 操作结果
    */
-  public async tryModifyGuestSecurityPolicy(
+  public async modifyGuestSecurityPolicy(
     guestID: string,
     macAddress: string,
     rules: SecurityRule[]
-  ): Promise<BackendResult<string>> {
+  ): Promise<BackendResult> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.ModifyGuestSecurityPolicy,
       modify_guest_security_policy: {
@@ -5828,55 +5692,19 @@ export class TaiyiConnector {
         rules,
       },
     };
-    const resp = await this.requestCommandResponse(cmd);
-    if (resp.error) {
-      return { error: resp.error };
-    }
-    if (!resp.data || !resp.data.id) {
-      return { error: "修改云主机安全策略失败" };
-    }
-    return { data: resp.data.id };
-  }
-
-  /**
-   * 修改云主机安全策略并等待完成
-   * @param guestID - 云主机ID
-   * @param macAddress - 目标网卡MAC地址
-   * @param rules - 新规则列表
-   * @param timeoutSeconds - 超时时间（秒），默认300秒
-   * @returns 操作结果
-   */
-  public async modifyGuestSecurityPolicy(
-    guestID: string,
-    macAddress: string,
-    rules: SecurityRule[],
-    timeoutSeconds: number = 300
-  ): Promise<BackendResult> {
-    const taskResult = await this.tryModifyGuestSecurityPolicy(
-      guestID,
-      macAddress,
-      rules
-    );
-    if (taskResult.error) {
-      return { error: taskResult.error };
-    }
-    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
-    if (taskData.error) {
-      return { error: taskData.error };
-    }
-    return {};
+    return await this.sendCommand(cmd);
   }
 
   /**
    * 重置云主机安全策略
    * @param guestID - 云主机ID
    * @param macAddress - 目标网卡MAC地址
-   * @returns 任务ID
+   * @returns 操作结果
    */
-  public async tryResetGuestSecurityPolicy(
+  public async resetGuestSecurityPolicy(
     guestID: string,
     macAddress: string
-  ): Promise<BackendResult<string>> {
+  ): Promise<BackendResult> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.ResetGuestSecurityPolicy,
       reset_guest_security_policy: {
@@ -5884,39 +5712,6 @@ export class TaiyiConnector {
         mac_address: macAddress,
       },
     };
-    const resp = await this.requestCommandResponse(cmd);
-    if (resp.error) {
-      return { error: resp.error };
-    }
-    if (!resp.data || !resp.data.id) {
-      return { error: "重置云主机安全策略失败" };
-    }
-    return { data: resp.data.id };
-  }
-
-  /**
-   * 重置云主机安全策略并等待完成
-   * @param guestID - 云主机ID
-   * @param macAddress - 目标网卡MAC地址
-   * @param timeoutSeconds - 超时时间（秒），默认300秒
-   * @returns 操作结果
-   */
-  public async resetGuestSecurityPolicy(
-    guestID: string,
-    macAddress: string,
-    timeoutSeconds: number = 300
-  ): Promise<BackendResult> {
-    const taskResult = await this.tryResetGuestSecurityPolicy(
-      guestID,
-      macAddress
-    );
-    if (taskResult.error) {
-      return { error: taskResult.error };
-    }
-    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
-    if (taskData.error) {
-      return { error: taskData.error };
-    }
-    return {};
+    return await this.sendCommand(cmd);
   }
 }

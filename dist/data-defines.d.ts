@@ -1550,14 +1550,6 @@ export interface FoundAdminSecret {
 }
 /**
  * 地址池配置
- * @interface
- * @property id - 地址池ID
- * @property mode - 模式 (address/port)
- * @property description - 描述
- * @property gateway_v4 - IPv4网关地址
- * @property gateway_v6 - IPv6网关地址
- * @property dns - DNS服务器列表
- * @property upstream_gateway - 上游网关地址
  */
 export interface AddressPoolConfig {
     id: string;
@@ -1568,14 +1560,56 @@ export interface AddressPoolConfig {
     dns: string[];
     upstream_gateway: string;
 }
+export interface AddressPoolConfigView {
+    id: string;
+    mode: string;
+    description?: string;
+    gateway_v4: string;
+    gateway_v6: string;
+    dns?: string[];
+    upstream_gateway?: string;
+}
+/**
+ * 地址范围
+ */
+export interface AddressSetRange {
+    begin: string;
+    end: string;
+    cidr: string;
+}
+export interface AddressSetRangeView {
+    begin: string;
+    end: string;
+    cidr?: string;
+}
+/**
+ * 已分配地址
+ */
+export interface AddressAllocation {
+    address: string;
+    guest_id: string;
+    interface_type: string;
+    allocate_time: string;
+}
+export interface AddressAllocationView {
+    address: string;
+    guest_id: string;
+    interface_type?: string;
+    allocate_time?: string;
+}
+/**
+ * 地址集
+ */
+export interface AddressSet {
+    ranges: AddressSetRange[];
+    allocations: AddressAllocation[];
+}
+export interface AddressSetView {
+    ranges: AddressSetRangeView[];
+    allocations: AddressAllocationView[];
+}
 /**
  * 地址池详情
- * @interface
- * @property config - 地址池配置
- * @property external_v4 - 外部IPv4地址集
- * @property external_v6 - 外部IPv6地址集
- * @property internal_v4 - 内部IPv4地址集
- * @property internal_v6 - 内部IPv6地址集
  */
 export interface AddressPoolDetail {
     config: AddressPoolConfig;
@@ -1584,51 +1618,15 @@ export interface AddressPoolDetail {
     internal_v4: AddressSet;
     internal_v6: AddressSet;
 }
-/**
- * 地址集
- * @interface
- * @property ranges - 地址范围列表
- * @property allocations - 已分配地址列表
- */
-export interface AddressSet {
-    ranges: AddressSetRange[];
-    allocations: AddressAllocation[];
-}
-/**
- * 地址范围
- * @interface
- * @property begin - 起始地址
- * @property end - 结束地址
- * @property cidr - CIDR格式
- */
-export interface AddressSetRange {
-    begin: string;
-    end: string;
-    cidr: string;
-}
-/**
- * 已分配地址
- * @interface
- * @property address - 地址
- * @property guest_id - 云主机ID
- * @property interface_type - 接口类型
- * @property allocate_time - 分配时间
- */
-export interface AddressAllocation {
-    address: string;
-    guest_id: string;
-    interface_type: string;
-    allocate_time: string;
+export interface AddressPoolDetailView {
+    config: AddressPoolConfigView;
+    external_v4: AddressSetView;
+    external_v6: AddressSetView;
+    internal_v4: AddressSetView;
+    internal_v6: AddressSetView;
 }
 /**
  * 安全策略规则
- * @interface
- * @property source_address - 源地址
- * @property dest_port - 目标端口
- * @property dest_port_end - 目标端口结束
- * @property protocol - 协议 (tcp/udp/icmp)
- * @property action - 动作 (accept/drop)
- * @property description - 描述
  */
 export interface SecurityRule {
     source_address: string;
@@ -1640,13 +1638,6 @@ export interface SecurityRule {
 }
 /**
  * 安全策略组
- * @interface
- * @property id - 策略组ID
- * @property name - 策略组名称
- * @property description - 描述
- * @property is_default - 是否默认策略组
- * @property external_rules - 外部网卡规则模板
- * @property internal_rules - 内部网卡规则模板
  */
 export interface SecurityPolicyGroup {
     id: string;
@@ -1657,6 +1648,16 @@ export interface SecurityPolicyGroup {
     internal_rules: SecurityRule[];
     external_rules_count?: number;
     internal_rules_count?: number;
+}
+export interface SecurityPolicyRecord {
+    id: string;
+    name: string;
+    description: string;
+    is_default: boolean;
+    external_rules_count: number;
+    internal_rules_count: number;
+    permissions: ResourcePermissions;
+    actions: ResourceAction[];
 }
 /**
  * 云主机安全策略

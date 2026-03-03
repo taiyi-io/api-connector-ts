@@ -35,83 +35,116 @@ constructor(backendHost: string, backendPort: number = 5851, device: string)
 
 #### 认证相关
 
-| 方法 | 说明 |
-|------|------|
-| `bindCallback(receiver, setter, getter, stateChange?)` | 绑定令牌存储回调 |
-| `bindAuthExpiredEvent(callback)` | 绑定认证过期事件 |
-| `authenticateByPassword(user, password)` | 密码认证 |
-| `authenticateByToken(token)` | 令牌认证 |
-| `loadTokens(tokens)` | 直接加载令牌 |
+| 方法 | 类型 | 说明 |
+|------|------|------|
+| `bindCallback(receiver, setter, getter, stateChange?)` | Sync | 绑定令牌存储回调 |
+| `bindAuthExpiredEvent(callback)` | Sync | 绑定认证过期事件 |
+| `authenticateByPassword(user, password)` | Sync | 密码认证 |
+| `authenticateByToken(token)` | Sync | 令牌认证 |
+| `loadTokens(tokens)` | Sync | 直接加载令牌 |
 
 #### 系统管理
 
-| 方法 | 说明 |
-|------|------|
-| `getSystemStatus()` | 获取系统状态 |
-| `initializeSystem(user, password)` | 初始化系统 |
+| 方法 | 类型 | 说明 |
+|------|------|------|
+| `getSystemStatus()` | Sync | 获取系统状态 |
+| `initializeSystem(user, password)` | Sync | 初始化系统 |
 
 #### 云主机管理
 
-| 方法 | 说明 |
-|------|------|
-| `queryGuests(start, limit, filter?)` | 查询云主机列表 |
-| `getGuest(guestID)` | 获取云主机详情 |
-| `createGuest(poolID, system, config, timeout?)` | 创建云主机 |
-| `tryCreateGuest(poolID, system, config)` | 异步创建云主机 |
-| `deleteGuest(guestID, timeout?)` | 删除云主机 |
-| `startGuest(guestID, media?, timeout?)` | 启动云主机 |
-| `stopGuest(guestID, reboot, force, timeout?)` | 停止云主机 |
+| 方法 | 类型 | 说明 |
+|------|------|------|
+| `queryGuests(start, limit, filter?)` | Sync | 查询云主机列表 |
+| `getGuest(guestID)` | Sync | 获取云主机详情 |
+| `createGuest(poolID, system, config, timeout?)` | Async (Wrapped) | 创建云主机 |
+| `tryCreateGuest(poolID, system, config)` | Async | 异步创建云主机 |
+| `deleteGuest(guestID, timeout?)` | Async (Wrapped) | 删除云主机 |
+| `tryDeleteGuest(guestID)` | Async | 异步删除云主机 |
+| `startGuest(guestID, media?, timeout?)` | Async (Wrapped) | 启动云主机 |
+| `tryStartGuest(guestID, media?)` | Async | 异步启动云主机 |
+| `stopGuest(guestID, reboot, force, timeout?)` | Async (Wrapped) | 停止云主机 |
+| `tryStopGuest(guestID, reboot, force)` | Async | 异步停止云主机 |
 
 #### 资源配置
 
-| 方法 | 说明 |
-|------|------|
-| `modifyGuestCPU(guestID, cores, timeout?)` | 修改 CPU |
-| `modifyGuestMemory(guestID, memoryMB, timeout?)` | 修改内存 |
-| `modifyGuestHostname(guestID, hostname, timeout?)` | 修改主机名 |
-| `modifyPassword(guestID, user, password, timeout?)` | 修改密码 |
-| `modifyAutoStart(guestID, enable, timeout?)` | 修改自动启动 |
-| `addVolume(guestID, volume, timeout?)` | 添加磁盘卷 |
-| `deleteVolume(guestID, tag, timeout?)` | 删除磁盘卷 |
+| 方法 | 类型 | 说明 |
+|------|------|------|
+| `modifyGuestCPU(guestID, cores, timeout?)` | Async (Wrapped) | 修改 CPU |
+| `tryModifyGuestCPU(guestID, cores)` | Async | 异步修改 CPU |
+| `modifyGuestMemory(guestID, memoryMB, timeout?)` | Async (Wrapped) | 修改内存 |
+| `tryModifyGuestMemory(guestID, memoryMB)` | Async | 异步修改内存 |
+| `modifyGuestHostname(guestID, hostname, timeout?)` | Async (Wrapped) | 修改主机名 |
+| `tryModifyGuestHostname(guestID, hostname)` | Async | 异步修改主机名 |
+| `modifyPassword(guestID, user, password, timeout?)` | Async (Wrapped) | 修改密码 |
+| `tryModifyPassword(guestID, user, password)` | Async | 异步修改密码 |
+| `modifyAutoStart(guestID, enable, timeout?)` | Async (Wrapped) | 修改自动启动 |
+| `tryModifyAutoStart(guestID, enable)` | Async | 异步修改自动启动 |
+| `addVolume(guestID, volume, timeout?)` | Async (Wrapped) | 添加磁盘卷 |
+| `tryAddVolume(guestID, volume)` | Async | 异步添加磁盘卷 |
+| `deleteVolume(guestID, tag, timeout?)` | Async (Wrapped) | 删除磁盘卷 |
+| `tryDeleteVolume(guestID, tag)` | Async | 异步删除磁盘卷 |
 
 #### 网络管理
 
-| 方法 | 说明 |
-|------|------|
-| `addExternalInterface(guestID, macAddress, timeout?)` | 添加外部网卡 |
-| `removeExternalInterface(guestID, macAddress, timeout?)` | 移除外部网卡 |
-| `addInternalInterface(guestID, macAddress, timeout?)` | 添加内部网卡 |
-| `removeInternalInterface(guestID, macAddress, timeout?)` | 移除内部网卡 |
+| 方法 | 类型 | 说明 |
+|------|------|------|
+| `addExternalInterface(guestID, macAddress, timeout?)` | Async (Wrapped) | 添加外部网卡 |
+| `tryAddExternalInterface(guestID, macAddress)` | Async | 异步添加外部网卡 |
+| `removeExternalInterface(guestID, macAddress, timeout?)` | Async (Wrapped) | 移除外部网卡 |
+| `tryRemoveExternalInterface(guestID, macAddress)` | Async | 异步移除外部网卡 |
+| `addInternalInterface(guestID, macAddress, timeout?)` | Async (Wrapped) | 添加内部网卡 |
+| `tryAddInternalInterface(guestID, macAddress)` | Async | 异步添加内部网卡 |
+| `removeInternalInterface(guestID, macAddress, timeout?)` | Async (Wrapped) | 移除内部网卡 |
+| `tryRemoveInternalInterface(guestID, macAddress)` | Async | 异步移除内部网卡 |
+
+#### 安全策略管理
+
+| 方法 | 类型 | 说明 |
+|------|------|------|
+| `querySecurityPolicies()` | Sync | 查询安全策略组列表 |
+| `getSecurityPolicy(policyID)` | Sync | 获取安全策略组详情 |
+| `createSecurityPolicy(id, name, ...)` | Async (Wrapped) | 创建安全策略组 |
+| `tryCreateSecurityPolicy(id, name, ...)` | Async | 异步创建安全策略组 |
+| `modifySecurityPolicy(id, ...)` | Async (Wrapped) | 修改安全策略组 |
+| `tryModifySecurityPolicy(id, ...)` | Async | 异步修改安全策略组 |
+| `deleteSecurityPolicy(policyID)` | Async (Wrapped) | 删除安全策略组 |
+| `tryDeleteSecurityPolicy(policyID)` | Async | 异步删除安全策略组 |
+| `getGuestSecurityPolicy(guestID)` | Sync | 获取云主机安全策略 |
+| `modifyGuestSecurityPolicy(guestID, mac, rules)` | Sync | 修改云主机网卡安全策略 |
+| `resetGuestSecurityPolicy(guestID, mac)` | Sync | 重置云主机网卡安全策略 |
 
 #### 任务管理
 
-| 方法 | 说明 |
-|------|------|
-| `startTask(cmd)` | 启动异步任务 |
-| `executeTask(cmd, timeout?, interval?)` | 执行并等待任务 |
-| `getTask(taskID)` | 获取任务详情 |
-| `waitTask(taskID, timeout?, interval?)` | 等待任务完成 |
-| `queryTasks(offset, pageSize)` | 查询任务列表 |
+| 方法 | 类型 | 说明 |
+|------|------|------|
+| `startTask(cmd)` | Sync | 启动异步任务 |
+| `executeTask(cmd, timeout?, interval?)` | Async (Wrapped) | 执行并等待任务 |
+| `getTask(taskID)` | Sync | 获取任务详情 |
+| `waitTask(taskID, timeout?, interval?)` | Async (Wrapped) | 等待任务完成 |
+| `queryTasks(offset, pageSize)` | Sync | 查询任务列表 |
 
 #### 集群管理
 
-| 方法 | 说明 |
-|------|------|
-| `queryNodes()` | 查询节点列表 |
-| `getNode(nodeID)` | 获取节点详情 |
-| `addNode(config)` | 添加节点 |
-| `removeNode(nodeID)` | 移除节点 |
-| `enableNode(nodeID)` | 启用节点 |
-| `disableNode(nodeID)` | 禁用节点 |
+| 方法 | 类型 | 说明 |
+|------|------|------|
+| `queryNodes()` | Sync | 查询节点列表 |
+| `getNode(nodeID)` | Sync | 获取节点详情 |
+| `addNode(config)` | Sync | 添加节点 |
+| `removeNode(nodeID)` | Sync | 移除节点 |
+| `enableNode(nodeID)` | Sync | 启用节点 |
+| `disableNode(nodeID)` | Sync | 禁用节点 |
 
 #### 资源池管理
 
-| 方法 | 说明 |
-|------|------|
-| `queryComputePools()` | 查询计算资源池 |
-| `getComputePool(poolID)` | 获取计算资源池详情 |
-| `queryStoragePools()` | 查询存储池 |
-| `queryAddressPools()` | 查询地址池 |
+| 方法 | 类型 | 说明 |
+|------|------|------|
+| `queryComputePools()` | Sync | 查询计算资源池 |
+| `getComputePool(poolID)` | Sync | 获取计算资源池详情 |
+| `queryStoragePools()` | Sync | 查询存储池 |
+| `queryAddressPools()` | Sync | 查询地址池 |
+| `queryAddressPoolConfigs()` | Sync | 查询地址池配置（新版） |
+| `getAddressPoolDetail(poolID)` | Sync | 获取地址池详情（新版） |
+
 
 ---
 

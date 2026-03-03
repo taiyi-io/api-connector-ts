@@ -14,6 +14,8 @@ export interface ControlCommandResponse {
     compute_pools?: ComputePoolStatus[];
     storage_pool?: StoragePool;
     storage_pools?: StoragePoolListRecord[];
+    address_pool_configs?: AddressPoolConfig[];
+    address_pool_detail?: AddressPoolDetail;
     guests?: GuestView[];
     guest?: GuestView;
     file?: FileStatus;
@@ -53,10 +55,8 @@ export interface ControlCommandResponse {
     system_status?: SystemStatus;
     resource_permissions?: ResourcePermissions;
     white_list?: string[];
-    address_pool_configs?: AddressPoolConfig[];
-    address_pool_detail?: AddressPoolDetail;
-    security_policies?: SecurityPolicyGroup[];
     security_policy?: SecurityPolicyGroup;
+    security_policies?: SecurityPolicyGroup[];
     guest_security_policy?: GuestSecurityPolicy;
 }
 export interface ControlCommandRequest {
@@ -81,13 +81,15 @@ export interface ControlCommandRequest {
     query_tasks?: ControlQueryTasksParams;
     add_node?: ClusterNode;
     remove_node?: ControlRemoveNodeParams;
-    get_node?: ControlGetNodeParams;
+    query_nodes?: ControlNodeQueryParams;
+    query_pools?: ControlPoolQueryParams;
     get_pool?: ControlGetPoolParams;
     add_pool?: ComputePoolConfig;
     modify_pool?: ComputePoolConfig;
     delete_pool?: ControlDeletePoolParams;
     add_pool_node?: ControlAddPoolNodeParams;
     remove_pool_node?: ControlRemovePoolNodeParams;
+    query_storage_pools?: ControlStoragePoolQueryParams;
     get_storage_pool?: ControlGetStoragePoolParams;
     add_storage_pool?: ControlAddStoragePoolParams;
     remove_storage_pool?: ControlRemoveStoragePoolParams;
@@ -99,9 +101,19 @@ export interface ControlCommandRequest {
     create_address_pool?: ControlCreateAddressPoolParams;
     modify_address_pool?: ControlModifyAddressPoolParams;
     delete_address_pool?: ControlDeleteAddressPoolParams;
-    get_address_pool_detail?: ControlGetAddressPoolDetailParams;
     add_address_range?: ControlAddAddressRangeParams;
     remove_address_range?: ControlRemoveAddressRangeParams;
+    query_address_pool_configs?: ControlAddressPoolQueryConfigsParams;
+    get_address_pool_detail?: ControlGetAddressPoolDetailParams;
+    create_security_policy?: ControlCreateSecurityPolicyParams;
+    modify_security_policy?: ControlModifySecurityPolicyParams;
+    delete_security_policy?: ControlDeleteSecurityPolicyParams;
+    query_security_policies?: ControlQuerySecurityPoliciesParams;
+    get_security_policy?: ControlGetSecurityPolicyParams;
+    copy_security_policy?: ControlCopySecurityPolicyParams;
+    get_guest_security_policy?: ControlGetGuestSecurityPolicyParams;
+    modify_guest_security_policy?: ControlModifyGuestSecurityPolicyParams;
+    reset_guest_security_policy?: ControlResetGuestSecurityPolicyParams;
     query_guests?: ControlQueryGuestsParams;
     get_guest?: ControlGetGuestParams;
     create_iso?: CreateFileParams;
@@ -120,6 +132,9 @@ export interface ControlCommandRequest {
     shrink_disk?: ControlShrinkDiskParams;
     install_disk_image?: ControlInstallDiskImageParams;
     create_disk_image?: ControlCreateDiskImageParams;
+    sync_iso_files?: ControlSyncFilesParams;
+    sync_disk_files?: ControlSyncFilesParams;
+    get_node?: ControlGetNodeParams;
     query_resource_pools?: ControlQueryResourcePoolsParams;
     modify_resource_storage_strategy?: ControlModifyResourceStorageStrategyParams;
     add_resource_container?: ControlAddResourceContainerParams;
@@ -133,12 +148,11 @@ export interface ControlCommandRequest {
     delete_snapshot?: ControlDeleteSnapshotParams;
     query_resource_usages?: ControlQueryResourceUsagesParams;
     query_resource_statistic?: ControlQueryResourceStatisticParams;
-    query_compute_nodes?: ControlQueryComputeNodesParams;
+    query_pool_nodes?: ControlQueryComputeNodesParams;
+    pool_strategy?: ControlComputePoolStragegyParams;
     query_nodes_usage?: ControlQueryNodesUsageParams;
     query_pools_usage?: ControlQueryPoolsUsageParams;
-    enable_node?: ControlNodeFlagParams;
-    disable_node?: ControlNodeFlagParams;
-    change_pool_strategy?: ControlComputePoolStrategyParams;
+    node_flag?: ControlNodeFlagParams;
     query_logs?: ControlQueryLogsParams;
     query_warnings?: ControlQueryWarningsParams;
     count_warnings?: ControlCountWarningsParams;
@@ -199,15 +213,6 @@ export interface ControlCommandRequest {
     update_white_list?: ControlUpdateWhiteListParams;
     query_white_list?: ControlQueryWhiteListParams;
     query_devices?: ControlQueryDevicesParams;
-    create_security_policy?: ControlCreateSecurityPolicyParams;
-    query_security_policies?: ControlQuerySecurityPoliciesParams;
-    get_security_policy?: ControlGetSecurityPolicyParams;
-    modify_security_policy?: ControlModifySecurityPolicyParams;
-    delete_security_policy?: ControlDeleteSecurityPolicyParams;
-    copy_security_policy?: ControlCopySecurityPolicyParams;
-    get_guest_security_policy?: ControlGetGuestSecurityPolicyParams;
-    modify_guest_security_policy?: ControlModifyGuestSecurityPolicyParams;
-    reset_guest_security_policy?: ControlResetGuestSecurityPolicyParams;
 }
 export interface ControlResponse {
     error?: string;
@@ -1594,7 +1599,7 @@ export interface ControlCreateSecurityPolicyParams {
  */
 export interface ControlQuerySecurityPoliciesParams {
     offset?: number;
-    page_size?: number;
+    limit?: number;
 }
 /**
  * 获取安全策略组详情请求参数
@@ -1671,4 +1676,18 @@ export interface ControlModifyGuestSecurityPolicyParams {
 export interface ControlResetGuestSecurityPolicyParams {
     guest_id: string;
     mac_address: string;
+}
+export interface ControlNodeQueryParams {
+}
+export interface ControlPoolQueryParams {
+}
+export interface ControlStoragePoolQueryParams {
+}
+export interface ControlAddressPoolQueryConfigsParams {
+}
+export interface ControlSyncFilesParams {
+}
+export interface ControlComputePoolStragegyParams {
+    pool_id: string;
+    strategy: ComputePoolStrategy;
 }

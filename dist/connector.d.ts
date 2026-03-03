@@ -63,6 +63,7 @@ export declare class TaiyiConnector {
     private _onAuthExpired;
     private _roles;
     private _keepAlive;
+    private _refreshPromise;
     /**
      * 构造函数
      * @param backendHost - 后端Control服务地址
@@ -114,6 +115,12 @@ export declare class TaiyiConnector {
      */
     hasRole(role: UserRole): boolean;
     /**
+     * 显式校验用户角色，并在校验失败时输出日志
+     * @param role - 所需角色
+     * @returns 是否满足要求
+     */
+    requireRole(role: UserRole): boolean;
+    /**
      * 密码认证
      * @param user - 用户标识
      * @param password - 密码
@@ -140,9 +147,10 @@ export declare class TaiyiConnector {
     /**
      * 直接加载令牌，初始化校验状态
      * @param tokens - 令牌
+     * @param source - 令牌来源说明，默认为"外部加载"
      * @returns 加载结果
      */
-    loadTokens(tokens: AllocatedTokens): BackendResult;
+    loadTokens(tokens: AllocatedTokens, source?: string): BackendResult;
     /**
      * 计划刷新令牌,访问令牌过期时间提前90秒，自动触发刷新令牌
      */
@@ -1493,19 +1501,6 @@ export declare class TaiyiConnector {
      * @param gatewayV6 - IPv6网关地址
      * @param dns - DNS服务器列表
      * @param upstreamGateway - 上游网关地址
-     * @returns 任务ID
-     */
-    tryCreateAddressPool(id: string, mode: string, description?: string, gatewayV4?: string, gatewayV6?: string, dns?: string[], upstreamGateway?: string): Promise<BackendResult<string>>;
-    /**
-     * 创建地址池并等待完成
-     * @param id - 地址池ID
-     * @param mode - 模式 (address/port)
-     * @param description - 描述
-     * @param gatewayV4 - IPv4网关地址
-     * @param gatewayV6 - IPv6网关地址
-     * @param dns - DNS服务器列表
-     * @param upstreamGateway - 上游网关地址
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
     createAddressPool(id: string, mode: string, description?: string, gatewayV4?: string, gatewayV6?: string, dns?: string[], upstreamGateway?: string): Promise<BackendResult>;
@@ -1528,28 +1523,11 @@ export declare class TaiyiConnector {
      * @param gatewayV6 - IPv6网关地址
      * @param dns - DNS服务器列表
      * @param upstreamGateway - 上游网关地址
-     * @returns 任务ID
-     */
-    tryModifyAddressPool(id: string, description?: string, gatewayV4?: string, gatewayV6?: string, dns?: string[], upstreamGateway?: string): Promise<BackendResult<string>>;
-    /**
-     * 修改地址池并等待完成
-     * @param id - 地址池ID
-     * @param description - 描述
-     * @param gatewayV4 - IPv4网关地址
-     * @param gatewayV6 - IPv6网关地址
-     * @param dns - DNS服务器列表
-     * @param upstreamGateway - 上游网关地址
      * @returns 操作结果
      */
     modifyAddressPool(id: string, description?: string, gatewayV4?: string, gatewayV6?: string, dns?: string[], upstreamGateway?: string): Promise<BackendResult>;
     /**
      * 删除地址池
-     * @param poolID - 地址池ID
-     * @returns 任务ID
-     */
-    tryDeleteAddressPool(poolID: string): Promise<BackendResult<string>>;
-    /**
-     * 删除地址池并等待完成
      * @param poolID - 地址池ID
      * @returns 操作结果
      */
@@ -1561,17 +1539,6 @@ export declare class TaiyiConnector {
      * @param begin - 起始地址
      * @param end - 结束地址
      * @param cidr - CIDR格式
-     * @returns 任务ID
-     */
-    tryAddAddressRange(pool: string, setType: string, begin?: string, end?: string, cidr?: string): Promise<BackendResult<string>>;
-    /**
-     * 添加地址范围并等待完成
-     * @param pool - 地址池ID
-     * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
-     * @param begin - 起始地址
-     * @param end - 结束地址
-     * @param cidr - CIDR格式
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
     addAddressRange(pool: string, setType: string, begin?: string, end?: string, cidr?: string): Promise<BackendResult>;
@@ -1581,16 +1548,6 @@ export declare class TaiyiConnector {
      * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
      * @param begin - 起始地址
      * @param end - 结束地址
-     * @returns 任务ID
-     */
-    tryRemoveAddressRange(pool: string, setType: string, begin: string, end: string): Promise<BackendResult<string>>;
-    /**
-     * 从地址池删除地址范围并等待完成
-     * @param pool - 地址池ID
-     * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
-     * @param begin - 起始地址
-     * @param end - 结束地址
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
     removeAddressRange(pool: string, setType: string, begin: string, end: string): Promise<BackendResult>;
@@ -1652,31 +1609,14 @@ export declare class TaiyiConnector {
      * @param guestID - 云主机ID
      * @param macAddress - 目标网卡MAC地址
      * @param rules - 新规则列表
-     * @returns 任务ID
-     */
-    tryModifyGuestSecurityPolicy(guestID: string, macAddress: string, rules: SecurityRule[]): Promise<BackendResult<string>>;
-    /**
-     * 修改云主机安全策略并等待完成
-     * @param guestID - 云主机ID
-     * @param macAddress - 目标网卡MAC地址
-     * @param rules - 新规则列表
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
-    modifyGuestSecurityPolicy(guestID: string, macAddress: string, rules: SecurityRule[], timeoutSeconds?: number): Promise<BackendResult>;
+    modifyGuestSecurityPolicy(guestID: string, macAddress: string, rules: SecurityRule[]): Promise<BackendResult>;
     /**
      * 重置云主机安全策略
      * @param guestID - 云主机ID
      * @param macAddress - 目标网卡MAC地址
-     * @returns 任务ID
-     */
-    tryResetGuestSecurityPolicy(guestID: string, macAddress: string): Promise<BackendResult<string>>;
-    /**
-     * 重置云主机安全策略并等待完成
-     * @param guestID - 云主机ID
-     * @param macAddress - 目标网卡MAC地址
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
-    resetGuestSecurityPolicy(guestID: string, macAddress: string, timeoutSeconds?: number): Promise<BackendResult>;
+    resetGuestSecurityPolicy(guestID: string, macAddress: string): Promise<BackendResult>;
 }

@@ -80,6 +80,7 @@ class TaiyiConnector {
         this._onAuthExpired = undefined;
         this._roles = [];
         this._keepAlive = false;
+        this._refreshPromise = null;
         this._backendURL = `http://${backendHost}:${backendPort}/api/${API_VERSION}/`;
         this._device = device;
         this._id = (0, cuid2_1.createId)();
@@ -149,6 +150,21 @@ class TaiyiConnector {
         return this._roles.includes(role);
     }
     /**
+     * 显式校验用户角色，并在校验失败时输出日志
+     * @param role - 所需角色
+     * @returns 是否满足要求
+     */
+    requireRole(role) {
+        const has = this.hasRole(role);
+        if (!has) {
+            console.log("[TaiyiConnector] 权限不足: 用户 %s (角色: [%s]) 缺少所需角色: %s", this._user, this._roles.join(", "), role);
+        }
+        else {
+            console.log("[TaiyiConnector] 权限校验通过: 用户 %s 具备角色 %s", this._user, role);
+        }
+        return has;
+    }
+    /**
      * 密码认证
      * @param user - 用户标识
      * @param password - 密码
@@ -172,7 +188,7 @@ class TaiyiConnector {
                 };
             }
             const tokens = tokenResult.data;
-            const result = this.loadTokens(tokens);
+            const result = this.loadTokens(tokens, "密码认证");
             if (result.error) {
                 return {
                     error: result.error,
@@ -224,7 +240,7 @@ class TaiyiConnector {
                 };
             }
             const tokens = tokenResult.data;
-            const result = this.loadTokens(tokens);
+            const result = this.loadTokens(tokens, "令牌串认证");
             if (result.error) {
                 return {
                     error: result.error,
@@ -261,52 +277,77 @@ class TaiyiConnector {
                     error: "尚未认证",
                 };
             }
-            const result = yield (0, request_forwarder_1.refreshAccessToken)(this._backendURL, this._user, this._device, this._authenticatedTokens.refresh_token);
-            if (result.unauthenticated) {
-                this._authenticated = false;
-                return {
-                    unauthenticated: result.unauthenticated,
-                };
+            // 并发控制：如果正在刷新，则等待
+            if (this._refreshPromise) {
+                return this._refreshPromise;
             }
-            else if (result.error) {
-                return {
-                    error: result.error,
-                };
-            }
-            else if (!result.data) {
-                return {
-                    error: "刷新令牌失败",
-                };
-            }
-            const tokens = result.data;
-            const err = this.validateTokens(tokens);
-            if (err) {
-                return {
-                    error: "无效令牌",
-                };
-            }
-            this._authenticatedTokens = tokens;
-            yield this.onTokenUpdated(tokens);
-            return {};
+            this._refreshPromise = (() => __awaiter(this, void 0, void 0, function* () {
+                try {
+                    // 在发起后端刷新前，先尝试同步，看看是否已有其他实例刷新了
+                    const changed = yield this.syncTokens();
+                    if (changed) {
+                        console.log("[TaiyiConnector] [自动刷新] 检测到其他实例已更新令牌，跳过刷新请求");
+                        return {};
+                    }
+                    const result = yield (0, request_forwarder_1.refreshAccessToken)(this._backendURL, this._user, this._device, this._authenticatedTokens.refresh_token);
+                    if (result.unauthenticated) {
+                        this._authenticated = false;
+                        return {
+                            unauthenticated: result.unauthenticated,
+                        };
+                    }
+                    else if (result.error) {
+                        return {
+                            error: result.error,
+                        };
+                    }
+                    else if (!result.data) {
+                        return {
+                            error: "刷新令牌失败",
+                        };
+                    }
+                    const tokens = result.data;
+                    const loadResult = this.loadTokens(tokens, "自动刷新");
+                    if (loadResult.error) {
+                        return loadResult;
+                    }
+                    yield this.onTokenUpdated(tokens);
+                    return {};
+                }
+                finally {
+                    this._refreshPromise = null;
+                }
+            }))();
+            return this._refreshPromise;
         });
     }
     /**
      * 直接加载令牌，初始化校验状态
      * @param tokens - 令牌
+     * @param source - 令牌来源说明，默认为"外部加载"
      * @returns 加载结果
      */
-    loadTokens(tokens) {
+    loadTokens(tokens, source = "外部加载") {
         const error = this.validateTokens(tokens);
         if (error) {
-            return {
-                error: "无效令牌",
-            };
+            console.log("[TaiyiConnector] [%s] 令牌无效: %s", source, error);
+            return { error: "无效令牌" };
         }
         this._authenticated = true;
         this._authenticatedTokens = tokens;
         this._roles = tokens.roles;
-        //using qualified id
         this._user = tokens.user;
+        // 简要输出身份信息
+        let jwtUser = "";
+        try {
+            const parts = tokens.access_token.split(".");
+            if (parts.length === 3) {
+                const payload = JSON.parse(atob(parts[1]));
+                jwtUser = ` (JWT: ${payload.user || payload.sub})`;
+            }
+        }
+        catch (e) { }
+        console.log("[TaiyiConnector] [%s] 认证成功: 用户: %s, 角色: [%s]%s, 令牌特征: %s...", source, this._user, this._roles.join(", "), jwtUser, tokens.access_token.substring(0, 10));
         return {};
     }
     /**
@@ -314,9 +355,12 @@ class TaiyiConnector {
      */
     startHeartBeat() {
         //access_expired_at根据RFC3339转换为时间，提前90秒，自动触发refreshToken
-        const expireTime = new Date(this._authenticatedTokens.access_expired_at).getTime() -
+        const baseDelay = new Date(this._authenticatedTokens.access_expired_at).getTime() -
             Date.now() -
             90 * 1000;
+        // 增加 0-30 秒的随机抖动，避免多个实例同时刷新
+        const jitter = Math.floor(Math.random() * 30 * 1000);
+        const expireTime = Math.max(0, baseDelay + jitter);
         //延迟15秒用于测试
         // const expireTime = 15 * 1000;
         this.stopHeartBeat();
@@ -478,7 +522,7 @@ class TaiyiConnector {
                 if (updatedTokens.access_token &&
                     currentAccessToken != updatedTokens.access_token) {
                     //令牌已更新
-                    this._authenticatedTokens = updatedTokens;
+                    this.loadTokens(updatedTokens, "存储同步");
                     changed = true;
                 }
             }
@@ -585,7 +629,8 @@ class TaiyiConnector {
     waitTask(taskID_1) {
         return __awaiter(this, arguments, void 0, function* (taskID, timeoutSeconds = 300, intervalSeconds = 1) {
             const startTime = Date.now();
-            while (Date.now() - startTime < timeoutSeconds * 1000) {
+            const timeoutMs = timeoutSeconds * 1000;
+            while (Date.now() - startTime < timeoutMs) {
                 const resp = yield this.getTask(taskID);
                 if (resp.error) {
                     return {
@@ -607,8 +652,12 @@ class TaiyiConnector {
                         error: resp.data.error || "任务执行失败",
                     };
                 }
-                // Wait for the interval before next check
-                yield new Promise((resolve) => setTimeout(resolve, intervalSeconds * 1000));
+                // Calculate remaining time and wait for minimum of interval or remaining time
+                const remainingTime = timeoutMs - (Date.now() - startTime);
+                const waitTime = Math.min(intervalSeconds * 1000, remainingTime);
+                if (waitTime > 0) {
+                    yield new Promise((resolve) => setTimeout(resolve, waitTime));
+                }
             }
             throw new Error(`任务${taskID}等待超过${timeoutSeconds}秒`);
         });
@@ -1745,7 +1794,7 @@ class TaiyiConnector {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.EnableNode,
-                enable_node: { node_id: nodeID },
+                node_flag: { node_id: nodeID },
             };
             return yield this.sendCommand(cmd);
         });
@@ -1759,7 +1808,7 @@ class TaiyiConnector {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.DisableNode,
-                disable_node: { node_id: nodeID },
+                node_flag: { node_id: nodeID },
             };
             return yield this.sendCommand(cmd);
         });
@@ -1886,7 +1935,7 @@ class TaiyiConnector {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.ChangeComputePoolStrategy,
-                change_pool_strategy: {
+                pool_strategy: {
                     pool_id: poolID,
                     strategy: strategy,
                 },
@@ -3007,7 +3056,7 @@ class TaiyiConnector {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.QueryComputeNodes,
-                query_compute_nodes: {
+                query_pool_nodes: {
                     pool_id: poolID,
                 },
             };
@@ -4830,42 +4879,6 @@ class TaiyiConnector {
      * @param gatewayV6 - IPv6网关地址
      * @param dns - DNS服务器列表
      * @param upstreamGateway - 上游网关地址
-     * @returns 任务ID
-     */
-    tryCreateAddressPool(id, mode, description, gatewayV4, gatewayV6, dns, upstreamGateway) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const cmd = {
-                type: enums_1.controlCommandEnum.CreateAddressPool,
-                create_address_pool: {
-                    id,
-                    mode,
-                    description,
-                    gateway_v4: gatewayV4,
-                    gateway_v6: gatewayV6,
-                    dns,
-                    upstream_gateway: upstreamGateway,
-                },
-            };
-            const resp = yield this.requestCommandResponse(cmd);
-            if (resp.error) {
-                return { error: resp.error };
-            }
-            if (!resp.data || !resp.data.id) {
-                return { error: "创建地址池失败" };
-            }
-            return { data: resp.data.id };
-        });
-    }
-    /**
-     * 创建地址池并等待完成
-     * @param id - 地址池ID
-     * @param mode - 模式 (address/port)
-     * @param description - 描述
-     * @param gatewayV4 - IPv4网关地址
-     * @param gatewayV6 - IPv6网关地址
-     * @param dns - DNS服务器列表
-     * @param upstreamGateway - 上游网关地址
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
     createAddressPool(id, mode, description, gatewayV4, gatewayV6, dns, upstreamGateway) {
@@ -4931,39 +4944,6 @@ class TaiyiConnector {
      * @param gatewayV6 - IPv6网关地址
      * @param dns - DNS服务器列表
      * @param upstreamGateway - 上游网关地址
-     * @returns 任务ID
-     */
-    tryModifyAddressPool(id, description, gatewayV4, gatewayV6, dns, upstreamGateway) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const cmd = {
-                type: enums_1.controlCommandEnum.ModifyAddressPool,
-                modify_address_pool: {
-                    id,
-                    description,
-                    gateway_v4: gatewayV4,
-                    gateway_v6: gatewayV6,
-                    dns,
-                    upstream_gateway: upstreamGateway,
-                },
-            };
-            const resp = yield this.requestCommandResponse(cmd);
-            if (resp.error) {
-                return { error: resp.error };
-            }
-            if (!resp.data || !resp.data.id) {
-                return { error: "修改地址池失败" };
-            }
-            return { data: resp.data.id };
-        });
-    }
-    /**
-     * 修改地址池并等待完成
-     * @param id - 地址池ID
-     * @param description - 描述
-     * @param gatewayV4 - IPv4网关地址
-     * @param gatewayV6 - IPv6网关地址
-     * @param dns - DNS服务器列表
-     * @param upstreamGateway - 上游网关地址
      * @returns 操作结果
      */
     modifyAddressPool(id, description, gatewayV4, gatewayV6, dns, upstreamGateway) {
@@ -4985,27 +4965,6 @@ class TaiyiConnector {
     /**
      * 删除地址池
      * @param poolID - 地址池ID
-     * @returns 任务ID
-     */
-    tryDeleteAddressPool(poolID) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const cmd = {
-                type: enums_1.controlCommandEnum.DeleteAddressPool,
-                delete_address_pool: { id: poolID },
-            };
-            const resp = yield this.requestCommandResponse(cmd);
-            if (resp.error) {
-                return { error: resp.error };
-            }
-            if (!resp.data || !resp.data.id) {
-                return { error: "删除地址池失败" };
-            }
-            return { data: resp.data.id };
-        });
-    }
-    /**
-     * 删除地址池并等待完成
-     * @param poolID - 地址池ID
      * @returns 操作结果
      */
     deleteAddressPool(poolID) {
@@ -5024,38 +4983,6 @@ class TaiyiConnector {
      * @param begin - 起始地址
      * @param end - 结束地址
      * @param cidr - CIDR格式
-     * @returns 任务ID
-     */
-    tryAddAddressRange(pool, setType, begin, end, cidr) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const cmd = {
-                type: enums_1.controlCommandEnum.AddAddressRange,
-                add_address_range: {
-                    pool,
-                    set_type: setType,
-                    begin,
-                    end,
-                    cidr,
-                },
-            };
-            const resp = yield this.requestCommandResponse(cmd);
-            if (resp.error) {
-                return { error: resp.error };
-            }
-            if (!resp.data || !resp.data.id) {
-                return { error: "添加地址范围失败" };
-            }
-            return { data: resp.data.id };
-        });
-    }
-    /**
-     * 添加地址范围并等待完成
-     * @param pool - 地址池ID
-     * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
-     * @param begin - 起始地址
-     * @param end - 结束地址
-     * @param cidr - CIDR格式
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
     addAddressRange(pool, setType, begin, end, cidr) {
@@ -5079,36 +5006,6 @@ class TaiyiConnector {
      * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
      * @param begin - 起始地址
      * @param end - 结束地址
-     * @returns 任务ID
-     */
-    tryRemoveAddressRange(pool, setType, begin, end) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const cmd = {
-                type: enums_1.controlCommandEnum.RemoveAddressRange,
-                remove_address_range: {
-                    pool,
-                    set_type: setType,
-                    begin,
-                    end,
-                },
-            };
-            const resp = yield this.requestCommandResponse(cmd);
-            if (resp.error) {
-                return { error: resp.error };
-            }
-            if (!resp.data || !resp.data.id) {
-                return { error: "删除地址范围失败" };
-            }
-            return { data: resp.data.id };
-        });
-    }
-    /**
-     * 从地址池删除地址范围并等待完成
-     * @param pool - 地址池ID
-     * @param setType - 集合类型 (ext-v4/ext-v6/int-v4/int-v6)
-     * @param begin - 起始地址
-     * @param end - 结束地址
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
      * @returns 操作结果
      */
     removeAddressRange(pool, setType, begin, end) {
@@ -5277,9 +5174,9 @@ class TaiyiConnector {
      * @param guestID - 云主机ID
      * @param macAddress - 目标网卡MAC地址
      * @param rules - 新规则列表
-     * @returns 任务ID
+     * @returns 操作结果
      */
-    tryModifyGuestSecurityPolicy(guestID, macAddress, rules) {
+    modifyGuestSecurityPolicy(guestID, macAddress, rules) {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.ModifyGuestSecurityPolicy,
@@ -5289,44 +5186,16 @@ class TaiyiConnector {
                     rules,
                 },
             };
-            const resp = yield this.requestCommandResponse(cmd);
-            if (resp.error) {
-                return { error: resp.error };
-            }
-            if (!resp.data || !resp.data.id) {
-                return { error: "修改云主机安全策略失败" };
-            }
-            return { data: resp.data.id };
-        });
-    }
-    /**
-     * 修改云主机安全策略并等待完成
-     * @param guestID - 云主机ID
-     * @param macAddress - 目标网卡MAC地址
-     * @param rules - 新规则列表
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
-     * @returns 操作结果
-     */
-    modifyGuestSecurityPolicy(guestID_1, macAddress_1, rules_1) {
-        return __awaiter(this, arguments, void 0, function* (guestID, macAddress, rules, timeoutSeconds = 300) {
-            const taskResult = yield this.tryModifyGuestSecurityPolicy(guestID, macAddress, rules);
-            if (taskResult.error) {
-                return { error: taskResult.error };
-            }
-            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
-            if (taskData.error) {
-                return { error: taskData.error };
-            }
-            return {};
+            return yield this.sendCommand(cmd);
         });
     }
     /**
      * 重置云主机安全策略
      * @param guestID - 云主机ID
      * @param macAddress - 目标网卡MAC地址
-     * @returns 任务ID
+     * @returns 操作结果
      */
-    tryResetGuestSecurityPolicy(guestID, macAddress) {
+    resetGuestSecurityPolicy(guestID, macAddress) {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.ResetGuestSecurityPolicy,
@@ -5335,34 +5204,7 @@ class TaiyiConnector {
                     mac_address: macAddress,
                 },
             };
-            const resp = yield this.requestCommandResponse(cmd);
-            if (resp.error) {
-                return { error: resp.error };
-            }
-            if (!resp.data || !resp.data.id) {
-                return { error: "重置云主机安全策略失败" };
-            }
-            return { data: resp.data.id };
-        });
-    }
-    /**
-     * 重置云主机安全策略并等待完成
-     * @param guestID - 云主机ID
-     * @param macAddress - 目标网卡MAC地址
-     * @param timeoutSeconds - 超时时间（秒），默认300秒
-     * @returns 操作结果
-     */
-    resetGuestSecurityPolicy(guestID_1, macAddress_1) {
-        return __awaiter(this, arguments, void 0, function* (guestID, macAddress, timeoutSeconds = 300) {
-            const taskResult = yield this.tryResetGuestSecurityPolicy(guestID, macAddress);
-            if (taskResult.error) {
-                return { error: taskResult.error };
-            }
-            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
-            if (taskData.error) {
-                return { error: taskData.error };
-            }
-            return {};
+            return yield this.sendCommand(cmd);
         });
     }
 }

@@ -472,6 +472,11 @@ export declare enum ComputePoolStrategy {
     LeastDiskLoad = "least_disk_load",
     LeastCoreLoad = "least_core_load"
 }
+export declare enum AddressMode {
+    Dual = "dual",
+    V4Only = "v4_only",
+    V6Only = "v6_only"
+}
 export declare enum CloudInitBootMode {
     None = "",
     DMI = "dmi",

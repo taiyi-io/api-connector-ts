@@ -1,7 +1,7 @@
 /**
  * 向API服务发送请求的数据结构定义
  */
-import { TaskData, ClusterNodeData, ComputePoolStatus, StoragePool, StoragePoolListRecord, AddressPoolConfig, AddressPoolDetail, SecurityPolicyGroup, GuestSecurityPolicy, GuestView, FileStatus, FileView, DataStore, SnapshotRecord, SnapshotTreeNode, GuestResourceUsageRecord, NodeResourceSnapshotRecord, PoolResourceSnapshotRecord, ClusterResourceSnapshotRecord, GuestSystemView, WarningRecord, ConsoleEvent, NodeConfigStatus, SSHKeyView, License, LicenseRecord, ClusterStatus, NetworkGraphNode, ResourceMonitorConfig, ImportSource, ImportTarget, UserGroupRecord, UserCredentialRecord, UserToken, PrivateKey, UserAccessRecord, SystemStatus, ResourcePermissions, ClusterNode, ComputePoolConfig, GuestConfig, VolumeSpec, FileSpec, VolumeContainer, GuestFilter, NodeConfig, GuestSystemSpec, UserGroup, SecurityRule } from "./data-defines";
+import { TaskData, ClusterNodeData, ComputePoolStatus, StoragePool, StoragePoolListRecord, AddressPoolConfigView, AddressPoolDetailView, SecurityPolicyGroup, SecurityPolicyRecord, GuestSecurityPolicy, GuestView, FileStatus, FileView, DataStore, SnapshotRecord, SnapshotTreeNode, GuestResourceUsageRecord, NodeResourceSnapshotRecord, PoolResourceSnapshotRecord, ClusterResourceSnapshotRecord, GuestSystemView, WarningRecord, ConsoleEvent, NodeConfigStatus, SSHKeyView, License, LicenseRecord, ClusterStatus, NetworkGraphNode, ResourceMonitorConfig, ImportSource, ImportTarget, UserGroupRecord, UserCredentialRecord, UserToken, PrivateKey, UserAccessRecord, SystemStatus, ResourcePermissions, ClusterNode, ComputePoolConfig, GuestConfig, VolumeSpec, FileSpec, VolumeContainer, GuestFilter, NodeConfig, GuestSystemSpec, UserGroup, SecurityRule } from "./data-defines";
 import { UserRole, controlCommandEnum, StorageType, VolumeContainerStrategy, StatisticRange, ComputePoolStrategy, ConsoleEventLevel, ImportVendor, ResourceType, SignatureAlgorithm, ResourceAccessLevel } from "./enums";
 export interface ControlCommandResponse {
     id?: string;
@@ -14,8 +14,8 @@ export interface ControlCommandResponse {
     compute_pools?: ComputePoolStatus[];
     storage_pool?: StoragePool;
     storage_pools?: StoragePoolListRecord[];
-    address_pool_configs?: AddressPoolConfig[];
-    address_pool_detail?: AddressPoolDetail;
+    address_pool_configs?: AddressPoolConfigView[];
+    address_pool_detail?: AddressPoolDetailView;
     guests?: GuestView[];
     guest?: GuestView;
     file?: FileStatus;
@@ -56,7 +56,7 @@ export interface ControlCommandResponse {
     resource_permissions?: ResourcePermissions;
     white_list?: string[];
     security_policy?: SecurityPolicyGroup;
-    security_policies?: SecurityPolicyGroup[];
+    security_policies?: SecurityPolicyRecord[];
     guest_security_policy?: GuestSecurityPolicy;
 }
 export interface ControlCommandRequest {
@@ -79,8 +79,10 @@ export interface ControlCommandRequest {
     modify_autostart?: ControlModifyAutoStartParams;
     get_task?: ControlGetTaskParams;
     query_tasks?: ControlQueryTasksParams;
-    add_node?: ClusterNode;
+    add_node?: ControlAddNodeParams;
     remove_node?: ControlRemoveNodeParams;
+    enable_node?: ControlNodeFlagParams;
+    disable_node?: ControlNodeFlagParams;
     query_nodes?: ControlNodeQueryParams;
     query_pools?: ControlPoolQueryParams;
     get_pool?: ControlGetPoolParams;
@@ -149,6 +151,7 @@ export interface ControlCommandRequest {
     query_resource_usages?: ControlQueryResourceUsagesParams;
     query_resource_statistic?: ControlQueryResourceStatisticParams;
     query_pool_nodes?: ControlQueryComputeNodesParams;
+    change_pool_strategy?: ControlComputePoolStrategyParams;
     pool_strategy?: ControlComputePoolStragegyParams;
     query_nodes_usage?: ControlQueryNodesUsageParams;
     query_pools_usage?: ControlQueryPoolsUsageParams;
@@ -499,9 +502,15 @@ export interface ControlQueryTasksParams {
     page_size: number;
 }
 /**
- * 集群删除节点请求参数
+ * 集群添加节点请求参数
  * @interface
- * @property id - 节点ID
+ * @property host - 节点地址
+ * @property port - 节点端口
+ */
+export interface ControlAddNodeParams extends ClusterNode {
+}
+/**
+ * 集群删除节点请求参数
  */
 export interface ControlRemoveNodeParams {
     id: string;

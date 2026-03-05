@@ -2,6 +2,7 @@
  * API使用云主机、镜像等逻辑对象的数据结构定义
  */
 import {
+  AddressMode,
   AuthorizationMode,
   CloudInitBootMode,
   ComputePoolStrategy,
@@ -1287,7 +1288,7 @@ export interface ComputePoolConfig {
   merge_memory?: boolean;
   enable_ha?: boolean;
   interface_mode?: string;
-  address_mode?: string;
+  address_mode?: AddressMode;
   security_policy?: string;
 }
 /**
@@ -1613,7 +1614,7 @@ export interface FoundAdminSecret {
  */
 export interface AddressPoolConfig {
   id: string;
-  mode: string;
+  mode: AddressMode;
   description: string;
   gateway_v4: string;
   gateway_v6: string;
@@ -1623,7 +1624,7 @@ export interface AddressPoolConfig {
 
 export interface AddressPoolConfigView {
   id: string;
-  mode: string;
+  mode: AddressMode;
   description?: string;
   gateway_v4: string;
   gateway_v6: string;
@@ -1735,10 +1736,10 @@ export interface SecurityPolicyRecord {
 /**
  * 云主机安全策略
  * @interface
- * @property policies - 接口安全策略列表
+ * @property interfaces - 接口安全策略列表
  */
 export interface GuestSecurityPolicy {
-  policies: InterfaceSecurityPolicy[];
+  interfaces: InterfaceSecurityPolicy[];
 }
 
 /**

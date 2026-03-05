@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { getTestConnector } from "../setup";
 import { TaiyiConnector } from "../../src/connector";
+import { AddressMode } from "../../src/enums";
 
 const TEST_POOL_ID = "ci-test-addr-pool";
 
@@ -28,7 +29,7 @@ describe("地址池管理（验证同步调用）", () => {
   it("createAddressPool 同步创建地址池（无 invalid task 错误）", async () => {
     const result = await connector.createAddressPool(
       TEST_POOL_ID,
-      "address",
+      AddressMode.V4Only,
       "CI 测试地址池"
     );
     expect(result.error).toBeUndefined();
@@ -41,6 +42,7 @@ describe("地址池管理（验证同步调用）", () => {
     expect(result.error).toBeUndefined();
     expect(result.data).toBeDefined();
     expect(result.data!.config.id).toBe(TEST_POOL_ID);
+    expect(result.data!.config.mode).toBe(AddressMode.V4Only);
   });
 
   it("addAddressRange 同步添加地址范围（无 invalid task 错误）", async () => {

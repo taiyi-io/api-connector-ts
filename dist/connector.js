@@ -156,12 +156,6 @@ class TaiyiConnector {
      */
     requireRole(role) {
         const has = this.hasRole(role);
-        if (!has) {
-            console.log("[TaiyiConnector] 权限不足: 用户 %s (角色: [%s]) 缺少所需角色: %s", this._user, this._roles.join(", "), role);
-        }
-        else {
-            console.log("[TaiyiConnector] 权限校验通过: 用户 %s 具备角色 %s", this._user, role);
-        }
         return has;
     }
     /**
@@ -286,7 +280,6 @@ class TaiyiConnector {
                     // 在发起后端刷新前，先尝试同步，看看是否已有其他实例刷新了
                     const changed = yield this.syncTokens();
                     if (changed) {
-                        console.log("[TaiyiConnector] [自动刷新] 检测到其他实例已更新令牌，跳过刷新请求");
                         return {};
                     }
                     const result = yield (0, request_forwarder_1.refreshAccessToken)(this._backendURL, this._user, this._device, this._authenticatedTokens.refresh_token);
@@ -330,24 +323,12 @@ class TaiyiConnector {
     loadTokens(tokens, source = "外部加载") {
         const error = this.validateTokens(tokens);
         if (error) {
-            console.log("[TaiyiConnector] [%s] 令牌无效: %s", source, error);
             return { error: "无效令牌" };
         }
         this._authenticated = true;
         this._authenticatedTokens = tokens;
         this._roles = tokens.roles;
         this._user = tokens.user;
-        // 简要输出身份信息
-        let jwtUser = "";
-        try {
-            const parts = tokens.access_token.split(".");
-            if (parts.length === 3) {
-                const payload = JSON.parse(atob(parts[1]));
-                jwtUser = ` (JWT: ${payload.user || payload.sub})`;
-            }
-        }
-        catch (e) { }
-        console.log("[TaiyiConnector] [%s] 认证成功: 用户: %s, 角色: [%s]%s, 令牌特征: %s...", source, this._user, this._roles.join(", "), jwtUser, tokens.access_token.substring(0, 10));
         return {};
     }
     /**
@@ -1795,6 +1776,7 @@ class TaiyiConnector {
             const cmd = {
                 type: enums_1.controlCommandEnum.EnableNode,
                 node_flag: { node_id: nodeID },
+                enable_node: { node_id: nodeID },
             };
             return yield this.sendCommand(cmd);
         });
@@ -1809,6 +1791,7 @@ class TaiyiConnector {
             const cmd = {
                 type: enums_1.controlCommandEnum.DisableNode,
                 node_flag: { node_id: nodeID },
+                disable_node: { node_id: nodeID },
             };
             return yield this.sendCommand(cmd);
         });
@@ -1936,6 +1919,10 @@ class TaiyiConnector {
             const cmd = {
                 type: enums_1.controlCommandEnum.ChangeComputePoolStrategy,
                 pool_strategy: {
+                    pool_id: poolID,
+                    strategy: strategy,
+                },
+                change_pool_strategy: {
                     pool_id: poolID,
                     strategy: strategy,
                 },

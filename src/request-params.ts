@@ -8,8 +8,11 @@ import {
   StoragePool,
   StoragePoolListRecord,
   AddressPoolConfig,
+  AddressPoolConfigView,
   AddressPoolDetail,
+  AddressPoolDetailView,
   SecurityPolicyGroup,
+  SecurityPolicyRecord,
   GuestSecurityPolicy,
   GuestView,
   FileStatus,
@@ -147,11 +150,13 @@ export interface ControlCommandRequest {
   query_tasks?: ControlQueryTasksParams;
   add_node?: ControlAddNodeParams;
   remove_node?: ControlRemoveNodeParams;
+  enable_node?: ControlNodeFlagParams;
+  disable_node?: ControlNodeFlagParams;
   query_nodes?: ControlNodeQueryParams;
   query_pools?: ControlPoolQueryParams;
   get_pool?: ControlGetPoolParams;
-  add_pool?: ControlAddPoolParams;
-  modify_pool?: ControlModifyPoolParams;
+  add_pool?: ComputePoolConfig;
+  modify_pool?: ComputePoolConfig;
   delete_pool?: ControlDeletePoolParams;
   add_pool_node?: ControlAddPoolNodeParams;
   remove_pool_node?: ControlRemovePoolNodeParams;
@@ -215,6 +220,7 @@ export interface ControlCommandRequest {
   query_resource_usages?: ControlQueryResourceUsagesParams;
   query_resource_statistic?: ControlQueryResourceStatisticParams;
   query_pool_nodes?: ControlQueryComputeNodesParams;
+  change_pool_strategy?: ControlComputePoolStrategyParams;
   pool_strategy?: ControlComputePoolStragegyParams;
   query_nodes_usage?: ControlQueryNodesUsageParams;
   query_pools_usage?: ControlQueryPoolsUsageParams;
@@ -574,9 +580,15 @@ export interface ControlQueryTasksParams {
   page_size: number;
 }
 /**
- * 集群删除节点请求参数
+ * 集群添加节点请求参数
  * @interface
- * @property id - 节点ID
+ * @property host - 节点地址
+ * @property port - 节点端口
+ */
+export interface ControlAddNodeParams extends ClusterNode {}
+
+/**
+ * 集群删除节点请求参数
  */
 export interface ControlRemoveNodeParams {
   id: string;

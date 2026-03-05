@@ -3,7 +3,7 @@
  * API所需枚举定义
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TokenSigningMethod = exports.PasswordHasher = exports.UserRole = exports.POOL_RESOURCE_SNAPSHOT_FIELD_COUNT = exports.NODE_RESOURCE_SNAPSHOT_FIELD_COUNT = exports.ImportVendor = exports.ConsoleEventCategory = exports.ConsoleEventRange = exports.ConsoleEventLevel = exports.StatisticRange = exports.FileState = exports.FileFormat = exports.FileCategory = exports.SignatureAlgorithm = exports.LicenseFeature = exports.AuthorizationMode = exports.Locale = exports.CloudInitBootMode = exports.ComputePoolStrategy = exports.NodeState = exports.NodeMode = exports.InterfaceMode = exports.VolumeFormat = exports.StorageType = exports.Priority = exports.VolumeContainerStrategy = exports.NetworkMode = exports.GuestState = exports.TaskStatus = exports.GuestTabletMode = exports.GuestSoundModel = exports.GuestFirmwareMode = exports.USBModel = exports.RemoteProtocol = exports.DisplayDriver = exports.NetworkModelType = exports.GuestDiskMode = exports.SystemCategory = exports.ResourceUsageDurationField = exports.ResourceSnapshotField = exports.StatisticUnitRecordField = exports.ResourceAccessScope = exports.ResourceAction = exports.ResourceAccessLevel = exports.ResourceType = exports.TaskType = exports.controlCommandEnum = void 0;
+exports.TokenSigningMethod = exports.PasswordHasher = exports.UserRole = exports.POOL_RESOURCE_SNAPSHOT_FIELD_COUNT = exports.NODE_RESOURCE_SNAPSHOT_FIELD_COUNT = exports.ImportVendor = exports.ConsoleEventCategory = exports.ConsoleEventRange = exports.ConsoleEventLevel = exports.StatisticRange = exports.FileState = exports.FileFormat = exports.FileCategory = exports.SignatureAlgorithm = exports.LicenseFeature = exports.AuthorizationMode = exports.Locale = exports.CloudInitBootMode = exports.AddressMode = exports.ComputePoolStrategy = exports.NodeState = exports.NodeMode = exports.InterfaceMode = exports.VolumeFormat = exports.StorageType = exports.Priority = exports.VolumeContainerStrategy = exports.NetworkMode = exports.GuestState = exports.TaskStatus = exports.GuestTabletMode = exports.GuestSoundModel = exports.GuestFirmwareMode = exports.USBModel = exports.RemoteProtocol = exports.DisplayDriver = exports.NetworkModelType = exports.GuestDiskMode = exports.SystemCategory = exports.ResourceUsageDurationField = exports.ResourceSnapshotField = exports.StatisticUnitRecordField = exports.ResourceAccessScope = exports.ResourceAction = exports.ResourceAccessLevel = exports.ResourceType = exports.TaskType = exports.controlCommandEnum = void 0;
 var controlCommandEnum;
 (function (controlCommandEnum) {
     controlCommandEnum["CreateGuest"] = "create_guest";
@@ -507,6 +507,12 @@ var ComputePoolStrategy;
     ComputePoolStrategy["LeastDiskLoad"] = "least_disk_load";
     ComputePoolStrategy["LeastCoreLoad"] = "least_core_load";
 })(ComputePoolStrategy || (exports.ComputePoolStrategy = ComputePoolStrategy = {}));
+var AddressMode;
+(function (AddressMode) {
+    AddressMode["Dual"] = "dual";
+    AddressMode["V4Only"] = "v4_only";
+    AddressMode["V6Only"] = "v6_only";
+})(AddressMode || (exports.AddressMode = AddressMode = {}));
 var CloudInitBootMode;
 (function (CloudInitBootMode) {
     CloudInitBootMode["None"] = "";

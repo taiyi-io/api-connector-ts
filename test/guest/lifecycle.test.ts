@@ -60,12 +60,18 @@ describe("云主机生命周期", () => {
     guestID = result.data!;
   });
 
-  it("查询云主机存在", async () => {
+  it("查询云主机存在并验证继承配置", async () => {
     if (!guestID) return;
     const result = await connector.getGuest(guestID);
     expect(result.error).toBeUndefined();
     expect(result.data).toBeDefined();
     expect(result.data!.id).toBe(guestID);
+    expect(result.data!.pool).toBe(poolID);
+    
+    // 如果测试的是默认池，则验证其关联的地址池是否正确继承
+    if (poolID === "default") {
+      expect(result.data!.address_pool).toBe("address1");
+    }
   });
 
   it("启动云主机", async () => {

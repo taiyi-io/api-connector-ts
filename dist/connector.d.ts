@@ -3,7 +3,7 @@
  */
 import { ConsoleEventLevel, ImportVendor, ComputePoolStrategy, UserRole, VolumeContainerStrategy, StatisticRange, ResourceType, ResourceAccessLevel, LicenseFeature } from "./enums";
 import { ControlCommandRequest } from "./request-params";
-import { AddressPoolConfig, AddressPoolDetail, SecurityPolicyGroup, GuestSecurityPolicy, SecurityRule, AllocatedTokens, BackendResult, ClusterNode, ClusterNodeData, ClusterStatus, ComputePoolConfig, ComputePoolStatus, ConsoleEvent, FileSpec, FileStatus, FileView, GuestConfig, GuestFilter, GuestView, ImportSource, ImportTarget, License, LicenseRecord, NetworkGraphNode, NodeConfig, NodeConfigStatus, PaginationResult, ResourceMonitorConfig, SSHKeyView, StoragePool, StoragePoolConfig, StoragePoolListRecord, SystemStatus, TaskData, UserAccessRecord, UserCredentialRecord, UserGroup, UserGroupRecord, UserToken, VolumeContainer, VolumeSpec, MonitorResponse, SnapshotTreeNode, ResourcePermissions, SnapshotRecord, GuestResourceUsageData, ResourceStatisticUnit, NodeResourceSnapshot, PoolResourceSnapshot, ClusterResourceSnapshot, GuestSystemView, GuestSystemSpec, DataStore, WarningRecordSet, WarningStatistic } from "./data-defines";
+import { AddressPoolConfigView, AddressPoolDetailView, SecurityPolicyGroup, SecurityPolicyRecord, GuestSecurityPolicy, SecurityRule, AllocatedTokens, BackendResult, ClusterNode, ClusterNodeData, ClusterStatus, ComputePoolConfig, ComputePoolStatus, ConsoleEvent, FileSpec, FileStatus, FileView, GuestConfig, GuestFilter, GuestView, ImportSource, ImportTarget, License, LicenseRecord, NetworkGraphNode, NodeConfig, NodeConfigStatus, PaginationResult, ResourceMonitorConfig, SSHKeyView, StoragePool, StoragePoolConfig, StoragePoolListRecord, SystemStatus, TaskData, UserAccessRecord, UserCredentialRecord, UserGroup, UserGroupRecord, UserToken, VolumeContainer, VolumeSpec, MonitorResponse, SnapshotTreeNode, ResourcePermissions, SnapshotRecord, GuestResourceUsageData, ResourceStatisticUnit, NodeResourceSnapshot, PoolResourceSnapshot, ClusterResourceSnapshot, GuestSystemView, GuestSystemSpec, DataStore, WarningRecordSet, WarningStatistic } from "./data-defines";
 export type SetTokenHandler = (storeID: string, tokens: AllocatedTokens) => Promise<void>;
 export type GetTokenHandler = (storeID: string) => Promise<AllocatedTokens>;
 export type StateChangeHandler = (storeID: string, authenticated: boolean) => void;
@@ -1508,13 +1508,13 @@ export declare class TaiyiConnector {
      * 查询地址池配置列表
      * @returns 地址池配置列表
      */
-    queryAddressPoolConfigs(): Promise<BackendResult<AddressPoolConfig[]>>;
+    queryAddressPoolConfigs(): Promise<BackendResult<AddressPoolConfigView[]>>;
     /**
      * 获取地址池详情
      * @param poolID - 地址池ID
      * @returns 地址池详情
      */
-    getAddressPoolDetail(poolID: string): Promise<BackendResult<AddressPoolDetail>>;
+    getAddressPoolDetail(poolID: string): Promise<BackendResult<AddressPoolDetailView>>;
     /**
      * 修改地址池
      * @param id - 地址池ID
@@ -1566,7 +1566,7 @@ export declare class TaiyiConnector {
      * 查询安全策略组列表
      * @returns 安全策略组列表
      */
-    querySecurityPolicies(): Promise<BackendResult<SecurityPolicyGroup[]>>;
+    querySecurityPolicies(): Promise<BackendResult<SecurityPolicyRecord[]>>;
     /**
      * 获取安全策略组详情
      * @param policyID - 策略组ID

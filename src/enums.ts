@@ -505,6 +505,12 @@ export enum ComputePoolStrategy {
   LeastCoreLoad = "least_core_load",
 }
 
+export enum AddressMode {
+  Dual = "dual",
+  V4Only = "v4_only",
+  V6Only = "v6_only",
+}
+
 export enum CloudInitBootMode {
   None = "",
   DMI = "dmi",

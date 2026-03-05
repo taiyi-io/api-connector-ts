@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { getTestConnector } from "../setup";
 import { TaiyiConnector } from "../../src/connector";
-import { ComputePoolStrategy } from "../../src/enums";
+import { ComputePoolStrategy, AddressMode } from "../../src/enums";
 
 const TEST_POOL_ID = "test-pool-ci";
 
@@ -32,6 +32,7 @@ describe("计算池管理", () => {
       id: TEST_POOL_ID,
       strategy: ComputePoolStrategy.MostAvailableMemory,
       description: "CI 测试计算池",
+      address_mode: AddressMode.Dual,
     });
     expect(createResult.error).toBeUndefined();
     poolCreated = true;
@@ -41,6 +42,7 @@ describe("计算池管理", () => {
     expect(getResult.error).toBeUndefined();
     expect(getResult.data).toBeDefined();
     expect(getResult.data!.id).toBe(TEST_POOL_ID);
+    expect(getResult.data!.address_mode).toBe(AddressMode.Dual);
 
     // 修改策略
     const strategyResult = await connector.changeComputePoolStrategy(
@@ -48,6 +50,21 @@ describe("计算池管理", () => {
       ComputePoolStrategy.LeastCoreLoad
     );
     expect(strategyResult.error).toBeUndefined();
+
+    // 验证关联地址池和安全策略
+    const modifyResult = await connector.modifyComputePool({
+      id: TEST_POOL_ID,
+      strategy: ComputePoolStrategy.LeastCoreLoad,
+      address: "some-addr-pool",
+      security_policy: "some-sec-policy",
+      address_mode: AddressMode.V4Only,
+    });
+    expect(modifyResult.error).toBeUndefined();
+
+    const getModified = await connector.getComputePool(TEST_POOL_ID);
+    expect(getModified.data!.address).toBe("some-addr-pool");
+    expect(getModified.data!.security_policy).toBe("some-sec-policy");
+    expect(getModified.data!.address_mode).toBe(AddressMode.V4Only);
 
     // 删除
     const deleteResult = await connector.deleteComputePool(TEST_POOL_ID);

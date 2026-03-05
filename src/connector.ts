@@ -35,8 +35,11 @@ import {
 } from "./request-params";
 import {
   AddressPoolConfig,
+  AddressPoolConfigView,
   AddressPoolDetail,
+  AddressPoolDetailView,
   SecurityPolicyGroup,
+  SecurityPolicyRecord,
   GuestSecurityPolicy,
   SecurityRule,
   AllocatedTokens,
@@ -5372,7 +5375,7 @@ export class TaiyiConnector {
    * @returns 地址池配置列表
    */
   public async queryAddressPoolConfigs(): Promise<
-    BackendResult<AddressPoolConfig[]>
+    BackendResult<AddressPoolConfigView[]>
   > {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.QueryAddressPoolConfigs,
@@ -5391,7 +5394,7 @@ export class TaiyiConnector {
    */
   public async getAddressPoolDetail(
     poolID: string
-  ): Promise<BackendResult<AddressPoolDetail>> {
+  ): Promise<BackendResult<AddressPoolDetailView>> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.GetAddressPoolDetail,
       get_address_pool_detail: { id: poolID },
@@ -5545,7 +5548,7 @@ export class TaiyiConnector {
    * @returns 安全策略组列表
    */
   public async querySecurityPolicies(): Promise<
-    BackendResult<SecurityPolicyGroup[]>
+    BackendResult<SecurityPolicyRecord[]>
   > {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.QuerySecurityPolicies,

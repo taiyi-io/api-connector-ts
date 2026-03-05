@@ -1554,11 +1554,11 @@ export interface FoundAdminSecret {
 export interface AddressPoolConfig {
     id: string;
     mode: AddressMode;
-    description: string;
+    description?: string;
     gateway_v4: string;
     gateway_v6: string;
-    dns: string[];
-    upstream_gateway: string;
+    dns?: string[];
+    upstream_gateway?: string;
 }
 export interface AddressPoolConfigView {
     id: string;
@@ -1575,7 +1575,7 @@ export interface AddressPoolConfigView {
 export interface AddressSetRange {
     begin: string;
     end: string;
-    cidr: string;
+    cidr?: string;
 }
 export interface AddressSetRangeView {
     begin: string;
@@ -1654,6 +1654,8 @@ export interface SecurityPolicyRecord {
     name: string;
     description: string;
     is_default: boolean;
+    external_rules?: SecurityRule[];
+    internal_rules?: SecurityRule[];
     external_rules_count: number;
     internal_rules_count: number;
     permissions: ResourcePermissions;

@@ -23,13 +23,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AddressMode = void 0;
 exports.newInsecureConnector = newInsecureConnector;
 __exportStar(require("./connector"), exports);
 __exportStar(require("./enums"), exports);
 __exportStar(require("./data-defines"), exports);
-var enums_1 = require("./enums");
-Object.defineProperty(exports, "AddressMode", { enumerable: true, get: function () { return enums_1.AddressMode; } });
 __exportStar(require("./request-params"), exports);
 __exportStar(require("./helper"), exports);
 __exportStar(require("./next-secure-store"), exports);

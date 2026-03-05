@@ -99,8 +99,10 @@ export interface SecurityPolicyGroup {
   name: string;
   description: string;
   is_default: boolean;
-  external_rules: SecurityRule[];
-  internal_rules: SecurityRule[];
+  external_rules?: SecurityRule[];
+  internal_rules?: SecurityRule[];
+  external_rules_count: number;
+  internal_rules_count: number;
 }
 ```
 

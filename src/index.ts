@@ -1,7 +1,6 @@
 export * from "./connector";
 export * from "./enums";
 export * from "./data-defines";
-export { AddressMode } from "./enums";
 export * from "./request-params";
 export * from "./helper";
 export * from "./next-secure-store";

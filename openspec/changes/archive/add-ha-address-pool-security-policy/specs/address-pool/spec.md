@@ -75,12 +75,12 @@ This specification defines the address pool management functionality in the Taiy
 ```typescript
 export interface AddressPoolConfig {
   id: string;
-  mode: string;
-  description: string;
+  mode: AddressMode;
+  description?: string;
   gateway_v4: string;
   gateway_v6: string;
-  dns: string[];
-  upstream_gateway: string;
+  dns?: string[];
+  upstream_gateway?: string;
 }
 ```
 
@@ -102,7 +102,7 @@ interface AddressSet {
 interface AddressRange {
   begin: string;
   end: string;
-  cidr: string;
+  cidr?: string;
 }
 
 interface AllocatedAddress {

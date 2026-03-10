@@ -1527,14 +1527,12 @@ export interface StatisticChartData extends Record<string, number | string> {
  * @interface
  * @property protocol - 协议
  * @property secret - 密钥
- * @property url - URL
- * @property published_url - 发布URL
+ * @property path - 路径
  */
 export interface MonitorResponse {
     protocol: string;
     secret: string;
-    url: string;
-    published_url?: string;
+    path: string;
 }
 /**
  * 云主机管理员密码检查结果

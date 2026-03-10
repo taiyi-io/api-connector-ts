@@ -2399,20 +2399,20 @@ class TaiyiConnector {
         });
     }
     /**
-     * 获取ISO文件URL
+     * 获取ISO文件Path
      * @param fileID - 文件ID
-     * @returns 文件URL
+     * @returns 文件Path
      */
-    getISOFileURL(fileID) {
-        return `${this._backendURL}files/isos/${fileID}`;
+    getISOFilePath(fileID) {
+        return `/api/${API_VERSION}/files/isos/${fileID}`;
     }
     /**
-     * 获取磁盘文件URL
+     * 获取磁盘文件Path
      * @param fileID - 文件ID
-     * @returns 文件URL
+     * @returns 文件Path
      */
-    getDiskFileURL(fileID) {
-        return `${this._backendURL}files/disks/${fileID}`;
+    getDiskFilePath(fileID) {
+        return `/api/${API_VERSION}/files/disks/${fileID}`;
     }
     /**
      * 打开监控通道

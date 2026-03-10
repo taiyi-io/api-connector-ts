@@ -745,17 +745,17 @@ export declare class TaiyiConnector {
      */
     queryDiskFiles(offset: number, limit: number, onlySelf?: boolean): Promise<BackendResult<PaginationResult<FileView>>>;
     /**
-     * 获取ISO文件URL
+     * 获取ISO文件Path
      * @param fileID - 文件ID
-     * @returns 文件URL
+     * @returns 文件Path
      */
-    getISOFileURL(fileID: string): string;
+    getISOFilePath(fileID: string): string;
     /**
-     * 获取磁盘文件URL
+     * 获取磁盘文件Path
      * @param fileID - 文件ID
-     * @returns 文件URL
+     * @returns 文件Path
      */
-    getDiskFileURL(fileID: string): string;
+    getDiskFilePath(fileID: string): string;
     /**
      * 打开监控通道
      * @param guestID - 云主机ID

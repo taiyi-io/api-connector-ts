@@ -2712,21 +2712,21 @@ export class TaiyiConnector {
   }
 
   /**
-   * 获取ISO文件URL
+   * 获取ISO文件Path
    * @param fileID - 文件ID
-   * @returns 文件URL
+   * @returns 文件Path
    */
-  public getISOFileURL(fileID: string): string {
-    return `${this._backendURL}files/isos/${fileID}`;
+  public getISOFilePath(fileID: string): string {
+    return `/api/${API_VERSION}/files/isos/${fileID}`;
   }
 
   /**
-   * 获取磁盘文件URL
+   * 获取磁盘文件Path
    * @param fileID - 文件ID
-   * @returns 文件URL
+   * @returns 文件Path
    */
-  public getDiskFileURL(fileID: string): string {
-    return `${this._backendURL}files/disks/${fileID}`;
+  public getDiskFilePath(fileID: string): string {
+    return `/api/${API_VERSION}/files/disks/${fileID}`;
   }
 
   /**

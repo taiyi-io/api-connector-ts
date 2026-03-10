@@ -70,7 +70,7 @@ export declare class TaiyiConnector {
      * @param backendPort - 后端Control服务端口，默认值为5851
      * @param device - 设备标识
      */
-    constructor(backendHost: string, backendPort: number | undefined, device: string);
+    constructor(backendHost: string, backendPort: number | undefined, device: string, useTLS?: boolean);
     /**
      * 释放资源
      */

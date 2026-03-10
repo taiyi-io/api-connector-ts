@@ -70,10 +70,10 @@ export const clearInsecureTokens = (connectorID: string): void => {
 export async function getInsecureConnector(
   deviceID: string,
   backendHost: string,
-  backendPort: number = 5851
+  backendPort: number = 5851, useTLS: boolean = false
 ): Promise<TaiyiConnector> {
   // 创建TaiyiConnector实例
-  const connector = new TaiyiConnector(backendHost, backendPort, deviceID);
+  const connector = new TaiyiConnector(backendHost, backendPort, deviceID, useTLS);
 
   // 绑定回调函数，不需要stateChange
   connector.bindCallback(connector.id, insecureSetTokens, insecureGetTokens);

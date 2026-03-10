@@ -36,11 +36,11 @@ const storageKeyDevice = "taiyi_device";
  * await connector.getGuest(guestID);
  */
 function getNextConnector(backendHost_1) {
-    return __awaiter(this, arguments, void 0, function* (backendHost, backendPort = 5851) {
+    return __awaiter(this, arguments, void 0, function* (backendHost, backendPort = 5851, useTLS = false) {
         const deviceID = yield getDeviceFromBrowser();
-        const store = yield (0, next_secure_store_1.getNextStore)(deviceID, backendHost, backendPort);
-        const connector = new connector_1.TaiyiConnector(store.backend_host, store.backend_port, store.device);
-        connector.bindCallback(store.id, next_secure_store_1.storeAllocatedTokens, next_secure_store_1.retrieveAllocatedTokens, next_secure_store_1.handleStoreStatusChanged);
+        const store = yield (0, next_secure_store_1.getNextStore)(deviceID, backendHost, backendPort, useTLS);
+        const connector = new connector_1.TaiyiConnector(store.backend_host, store.backend_port, store.device, useTLS);
+        connector.bindCallback(store.id, (id, tokens) => __awaiter(this, void 0, void 0, function* () { return yield (0, next_secure_store_1.storeAllocatedTokens)(id, tokens, useTLS); }), (id) => __awaiter(this, void 0, void 0, function* () { return yield (0, next_secure_store_1.retrieveAllocatedTokens)(id, useTLS); }), (id, auth) => (0, next_secure_store_1.handleStoreStatusChanged)(id, auth, useTLS));
         if (store.authenticated) {
             const values = yield (0, next_secure_store_1.retrieveCriticalValues)(store.id);
             if (values) {
@@ -57,7 +57,8 @@ function getNextConnector(backendHost_1) {
                 };
                 const result = connector.loadTokens(tokens);
                 if (result.error) {
-                    throw new Error(`加载已分配令牌失败:${result.error}`);
+                    yield (0, next_secure_store_1.clearAllocatedTokens)(store.id, useTLS);
+                    console.warn(`加载令牌失败，已清除无效存储: ${result.error}`);
                 }
             }
         }

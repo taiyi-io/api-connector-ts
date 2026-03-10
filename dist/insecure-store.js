@@ -73,9 +73,9 @@ exports.clearInsecureTokens = clearInsecureTokens;
  * await connector.getGuest(guestID)
  */
 function getInsecureConnector(deviceID_1, backendHost_1) {
-    return __awaiter(this, arguments, void 0, function* (deviceID, backendHost, backendPort = 5851) {
+    return __awaiter(this, arguments, void 0, function* (deviceID, backendHost, backendPort = 5851, useTLS = false) {
         // 创建TaiyiConnector实例
-        const connector = new connector_1.TaiyiConnector(backendHost, backendPort, deviceID);
+        const connector = new connector_1.TaiyiConnector(backendHost, backendPort, deviceID, useTLS);
         // 绑定回调函数，不需要stateChange
         connector.bindCallback(connector.id, exports.insecureSetTokens, exports.insecureGetTokens);
         return connector;

@@ -9,6 +9,7 @@ import {
   getNextStore,
   retrieveAllocatedTokens,
   retrieveCriticalValues,
+  clearAllocatedTokens,
   setDeviceID,
   storeAllocatedTokens,
   handleStoreStatusChanged,
@@ -35,20 +36,20 @@ const storageKeyDevice = "taiyi_device";
  */
 export async function getNextConnector(
   backendHost: string,
-  backendPort: number = 5851
+  backendPort: number = 5851, useTLS: boolean = false
 ): Promise<TaiyiConnector> {
   const deviceID = await getDeviceFromBrowser();
-  const store = await getNextStore(deviceID, backendHost, backendPort);
+  const store = await getNextStore(deviceID, backendHost, backendPort, useTLS);
   const connector = new TaiyiConnector(
     store.backend_host,
     store.backend_port,
-    store.device
+    store.device, useTLS
   );
   connector.bindCallback(
     store.id,
-    storeAllocatedTokens,
-    retrieveAllocatedTokens,
-    handleStoreStatusChanged
+    async (id, tokens) => await storeAllocatedTokens(id, tokens, useTLS),
+    async (id) => await retrieveAllocatedTokens(id, useTLS),
+    (id, auth) => handleStoreStatusChanged(id, auth, useTLS)
   );
   if (store.authenticated) {
     const values = await retrieveCriticalValues(store.id);
@@ -66,7 +67,8 @@ export async function getNextConnector(
       };
       const result = connector.loadTokens(tokens);
       if (result.error) {
-        throw new Error(`加载已分配令牌失败:${result.error}`);
+        await clearAllocatedTokens(store.id, useTLS);
+      console.warn(`加载令牌失败，已清除无效存储: ${result.error}`);
       }
     }
   }

@@ -64,7 +64,7 @@ class TaiyiConnector {
      * @param backendPort - 后端Control服务端口，默认值为5851
      * @param device - 设备标识
      */
-    constructor(backendHost, backendPort = 5851, device) {
+    constructor(backendHost, backendPort = 5851, device, useTLS = false) {
         this._authMethod = AuthMethod.Secret;
         this._privateKey = "";
         this._user = "";
@@ -81,7 +81,8 @@ class TaiyiConnector {
         this._roles = [];
         this._keepAlive = false;
         this._refreshPromise = null;
-        this._backendURL = `http://${backendHost}:${backendPort}/api/${API_VERSION}/`;
+        const protocol = useTLS ? "https" : "http";
+        this._backendURL = `${protocol}://${backendHost}:${backendPort}/api/${API_VERSION}/`;
         this._device = device;
         this._id = (0, cuid2_1.createId)();
     }
@@ -323,7 +324,7 @@ class TaiyiConnector {
     loadTokens(tokens, source = "外部加载") {
         const error = this.validateTokens(tokens);
         if (error) {
-            return { error: "无效令牌" };
+            return { error: `[${source}]校验失败: ${error}` };
         }
         this._authenticated = true;
         this._authenticatedTokens = tokens;
@@ -399,6 +400,7 @@ class TaiyiConnector {
      */
     validateTokens(tokens) {
         const now = Date.now();
+        const mask = (str) => str ? `${str.slice(0, 4)}...${str.slice(-4)}` : "null";
         if (!tokens.user) {
             return "无用户标识";
         }
@@ -420,16 +422,15 @@ class TaiyiConnector {
         if (!tokens.refresh_expired_at) {
             return `未给用户${tokens.user}指定更新令牌失效时间`;
         }
-        //检查过期时间，允许5分钟的偏差，无效则异常
+        //检查过期时间，允许10分钟的偏差，无效则异常
         const ToleranceDuration = 10 * 60 * 1000;
         const accessExpired = new Date(tokens.access_expired_at);
         if (now - ToleranceDuration > accessExpired.getTime()) {
-            return `用户${tokens.user}访问令牌过期: ${accessExpired.toLocaleString()},刷新令牌${tokens.refresh_token} `;
-            return "刷新令牌过期";
+            return `用户${tokens.user}访问令牌过期。过期时间: ${accessExpired.toLocaleString()}, 客户端当前时间: ${new Date(now).toLocaleString()} (允许偏差: 10分钟)。`;
         }
         const refreshExpired = new Date(tokens.refresh_expired_at);
         if (now - ToleranceDuration > refreshExpired.getTime()) {
-            return `用户${tokens.user}刷新令牌过期: ${refreshExpired.toLocaleString()},刷新令牌${tokens.refresh_token} `;
+            return `用户${tokens.user}刷新令牌过期。过期时间: ${refreshExpired.toLocaleString()}, 客户端当前时间: ${new Date(now).toLocaleString()} (允许偏差: 10分钟), 刷新令牌: ${mask(tokens.refresh_token)}`;
         }
         return "";
     }

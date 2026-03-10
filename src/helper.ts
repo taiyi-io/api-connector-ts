@@ -548,9 +548,9 @@ export function canDeleteResource(resource: OperatableResource): boolean {
 export function generateDeviceFingerprint(
   device: string,
   host: string,
-  port: number
+  port: number, useTLS: boolean = false
 ): string {
-  const input = `${device}@${host}:${port}`;
+  const input = `${device}@${host}:${port}${useTLS ? "@tls" : ""}`;
   return fnv1a(input, { size: 64 }).toString(16);
 }
 

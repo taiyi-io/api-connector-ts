@@ -90,5 +90,5 @@ export declare function canDeleteResource(resource: OperatableResource): boolean
  * @param port - 端口号
  * @returns 生成的特征字符串
  */
-export declare function generateDeviceFingerprint(device: string, host: string, port: number): string;
+export declare function generateDeviceFingerprint(device: string, host: string, port: number, useTLS?: boolean): string;
 export declare function StreamEnabled(): Promise<boolean>;

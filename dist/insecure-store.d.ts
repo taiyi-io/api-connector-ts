@@ -42,4 +42,4 @@ export declare const clearInsecureTokens: (connectorID: string) => void;
  * //获取云主机信息
  * await connector.getGuest(guestID)
  */
-export declare function getInsecureConnector(deviceID: string, backendHost: string, backendPort?: number): Promise<TaiyiConnector>;
+export declare function getInsecureConnector(deviceID: string, backendHost: string, backendPort?: number, useTLS?: boolean): Promise<TaiyiConnector>;

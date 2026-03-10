@@ -56,7 +56,7 @@ async function cleanup() {
   }
 
   console.log("[4/6] Cleaning SSH keys...");
-  const sshKeys = await connector.querySSHKeys();
+  const sshKeys = await connector.querySSHKeys(0, 100);
   const targetKeys = (sshKeys.data?.records || []).filter(k => 
     k.label.includes("ci-test-ssh") || k.label.includes("test-ssh")
   );

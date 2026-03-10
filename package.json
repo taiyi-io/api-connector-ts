@@ -15,7 +15,7 @@
   },
   "license": "MIT",
   "author": "Akumas",
-  "type": "commonjs",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {

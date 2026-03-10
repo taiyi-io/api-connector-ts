@@ -55,8 +55,8 @@ const insecure_store_1 = require("./insecure-store");
  * await connector.getGuest(guestID);
  */
 function newInsecureConnector(deviceID_1, accessString_1, backendHost_1) {
-    return __awaiter(this, arguments, void 0, function* (deviceID, accessString, backendHost, backendPort = 5851) {
-        const connector = yield (0, insecure_store_1.getInsecureConnector)(deviceID, backendHost, backendPort);
+    return __awaiter(this, arguments, void 0, function* (deviceID, accessString, backendHost, backendPort = 5851, useTLS = false) {
+        const connector = yield (0, insecure_store_1.getInsecureConnector)(deviceID, backendHost, backendPort, useTLS);
         const result = yield connector.authenticateByToken(accessString);
         if (result.error) {
             throw new Error(`认证失败:${result.error}`);

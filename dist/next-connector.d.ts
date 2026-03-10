@@ -20,4 +20,4 @@ import { TaiyiConnector } from "./connector";
  * await connector.authenticateByToken(token);
  * await connector.getGuest(guestID);
  */
-export declare function getNextConnector(backendHost: string, backendPort?: number): Promise<TaiyiConnector>;
+export declare function getNextConnector(backendHost: string, backendPort?: number, useTLS?: boolean): Promise<TaiyiConnector>;

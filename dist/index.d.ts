@@ -28,4 +28,4 @@ import { TaiyiConnector } from "./connector";
  * // 获取云主机信息
  * await connector.getGuest(guestID);
  */
-export declare function newInsecureConnector(deviceID: string, accessString: string, backendHost: string, backendPort?: number): Promise<TaiyiConnector>;
+export declare function newInsecureConnector(deviceID: string, accessString: string, backendHost: string, backendPort?: number, useTLS?: boolean): Promise<TaiyiConnector>;

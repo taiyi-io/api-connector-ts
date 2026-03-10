@@ -438,8 +438,8 @@ function canDeleteResource(resource) {
  * @param port - 端口号
  * @returns 生成的特征字符串
  */
-function generateDeviceFingerprint(device, host, port) {
-    const input = `${device}@${host}:${port}`;
+function generateDeviceFingerprint(device, host, port, useTLS = false) {
+    const input = `${device}@${host}:${port}${useTLS ? "@tls" : ""}`;
     return (0, fnv1a_1.default)(input, { size: 64 }).toString(16);
 }
 function StreamEnabled() {

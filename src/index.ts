@@ -34,12 +34,12 @@ export async function newInsecureConnector(
   deviceID: string,
   accessString: string,
   backendHost: string,
-  backendPort: number = 5851
+  backendPort: number = 5851, useTLS: boolean = false
 ): Promise<TaiyiConnector> {
   const connector = await getInsecureConnector(
     deviceID,
     backendHost,
-    backendPort
+    backendPort, useTLS
   );
   const result = await connector.authenticateByToken(accessString);
   if (result.error) {

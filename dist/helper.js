@@ -444,6 +444,6 @@ function generateDeviceFingerprint(device, host, port, useTLS = false) {
 }
 function StreamEnabled() {
     return __awaiter(this, void 0, void 0, function* () {
-        return false;
+        return true;
     });
 }

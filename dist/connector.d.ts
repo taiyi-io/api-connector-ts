@@ -3,7 +3,7 @@
  */
 import { ConsoleEventLevel, ImportVendor, ComputePoolStrategy, UserRole, VolumeContainerStrategy, StatisticRange, ResourceType, ResourceAccessLevel, LicenseFeature } from "./enums";
 import { ControlCommandRequest } from "./request-params";
-import { AddressPoolConfigView, AddressPoolDetailView, SecurityPolicyGroup, SecurityPolicyRecord, GuestSecurityPolicy, SecurityRule, AllocatedTokens, BackendResult, ClusterNode, ClusterNodeData, ClusterStatus, ComputePoolConfig, ComputePoolStatus, ConsoleEvent, FileSpec, FileStatus, FileView, GuestConfig, GuestFilter, GuestView, ImportSource, ImportTarget, License, LicenseRecord, NetworkGraphNode, NodeConfig, NodeConfigStatus, PaginationResult, ResourceMonitorConfig, SSHKeyView, StoragePool, StoragePoolConfig, StoragePoolListRecord, SystemStatus, TaskData, UserAccessRecord, UserCredentialRecord, UserGroup, UserGroupRecord, UserToken, VolumeContainer, VolumeSpec, MonitorResponse, SnapshotTreeNode, ResourcePermissions, SnapshotRecord, GuestResourceUsageData, ResourceStatisticUnit, NodeResourceSnapshot, PoolResourceSnapshot, ClusterResourceSnapshot, GuestSystemView, GuestSystemSpec, DataStore, WarningRecordSet, WarningStatistic } from "./data-defines";
+import { AddressPoolConfigView, AddressPoolDetailView, SecurityPolicyGroup, SecurityPolicyRecord, GuestSecurityPolicy, SecurityRule, AllocatedTokens, BackendResult, ClusterNode, ClusterNodeData, ClusterStatus, ComputePoolConfig, ComputePoolStatus, ConsoleEvent, FileSpec, FileStatus, FileView, GuestConfig, GuestFilter, GuestView, ImportSource, ImportTarget, License, LicenseRecord, NetworkGraphNode, NodeConfig, NodeConfigStatus, PaginationResult, ResourceMonitorConfig, SSHKeyView, StoragePool, StoragePoolConfig, StoragePoolListRecord, SystemStatus, TaskData, UserAccessRecord, UserCredentialRecord, UserGroup, UserGroupRecord, UserToken, VolumeContainer, VolumeSpec, MonitorResponse, SnapshotTreeNode, ResourcePermissions, SnapshotRecord, GuestResourceUsageData, ResourceStatisticUnit, NodeResourceSnapshot, PoolResourceSnapshot, ClusterResourceSnapshot, GuestSystemView, GuestSystemSpec, DataStore, WarningRecordSet, WarningStatistic, TLSStatusResponse } from "./data-defines";
 export type SetTokenHandler = (storeID: string, tokens: AllocatedTokens) => Promise<void>;
 export type GetTokenHandler = (storeID: string) => Promise<AllocatedTokens>;
 export type StateChangeHandler = (storeID: string, authenticated: boolean) => void;
@@ -1619,4 +1619,14 @@ export declare class TaiyiConnector {
      * @returns 操作结果
      */
     resetGuestSecurityPolicy(guestID: string, macAddress: string): Promise<BackendResult>;
+    /**
+     * 查询 TLS 证书状态
+     * @returns TLS 证书状态信息
+     */
+    getTLSStatus(): Promise<BackendResult<TLSStatusResponse>>;
+    /**
+     * 获取 TLS 证书上传 API 路径（不含 host），portal 拼接完整 URL
+     * 返回路径如 `/api/v1/system/tls/certs`
+     */
+    getTLSCertUploadPath(): string;
 }

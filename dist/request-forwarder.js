@@ -55,6 +55,7 @@ exports.authenticateByPassword = authenticateByPassword;
 exports.authenticateByToken = authenticateByToken;
 exports.refreshAccessToken = refreshAccessToken;
 exports.openMonitorChannel = openMonitorChannel;
+exports.fetchTLSStatus = fetchTLSStatus;
 const ed25519 = __importStar(require("@noble/ed25519"));
 const enums_1 = require("./enums");
 const helper_1 = require("./helper");
@@ -522,5 +523,40 @@ function openMonitorChannel(backendURL, accessToken, csrfToken, guestID) {
             return { error: result.error };
         }
         return { data: result.data };
+    });
+}
+/**
+ * 查询 TLS 证书状态
+ * @param backendURL - 后端URL
+ * @param accessToken - 访问令牌
+ * @param csrfToken - CSRF令牌
+ * @returns TLS 证书状态
+ */
+function fetchTLSStatus(backendURL, accessToken, csrfToken) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const url = `${backendURL}system/tls/status`;
+        const headers = {
+            Authorization: `Bearer ${accessToken}`,
+        };
+        if (csrfToken) {
+            headers["X-CSRF-Token"] = csrfToken;
+        }
+        try {
+            const resp = yield fetch(url, {
+                method: "GET",
+                headers,
+            });
+            const result = yield resp.json();
+            if (result.error) {
+                return { error: result.error };
+            }
+            return { data: result.data };
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                return { error: `请求${url}失败:${error.message}` };
+            }
+            return { error: `请求${url}时发生未知错误` };
+        }
     });
 }

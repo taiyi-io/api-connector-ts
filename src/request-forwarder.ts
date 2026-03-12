@@ -11,6 +11,7 @@ import {
   BackendResponse,
   SystemStatus,
   MonitorResponse,
+  TLSStatusResponse,
 } from "./data-defines";
 import { generateNonce } from "./helper";
 import {
@@ -525,4 +526,41 @@ export async function openMonitorChannel(
     return { error: result.error };
   }
   return { data: result.data as MonitorResponse };
+}
+
+/**
+ * 查询 TLS 证书状态
+ * @param backendURL - 后端URL
+ * @param accessToken - 访问令牌
+ * @param csrfToken - CSRF令牌
+ * @returns TLS 证书状态
+ */
+export async function fetchTLSStatus(
+  backendURL: string,
+  accessToken: string,
+  csrfToken: string
+): Promise<BackendResult<TLSStatusResponse>> {
+  const url = `${backendURL}system/tls/status`;
+  const headers: HeadersInit = {
+    Authorization: `Bearer ${accessToken}`,
+  };
+  if (csrfToken) {
+    headers["X-CSRF-Token"] = csrfToken;
+  }
+  try {
+    const resp = await fetch(url, {
+      method: "GET",
+      headers,
+    });
+    const result: ControlResponse = await resp.json();
+    if (result.error) {
+      return { error: result.error };
+    }
+    return { data: result.data as TLSStatusResponse };
+  } catch (error) {
+    if (error instanceof Error) {
+      return { error: `请求${url}失败:${error.message}` };
+    }
+    return { error: `请求${url}时发生未知错误` };
+  }
 }

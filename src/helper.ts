@@ -555,5 +555,5 @@ export function generateDeviceFingerprint(
 }
 
 export async function StreamEnabled(): Promise<boolean> {
-  return false;
+  return true;
 }

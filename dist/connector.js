@@ -5195,5 +5195,24 @@ class TaiyiConnector {
             return yield this.sendCommand(cmd);
         });
     }
+    /**
+     * 查询 TLS 证书状态
+     * @returns TLS 证书状态信息
+     */
+    getTLSStatus() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield (0, request_forwarder_1.fetchTLSStatus)(this._backendURL, this._authenticatedTokens.access_token, this._authenticatedTokens.csrf_token);
+        });
+    }
+    /**
+     * 获取 TLS 证书上传 API 路径（不含 host），portal 拼接完整 URL
+     * 返回路径如 `/api/v1/system/tls/certs`
+     */
+    getTLSCertUploadPath() {
+        // _backendURL 格式：http(s)://host:port/api/v1/
+        // 提取 /api/v1/ 路径部分
+        const url = new URL(this._backendURL);
+        return `${url.pathname}system/tls/certs`;
+    }
 }
 exports.TaiyiConnector = TaiyiConnector;

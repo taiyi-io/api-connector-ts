@@ -2073,3 +2073,26 @@ export interface AllocatedTokens {
   roles: UserRole[];
   user: string;
 }
+
+/**
+ * TLS 证书状态响应
+ * @interface
+ * @property tls_enabled - 是否启用TLS
+ * @property has_certificate - 是否存在证书
+ * @property is_self_signed - 是否为自签证书
+ * @property subject - 证书主体（CommonName）
+ * @property issuer - 证书颁发者（CommonName）
+ * @property not_before - 证书有效期开始时间（RFC3339）
+ * @property not_after - 证书有效期结束时间（RFC3339）
+ * @property san - Subject Alternative Names（DNS名称和IP地址）
+ */
+export interface TLSStatusResponse {
+  tls_enabled: boolean;
+  has_certificate: boolean;
+  is_self_signed?: boolean;
+  subject?: string;
+  issuer?: string;
+  not_before?: string;
+  not_after?: string;
+  san?: string[];
+}

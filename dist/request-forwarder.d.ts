@@ -1,5 +1,5 @@
 import { SignatureAlgorithm } from "./enums";
-import { BackendResult, AllocatedTokens, SystemStatus, MonitorResponse } from "./data-defines";
+import { BackendResult, AllocatedTokens, SystemStatus, MonitorResponse, TLSStatusResponse } from "./data-defines";
 import { ControlCommandRequest, ControlCommandResponse } from "./request-params";
 /**
  * 发送控制命令，解析响应内容
@@ -71,3 +71,11 @@ export declare function refreshAccessToken(backendURL: string, user: string, dev
  * @returns 监控通道数据
  */
 export declare function openMonitorChannel(backendURL: string, accessToken: string, csrfToken: string, guestID: string): Promise<BackendResult<MonitorResponse>>;
+/**
+ * 查询 TLS 证书状态
+ * @param backendURL - 后端URL
+ * @param accessToken - 访问令牌
+ * @param csrfToken - CSRF令牌
+ * @returns TLS 证书状态
+ */
+export declare function fetchTLSStatus(backendURL: string, accessToken: string, csrfToken: string): Promise<BackendResult<TLSStatusResponse>>;

@@ -150,7 +150,7 @@ export interface ControlCommandRequest {
     delete_snapshot?: ControlDeleteSnapshotParams;
     query_resource_usages?: ControlQueryResourceUsagesParams;
     query_resource_statistic?: ControlQueryResourceStatisticParams;
-    query_pool_nodes?: ControlQueryComputeNodesParams;
+    query_compute_nodes?: ControlQueryComputeNodesParams;
     change_pool_strategy?: ControlComputePoolStrategyParams;
     pool_strategy?: ControlComputePoolStragegyParams;
     query_nodes_usage?: ControlQueryNodesUsageParams;

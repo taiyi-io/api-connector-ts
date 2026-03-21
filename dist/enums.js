@@ -93,7 +93,7 @@ var controlCommandEnum;
     controlCommandEnum["DeleteSnapshot"] = "delete_snapshot";
     controlCommandEnum["QueryResourceUsages"] = "query_resource_usages";
     controlCommandEnum["QueryResourceStatistic"] = "query_resource_statistic";
-    controlCommandEnum["QueryComputeNodes"] = "query_pool_nodes";
+    controlCommandEnum["QueryComputeNodes"] = "query_compute_nodes";
     controlCommandEnum["QueryNodesUsage"] = "query_nodes_usage";
     controlCommandEnum["QueryPoolsUsage"] = "query_pools_usage";
     controlCommandEnum["QueryClusterUsage"] = "query_cluster_usage";

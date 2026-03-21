@@ -3044,7 +3044,7 @@ class TaiyiConnector {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.QueryComputeNodes,
-                query_pool_nodes: {
+                query_compute_nodes: {
                     pool_id: poolID,
                 },
             };

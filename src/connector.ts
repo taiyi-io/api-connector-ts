@@ -3438,7 +3438,7 @@ export class TaiyiConnector {
   ): Promise<BackendResult<ClusterNodeData[]>> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.QueryComputeNodes,
-      query_pool_nodes: {
+      query_compute_nodes: {
         pool_id: poolID,
       },
     };

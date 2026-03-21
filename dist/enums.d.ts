@@ -86,7 +86,7 @@ export declare enum controlCommandEnum {
     DeleteSnapshot = "delete_snapshot",
     QueryResourceUsages = "query_resource_usages",
     QueryResourceStatistic = "query_resource_statistic",
-    QueryComputeNodes = "query_pool_nodes",// SDK calls QueryComputeNodes
+    QueryComputeNodes = "query_compute_nodes",// SDK calls QueryComputeNodes
     QueryNodesUsage = "query_nodes_usage",
     QueryPoolsUsage = "query_pools_usage",
     QueryClusterUsage = "query_cluster_usage",// Added back

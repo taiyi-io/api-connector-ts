@@ -1,7 +1,7 @@
 /**
  * 向API服务发送请求的数据结构定义
  */
-import { TaskData, ClusterNodeData, ComputePoolStatus, StoragePool, StoragePoolListRecord, AddressPoolConfigView, AddressPoolDetailView, SecurityPolicyGroup, SecurityPolicyRecord, GuestSecurityPolicy, GuestView, FileStatus, FileView, DataStore, SnapshotRecord, SnapshotTreeNode, GuestResourceUsageRecord, NodeResourceSnapshotRecord, PoolResourceSnapshotRecord, ClusterResourceSnapshotRecord, GuestSystemView, WarningRecord, ConsoleEvent, NodeConfigStatus, SSHKeyView, License, LicenseRecord, ClusterStatus, NetworkGraphNode, ResourceMonitorConfig, ImportSource, ImportTarget, UserGroupRecord, UserCredentialRecord, UserToken, PrivateKey, UserAccessRecord, SystemStatus, ResourcePermissions, ClusterNode, ComputePoolConfig, GuestConfig, VolumeSpec, FileSpec, VolumeContainer, GuestFilter, NodeConfig, GuestSystemSpec, UserGroup, SecurityRule } from "./data-defines";
+import { TaskData, ClusterNodeData, ComputePoolStatus, StoragePool, StoragePoolListRecord, AddressPoolConfigView, AddressPoolDetailView, SecurityPolicyGroup, SecurityPolicyRecord, GuestSecurityPolicy, GuestView, FileStatus, FileView, DataStore, SnapshotRecord, SnapshotTreeNode, GuestResourceUsageRecord, NodeResourceSnapshotRecord, PoolResourceSnapshotRecord, ClusterResourceSnapshotRecord, GuestSystemView, WarningRecord, ConsoleEvent, NodeConfigStatus, SSHKeyView, License, LicenseRecord, ClusterStatus, NetworkGraphNode, ResourceMonitorConfig, ImportSource, ImportTarget, UserGroupRecord, UserCredentialRecord, UserToken, PrivateKey, UserAccessRecord, SystemStatus, ResourcePermissions, ClusterNode, ComputePoolConfig, GuestConfig, VolumeSpec, FileSpec, VolumeContainer, GuestFilter, NodeConfig, GuestSystemSpec, UserGroup, SecurityRule, SecurityIfaceInfo } from "./data-defines";
 import { UserRole, controlCommandEnum, StorageType, VolumeContainerStrategy, StatisticRange, ComputePoolStrategy, ConsoleEventLevel, ImportVendor, ResourceType, SignatureAlgorithm, ResourceAccessLevel } from "./enums";
 export interface ControlCommandResponse {
     id?: string;
@@ -58,6 +58,7 @@ export interface ControlCommandResponse {
     security_policy?: SecurityPolicyGroup;
     security_policies?: SecurityPolicyRecord[];
     guest_security_policy?: GuestSecurityPolicy;
+    security_interfaces?: SecurityIfaceInfo[];
 }
 export interface ControlCommandRequest {
     type: controlCommandEnum;
@@ -1599,6 +1600,7 @@ export interface ControlCreateSecurityPolicyParams {
     name: string;
     description?: string;
     is_default?: boolean;
+    default_action?: string;
     external_rules: SecurityRule[];
     internal_rules: SecurityRule[];
 }
@@ -1633,6 +1635,7 @@ export interface ControlModifySecurityPolicyParams {
     name?: string;
     description?: string;
     is_default?: boolean;
+    default_action?: string;
     external_rules?: SecurityRule[];
     internal_rules?: SecurityRule[];
 }
@@ -1668,23 +1671,21 @@ export interface ControlGetGuestSecurityPolicyParams {
  * 修改云主机安全策略请求参数
  * @interface
  * @property guest_id - 云主机ID
- * @property mac_address - 目标网卡MAC地址
+ * @property default_action - 默认动作 (accept/drop)
  * @property rules - 新规则列表
  */
 export interface ControlModifyGuestSecurityPolicyParams {
     guest_id: string;
-    mac_address: string;
+    default_action: string;
     rules: SecurityRule[];
 }
 /**
  * 重置云主机安全策略请求参数
  * @interface
  * @property guest_id - 云主机ID
- * @property mac_address - 目标网卡MAC地址
  */
 export interface ControlResetGuestSecurityPolicyParams {
     guest_id: string;
-    mac_address: string;
 }
 export interface ControlNodeQueryParams {
 }

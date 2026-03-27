@@ -43,6 +43,7 @@ import {
   SecurityPolicyRecord,
   GuestSecurityPolicy,
   SecurityRule,
+  SecurityIfaceInfo,
   AllocatedTokens,
   BackendResult,
   ClusterNode,
@@ -5526,6 +5527,7 @@ export class TaiyiConnector {
    * @param internalRules - 内部网卡规则模板
    * @param description - 描述
    * @param isDefault - 是否默认策略组
+   * @param defaultAction - 默认动作 (accept/drop)
    * @returns 操作结果
    */
   public async createSecurityPolicy(
@@ -5534,7 +5536,8 @@ export class TaiyiConnector {
     externalRules: SecurityRule[],
     internalRules: SecurityRule[],
     description?: string,
-    isDefault?: boolean
+    isDefault?: boolean,
+    defaultAction?: string
   ): Promise<BackendResult> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.CreateSecurityPolicy,
@@ -5545,6 +5548,7 @@ export class TaiyiConnector {
         internal_rules: internalRules,
         description,
         is_default: isDefault,
+        default_action: defaultAction,
       },
     };
     return await this.sendCommand(cmd);
@@ -5598,6 +5602,7 @@ export class TaiyiConnector {
    * @param isDefault - 是否默认策略组
    * @param externalRules - 外部网卡规则模板
    * @param internalRules - 内部网卡规则模板
+   * @param defaultAction - 默认动作 (accept/drop)
    * @returns 操作结果
    */
   public async modifySecurityPolicy(
@@ -5606,7 +5611,8 @@ export class TaiyiConnector {
     description?: string,
     isDefault?: boolean,
     externalRules?: SecurityRule[],
-    internalRules?: SecurityRule[]
+    internalRules?: SecurityRule[],
+    defaultAction?: string
   ): Promise<BackendResult> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.ModifySecurityPolicy,
@@ -5617,6 +5623,7 @@ export class TaiyiConnector {
         is_default: isDefault,
         external_rules: externalRules,
         internal_rules: internalRules,
+        default_action: defaultAction,
       },
     };
     return await this.sendCommand(cmd);
@@ -5663,11 +5670,11 @@ export class TaiyiConnector {
   /**
    * 获取云主机安全策略
    * @param guestID - 云主机ID
-   * @returns 云主机安全策略
+   * @returns 云主机安全策略及网卡信息
    */
   public async getGuestSecurityPolicy(
     guestID: string
-  ): Promise<BackendResult<GuestSecurityPolicy>> {
+  ): Promise<BackendResult<{ policy: GuestSecurityPolicy; interfaces: SecurityIfaceInfo[] }>> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.GetGuestSecurityPolicy,
       get_guest_security_policy: { guest_id: guestID },
@@ -5679,47 +5686,56 @@ export class TaiyiConnector {
     if (!resp.data || !resp.data.guest_security_policy) {
       return { error: "获取云主机安全策略失败" };
     }
-    return { data: resp.data.guest_security_policy };
+    return {
+      data: {
+        policy: resp.data.guest_security_policy,
+        interfaces: resp.data.security_interfaces || [],
+      },
+    };
   }
 
   /**
    * 修改云主机安全策略
    * @param guestID - 云主机ID
-   * @param macAddress - 目标网卡MAC地址
+   * @param defaultAction - 默认动作 (accept/drop)
    * @param rules - 新规则列表
    * @returns 操作结果
    */
   public async modifyGuestSecurityPolicy(
     guestID: string,
-    macAddress: string,
+    defaultAction: string,
     rules: SecurityRule[]
   ): Promise<BackendResult> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.ModifyGuestSecurityPolicy,
       modify_guest_security_policy: {
         guest_id: guestID,
-        mac_address: macAddress,
+        default_action: defaultAction,
         rules,
       },
     };
-    return await this.sendCommand(cmd);
+    const taskResult = await this.executeTask(cmd, 30);
+    if (taskResult.error) {
+      return { error: taskResult.error };
+    }
+    if (taskResult.data && taskResult.data.error) {
+      return { error: taskResult.data.error };
+    }
+    return {};
   }
 
   /**
    * 重置云主机安全策略
    * @param guestID - 云主机ID
-   * @param macAddress - 目标网卡MAC地址
    * @returns 操作结果
    */
   public async resetGuestSecurityPolicy(
-    guestID: string,
-    macAddress: string
+    guestID: string
   ): Promise<BackendResult> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.ResetGuestSecurityPolicy,
       reset_guest_security_policy: {
         guest_id: guestID,
-        mac_address: macAddress,
       },
     };
     return await this.sendCommand(cmd);

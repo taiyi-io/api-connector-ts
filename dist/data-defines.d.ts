@@ -1627,6 +1627,7 @@ export interface AddressPoolDetailView {
  * 安全策略规则
  */
 export interface SecurityRule {
+    scope?: string[];
     source_address: string;
     dest_port: number;
     dest_port_end: number;
@@ -1642,6 +1643,7 @@ export interface SecurityPolicyGroup {
     name: string;
     description: string;
     is_default: boolean;
+    default_action: string;
     external_rules: SecurityRule[];
     internal_rules: SecurityRule[];
     external_rules_count?: number;
@@ -1652,6 +1654,7 @@ export interface SecurityPolicyRecord {
     name: string;
     description: string;
     is_default: boolean;
+    default_action?: string;
     external_rules?: SecurityRule[];
     internal_rules?: SecurityRule[];
     external_rules_count: number;
@@ -1660,26 +1663,32 @@ export interface SecurityPolicyRecord {
     actions: ResourceAction[];
 }
 /**
- * 云主机安全策略
- * @interface
- * @property interfaces - 接口安全策略列表
- */
-export interface GuestSecurityPolicy {
-    interfaces: InterfaceSecurityPolicy[];
-}
-/**
- * 接口安全策略
+ * 接口安全信息
  * @interface
  * @property mac_address - MAC地址
  * @property is_external - 是否外部网卡
- * @property source_group - 来源策略组ID
- * @property rules - 规则列表
+ * @property index - 网卡序号
+ * @property ip_address - IPv4地址
+ * @property ip_address_v6 - IPv6地址
  */
-export interface InterfaceSecurityPolicy {
+export interface SecurityIfaceInfo {
     mac_address: string;
     is_external: boolean;
-    source_group: string;
+    index: number;
+    ip_address?: string;
+    ip_address_v6?: string;
+}
+/**
+ * 云主机安全策略
+ * @interface
+ * @property default_action - 默认动作 (accept/drop)
+ * @property rules - 统一规则列表
+ * @property source_group - 来源策略组ID
+ */
+export interface GuestSecurityPolicy {
+    default_action: string;
     rules: SecurityRule[];
+    source_group?: string;
 }
 export interface ConsoleEvent {
     level: ConsoleEventLevel;

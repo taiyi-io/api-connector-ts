@@ -5019,9 +5019,10 @@ class TaiyiConnector {
      * @param internalRules - 内部网卡规则模板
      * @param description - 描述
      * @param isDefault - 是否默认策略组
+     * @param defaultAction - 默认动作 (accept/drop)
      * @returns 操作结果
      */
-    createSecurityPolicy(id, name, externalRules, internalRules, description, isDefault) {
+    createSecurityPolicy(id, name, externalRules, internalRules, description, isDefault, defaultAction) {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.CreateSecurityPolicy,
@@ -5032,6 +5033,7 @@ class TaiyiConnector {
                     internal_rules: internalRules,
                     description,
                     is_default: isDefault,
+                    default_action: defaultAction,
                 },
             };
             return yield this.sendCommand(cmd);
@@ -5084,9 +5086,10 @@ class TaiyiConnector {
      * @param isDefault - 是否默认策略组
      * @param externalRules - 外部网卡规则模板
      * @param internalRules - 内部网卡规则模板
+     * @param defaultAction - 默认动作 (accept/drop)
      * @returns 操作结果
      */
-    modifySecurityPolicy(id, name, description, isDefault, externalRules, internalRules) {
+    modifySecurityPolicy(id, name, description, isDefault, externalRules, internalRules, defaultAction) {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.ModifySecurityPolicy,
@@ -5097,6 +5100,7 @@ class TaiyiConnector {
                     is_default: isDefault,
                     external_rules: externalRules,
                     internal_rules: internalRules,
+                    default_action: defaultAction,
                 },
             };
             return yield this.sendCommand(cmd);
@@ -5139,7 +5143,7 @@ class TaiyiConnector {
     /**
      * 获取云主机安全策略
      * @param guestID - 云主机ID
-     * @returns 云主机安全策略
+     * @returns 云主机安全策略及网卡信息
      */
     getGuestSecurityPolicy(guestID) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -5154,42 +5158,52 @@ class TaiyiConnector {
             if (!resp.data || !resp.data.guest_security_policy) {
                 return { error: "获取云主机安全策略失败" };
             }
-            return { data: resp.data.guest_security_policy };
+            return {
+                data: {
+                    policy: resp.data.guest_security_policy,
+                    interfaces: resp.data.security_interfaces || [],
+                },
+            };
         });
     }
     /**
      * 修改云主机安全策略
      * @param guestID - 云主机ID
-     * @param macAddress - 目标网卡MAC地址
+     * @param defaultAction - 默认动作 (accept/drop)
      * @param rules - 新规则列表
      * @returns 操作结果
      */
-    modifyGuestSecurityPolicy(guestID, macAddress, rules) {
+    modifyGuestSecurityPolicy(guestID, defaultAction, rules) {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.ModifyGuestSecurityPolicy,
                 modify_guest_security_policy: {
                     guest_id: guestID,
-                    mac_address: macAddress,
+                    default_action: defaultAction,
                     rules,
                 },
             };
-            return yield this.sendCommand(cmd);
+            const taskResult = yield this.executeTask(cmd, 30);
+            if (taskResult.error) {
+                return { error: taskResult.error };
+            }
+            if (taskResult.data && taskResult.data.error) {
+                return { error: taskResult.data.error };
+            }
+            return {};
         });
     }
     /**
      * 重置云主机安全策略
      * @param guestID - 云主机ID
-     * @param macAddress - 目标网卡MAC地址
      * @returns 操作结果
      */
-    resetGuestSecurityPolicy(guestID, macAddress) {
+    resetGuestSecurityPolicy(guestID) {
         return __awaiter(this, void 0, void 0, function* () {
             const cmd = {
                 type: enums_1.controlCommandEnum.ResetGuestSecurityPolicy,
                 reset_guest_security_policy: {
                     guest_id: guestID,
-                    mac_address: macAddress,
                 },
             };
             return yield this.sendCommand(cmd);

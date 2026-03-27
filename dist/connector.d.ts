@@ -3,7 +3,7 @@
  */
 import { ConsoleEventLevel, ImportVendor, ComputePoolStrategy, UserRole, VolumeContainerStrategy, StatisticRange, ResourceType, ResourceAccessLevel, LicenseFeature } from "./enums";
 import { ControlCommandRequest } from "./request-params";
-import { AddressPoolConfigView, AddressPoolDetailView, SecurityPolicyGroup, SecurityPolicyRecord, GuestSecurityPolicy, SecurityRule, AllocatedTokens, BackendResult, ClusterNode, ClusterNodeData, ClusterStatus, ComputePoolConfig, ComputePoolStatus, ConsoleEvent, FileSpec, FileStatus, FileView, GuestConfig, GuestFilter, GuestView, ImportSource, ImportTarget, License, LicenseRecord, NetworkGraphNode, NodeConfig, NodeConfigStatus, PaginationResult, ResourceMonitorConfig, SSHKeyView, StoragePool, StoragePoolConfig, StoragePoolListRecord, SystemStatus, TaskData, UserAccessRecord, UserCredentialRecord, UserGroup, UserGroupRecord, UserToken, VolumeContainer, VolumeSpec, MonitorResponse, SnapshotTreeNode, ResourcePermissions, SnapshotRecord, GuestResourceUsageData, ResourceStatisticUnit, NodeResourceSnapshot, PoolResourceSnapshot, ClusterResourceSnapshot, GuestSystemView, GuestSystemSpec, DataStore, WarningRecordSet, WarningStatistic, TLSStatusResponse } from "./data-defines";
+import { AddressPoolConfigView, AddressPoolDetailView, SecurityPolicyGroup, SecurityPolicyRecord, GuestSecurityPolicy, SecurityRule, SecurityIfaceInfo, AllocatedTokens, BackendResult, ClusterNode, ClusterNodeData, ClusterStatus, ComputePoolConfig, ComputePoolStatus, ConsoleEvent, FileSpec, FileStatus, FileView, GuestConfig, GuestFilter, GuestView, ImportSource, ImportTarget, License, LicenseRecord, NetworkGraphNode, NodeConfig, NodeConfigStatus, PaginationResult, ResourceMonitorConfig, SSHKeyView, StoragePool, StoragePoolConfig, StoragePoolListRecord, SystemStatus, TaskData, UserAccessRecord, UserCredentialRecord, UserGroup, UserGroupRecord, UserToken, VolumeContainer, VolumeSpec, MonitorResponse, SnapshotTreeNode, ResourcePermissions, SnapshotRecord, GuestResourceUsageData, ResourceStatisticUnit, NodeResourceSnapshot, PoolResourceSnapshot, ClusterResourceSnapshot, GuestSystemView, GuestSystemSpec, DataStore, WarningRecordSet, WarningStatistic, TLSStatusResponse } from "./data-defines";
 export type SetTokenHandler = (storeID: string, tokens: AllocatedTokens) => Promise<void>;
 export type GetTokenHandler = (storeID: string) => Promise<AllocatedTokens>;
 export type StateChangeHandler = (storeID: string, authenticated: boolean) => void;
@@ -1559,9 +1559,10 @@ export declare class TaiyiConnector {
      * @param internalRules - 内部网卡规则模板
      * @param description - 描述
      * @param isDefault - 是否默认策略组
+     * @param defaultAction - 默认动作 (accept/drop)
      * @returns 操作结果
      */
-    createSecurityPolicy(id: string, name: string, externalRules: SecurityRule[], internalRules: SecurityRule[], description?: string, isDefault?: boolean): Promise<BackendResult>;
+    createSecurityPolicy(id: string, name: string, externalRules: SecurityRule[], internalRules: SecurityRule[], description?: string, isDefault?: boolean, defaultAction?: string): Promise<BackendResult>;
     /**
      * 查询安全策略组列表
      * @returns 安全策略组列表
@@ -1581,9 +1582,10 @@ export declare class TaiyiConnector {
      * @param isDefault - 是否默认策略组
      * @param externalRules - 外部网卡规则模板
      * @param internalRules - 内部网卡规则模板
+     * @param defaultAction - 默认动作 (accept/drop)
      * @returns 操作结果
      */
-    modifySecurityPolicy(id: string, name?: string, description?: string, isDefault?: boolean, externalRules?: SecurityRule[], internalRules?: SecurityRule[]): Promise<BackendResult>;
+    modifySecurityPolicy(id: string, name?: string, description?: string, isDefault?: boolean, externalRules?: SecurityRule[], internalRules?: SecurityRule[], defaultAction?: string): Promise<BackendResult>;
     /**
      * 删除安全策略组
      * @param policyID - 策略组ID
@@ -1601,24 +1603,26 @@ export declare class TaiyiConnector {
     /**
      * 获取云主机安全策略
      * @param guestID - 云主机ID
-     * @returns 云主机安全策略
+     * @returns 云主机安全策略及网卡信息
      */
-    getGuestSecurityPolicy(guestID: string): Promise<BackendResult<GuestSecurityPolicy>>;
+    getGuestSecurityPolicy(guestID: string): Promise<BackendResult<{
+        policy: GuestSecurityPolicy;
+        interfaces: SecurityIfaceInfo[];
+    }>>;
     /**
      * 修改云主机安全策略
      * @param guestID - 云主机ID
-     * @param macAddress - 目标网卡MAC地址
+     * @param defaultAction - 默认动作 (accept/drop)
      * @param rules - 新规则列表
      * @returns 操作结果
      */
-    modifyGuestSecurityPolicy(guestID: string, macAddress: string, rules: SecurityRule[]): Promise<BackendResult>;
+    modifyGuestSecurityPolicy(guestID: string, defaultAction: string, rules: SecurityRule[]): Promise<BackendResult>;
     /**
      * 重置云主机安全策略
      * @param guestID - 云主机ID
-     * @param macAddress - 目标网卡MAC地址
      * @returns 操作结果
      */
-    resetGuestSecurityPolicy(guestID: string, macAddress: string): Promise<BackendResult>;
+    resetGuestSecurityPolicy(guestID: string): Promise<BackendResult>;
     /**
      * 查询 TLS 证书状态
      * @returns TLS 证书状态信息

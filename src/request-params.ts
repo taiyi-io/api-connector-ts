@@ -54,6 +54,7 @@ import {
   GuestSystemSpec,
   UserGroup,
   SecurityRule,
+  SecurityIfaceInfo,
 } from "./data-defines";
 import {
   UserRole,
@@ -126,6 +127,7 @@ export interface ControlCommandResponse {
   security_policy?: SecurityPolicyGroup;
   security_policies?: SecurityPolicyRecord[];
   guest_security_policy?: GuestSecurityPolicy;
+  security_interfaces?: SecurityIfaceInfo[];
 }
 
 export interface ControlCommandRequest {
@@ -1711,6 +1713,7 @@ export interface ControlCreateSecurityPolicyParams {
   name: string;
   description?: string;
   is_default?: boolean;
+  default_action?: string;
   external_rules: SecurityRule[];
   internal_rules: SecurityRule[];
 }
@@ -1748,6 +1751,7 @@ export interface ControlModifySecurityPolicyParams {
   name?: string;
   description?: string;
   is_default?: boolean;
+  default_action?: string;
   external_rules?: SecurityRule[];
   internal_rules?: SecurityRule[];
 }
@@ -1787,12 +1791,12 @@ export interface ControlGetGuestSecurityPolicyParams {
  * 修改云主机安全策略请求参数
  * @interface
  * @property guest_id - 云主机ID
- * @property mac_address - 目标网卡MAC地址
+ * @property default_action - 默认动作 (accept/drop)
  * @property rules - 新规则列表
  */
 export interface ControlModifyGuestSecurityPolicyParams {
   guest_id: string;
-  mac_address: string;
+  default_action: string;
   rules: SecurityRule[];
 }
 
@@ -1800,11 +1804,9 @@ export interface ControlModifyGuestSecurityPolicyParams {
  * 重置云主机安全策略请求参数
  * @interface
  * @property guest_id - 云主机ID
- * @property mac_address - 目标网卡MAC地址
  */
 export interface ControlResetGuestSecurityPolicyParams {
   guest_id: string;
-  mac_address: string;
 }
 
 export interface ControlNodeQueryParams {}

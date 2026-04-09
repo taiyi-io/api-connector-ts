@@ -53,3 +53,5 @@ certificates
 docs
 *.tar.gz
 .opencode
+.trae
+.claude

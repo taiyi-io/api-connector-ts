@@ -25,8 +25,7 @@
   - [节点管理](#节点管理)
   - [计算资源池管理](#计算资源池管理)
   - [存储池管理](#存储池管理)
-  - [地址池管理（⚠️ Deprecated）](#地址池管理-deprecated)
-  - [地址池管理（新版）](#地址池管理新版)
+  - [地址池管理](#地址池管理)
   - [安全策略管理](#安全策略管理)
   - [文件管理](#文件管理)
   - [系统模板管理](#系统模板管理)
@@ -41,13 +40,13 @@
 - [数据接口定义](#数据接口定义)
 - [枚举定义](#枚举定义)
 
----
+***
 
 ## 概述
 
 `@taiyi-io/api-connector-ts` 是用于访问太一云平台控制服务的 TypeScript SDK。
 
-**核心类 `TaiyiConnector`** 封装了与太一云平台 Control 服务的全部交互逻辑，包括：鉴权、令牌自动刷新、指令发送与响应解析。通过构造函数指定后端地址和设备标识，绑定令牌存取回调后完成认证，即可调用全部管理接口。
+**核心类** **`TaiyiConnector`** 封装了与太一云平台 Control 服务的全部交互逻辑，包括：鉴权、令牌自动刷新、指令发送与响应解析。通过构造函数指定后端地址和设备标识，绑定令牌存取回调后完成认证，即可调用全部管理接口。
 
 **核心特性：**
 
@@ -59,13 +58,13 @@
 
 **SDK 提供三种使用方式**（按推荐顺序）：
 
-| 方式 | 入口函数 | 适用场景 |
-|------|----------|----------|
-| Next.js 集成 | `getNextConnector()` | Next.js 应用，自动管理设备标识和令牌存储（cookie + localStorage） |
-| 测试/开发 | `getInsecureConnector()` | 开发调试，基于内存存储令牌，不持久化 |
-| 自定义 | `new TaiyiConnector()` + `bindCallback()` | 需要自行控制令牌存取策略的场景 |
+| 方式         | 入口函数                                      | 适用场景                                            |
+| ---------- | ----------------------------------------- | ----------------------------------------------- |
+| Next.js 集成 | `getNextConnector()`                      | Next.js 应用，自动管理设备标识和令牌存储（cookie + localStorage） |
+| 测试/开发      | `getInsecureConnector()`                  | 开发调试，基于内存存储令牌，不持久化                              |
+| 自定义        | `new TaiyiConnector()` + `bindCallback()` | 需要自行控制令牌存取策略的场景                                 |
 
----
+***
 
 ## 安装
 
@@ -75,7 +74,7 @@ npm install @taiyi-io/api-connector-ts
 yarn add @taiyi-io/api-connector-ts
 ```
 
----
+***
 
 ## 快速开始
 
@@ -265,11 +264,11 @@ if (createResult.error) throw new Error(createResult.error);
 console.log("云主机ID:", createResult.data);
 ```
 
----
+***
 
 ## 核心概念
 
-### BackendResult\<T\>
+### BackendResult\<T>
 
 所有 API 方法的统一返回类型：
 
@@ -294,7 +293,7 @@ if (result.unauthenticated) {
 }
 ```
 
-### PaginationResult\<T\>
+### PaginationResult\<T>
 
 分页查询结果：
 
@@ -321,7 +320,7 @@ type StateChangeHandler = (storeID: string, authenticated: boolean) => void;
 type AuthExpiredEvent = (connectorID: string) => void;
 ```
 
----
+***
 
 ## TaiyiConnector 类
 
@@ -335,11 +334,11 @@ constructor(backendHost: string, backendPort: number = 5851, device: string)
 
 创建 TaiyiConnector 实例。
 
-| 参数 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| backendHost | string | - | 后端 Control 服务地址 |
+| 参数          | 类型     | 默认值  | 说明              |
+| ----------- | ------ | ---- | --------------- |
+| backendHost | string | -    | 后端 Control 服务地址 |
 | backendPort | number | 5851 | 后端 Control 服务端口 |
-| device | string | - | 设备标识 |
+| device      | string | -    | 设备标识            |
 
 ```typescript
 const connector = new TaiyiConnector("192.168.1.100", 5851, "my-device");
@@ -386,12 +385,12 @@ release(): void
 
 ### 属性
 
-| 属性 | 类型 | 说明 |
-|------|------|------|
-| id | string | 连接器唯一标识 |
-| authenticated | boolean | 当前认证状态 |
-| user | string | 当前用户标识 |
-| roles | UserRole[] | 当前用户角色列表 |
+| 属性            | 类型          | 说明       |
+| ------------- | ----------- | -------- |
+| id            | string      | 连接器唯一标识  |
+| authenticated | boolean     | 当前认证状态   |
+| user          | string      | 当前用户标识   |
+| roles         | UserRole\[] | 当前用户角色列表 |
 
 ### 认证方法
 
@@ -1449,7 +1448,7 @@ await connector.addUser("developer", "dev-team", "password123");
 const permissions = await connector.getResourcePermissions(ResourceType.Guest, "guest-id");
 ```
 
----
+***
 
 ## 辅助函数
 
@@ -1524,219 +1523,219 @@ copyToClipboard(text: string): Promise<boolean>
 
 复制文本到剪贴板。
 
----
+***
 
 ## 数据接口定义
 
 ### 核心接口
 
-| 接口 | 说明 |
-|------|------|
-| `BackendResult<T>` | 统一 API 返回结果，含 `error`、`unauthenticated`、`data` |
-| `PaginationResult<T>` | 分页结果，含 `records` 和 `total` |
-| `AllocatedTokens` | 已分配令牌集合，含访问/刷新/CSRF令牌、公钥、签名算法、角色 |
+| 接口                    | 说明                                             |
+| --------------------- | ---------------------------------------------- |
+| `BackendResult<T>`    | 统一 API 返回结果，含 `error`、`unauthenticated`、`data` |
+| `PaginationResult<T>` | 分页结果，含 `records` 和 `total`                     |
+| `AllocatedTokens`     | 已分配令牌集合，含访问/刷新/CSRF令牌、公钥、签名算法、角色               |
 
 ### 云主机相关
 
-| 接口 | 说明 |
-|------|------|
-| `GuestConfig` | 创建云主机配置：名称、核心数、内存(MB)、磁盘列表(MB)、访问级别 |
-| `GuestView` | 云主机完整视图：规格 + 运行状态 + 权限 + 操作列表 |
-| `GuestSpec` | 云主机规格：网络、存储、系统、CloudInit、QoS 等 |
-| `GuestStatus` | 云主机状态，继承 GuestSpec 并添加运行时信息 |
-| `GuestFilter` | 查询过滤条件：关键字、状态、资源池、节点、仅自己 |
-| `GuestQoS` | QoS参数：CPU优先级、读写速度、IOPS、网络带宽 |
-| `GuestHAConfig` | HA配置：是否启用、epoch值 |
-| `GuestSystemSpec` | 系统规格：OS类别、磁盘模式、网络模型、显示驱动等 |
-| `GuestSystemView` | 系统模板视图 |
+| 接口                | 说明                                  |
+| ----------------- | ----------------------------------- |
+| `GuestConfig`     | 创建云主机配置：名称、核心数、内存(MB)、磁盘列表(MB)、访问级别 |
+| `GuestView`       | 云主机完整视图：规格 + 运行状态 + 权限 + 操作列表       |
+| `GuestSpec`       | 云主机规格：网络、存储、系统、CloudInit、QoS 等      |
+| `GuestStatus`     | 云主机状态，继承 GuestSpec 并添加运行时信息         |
+| `GuestFilter`     | 查询过滤条件：关键字、状态、资源池、节点、仅自己            |
+| `GuestQoS`        | QoS参数：CPU优先级、读写速度、IOPS、网络带宽         |
+| `GuestHAConfig`   | HA配置：是否启用、epoch值                    |
+| `GuestSystemSpec` | 系统规格：OS类别、磁盘模式、网络模型、显示驱动等           |
+| `GuestSystemView` | 系统模板视图                              |
 
 ### 存储相关
 
-| 接口 | 说明 |
-|------|------|
-| `VolumeSpec` | 卷规格：标签、格式(raw/qcow2)、大小(MiB) |
-| `VolumeContainer` | 卷容器配置 |
-| `DiskSpec` | 磁盘规格 |
-| `StoragePool` | 存储池详情 |
-| `StoragePoolConfig` | 存储池配置 |
-| `StoragePoolListRecord` | 存储池列表记录 |
-| `DataStore` | 节点本地存储，继承 StoragePool |
-| `FileSpec` | 文件规格（名称、描述） |
-| `FileStatus` | 文件状态信息 |
-| `FileView` | 文件视图 |
+| 接口                      | 说明                           |
+| ----------------------- | ---------------------------- |
+| `VolumeSpec`            | 卷规格：标签、格式(raw/qcow2)、大小(MiB) |
+| `VolumeContainer`       | 卷容器配置                        |
+| `DiskSpec`              | 磁盘规格                         |
+| `StoragePool`           | 存储池详情                        |
+| `StoragePoolConfig`     | 存储池配置                        |
+| `StoragePoolListRecord` | 存储池列表记录                      |
+| `DataStore`             | 节点本地存储，继承 StoragePool        |
+| `FileSpec`              | 文件规格（名称、描述）                  |
+| `FileStatus`            | 文件状态信息                       |
+| `FileView`              | 文件视图                         |
 
 ### 节点与集群
 
-| 接口 | 说明 |
-|------|------|
-| `ClusterNode` | 集群节点配置 |
-| `ClusterNodeData` | 集群节点数据 |
-| `ClusterStatus` | 集群状态 |
-| `ComputePoolConfig` | 计算资源池配置（含HA：enable_ha、interface_mode、address_mode、security_policy） |
-| `ComputePoolStatus` | 计算资源池状态 |
-| `NodeConfig` | 节点配置（含语言、端口、最大云主机数） |
-| `NodeConfigStatus` | 节点配置状态（含是否已修改） |
+| 接口                  | 说明                                                                     |
+| ------------------- | ---------------------------------------------------------------------- |
+| `ClusterNode`       | 集群节点配置                                                                 |
+| `ClusterNodeData`   | 集群节点数据                                                                 |
+| `ClusterStatus`     | 集群状态                                                                   |
+| `ComputePoolConfig` | 计算资源池配置（含HA：enable\_ha、interface\_mode、address\_mode、security\_policy） |
+| `ComputePoolStatus` | 计算资源池状态                                                                |
+| `NodeConfig`        | 节点配置（含语言、端口、最大云主机数）                                                    |
+| `NodeConfigStatus`  | 节点配置状态（含是否已修改）                                                         |
 
 ### 快照
 
-| 接口 | 说明 |
-|------|------|
-| `SnapshotRecord` | 快照记录 |
+| 接口                 | 说明           |
+| ------------------ | ------------ |
+| `SnapshotRecord`   | 快照记录         |
 | `SnapshotTreeNode` | 快照树节点（含父子关系） |
 
 ### 网络
 
-| 接口 | 说明 |
-|------|------|
-| `NetworkInterface` | 网络接口：MAC、IP(v4/v6)、DNS、网关 |
-| `NetworkInterfaces` | 网络接口集合（内部+外部） |
-| `NetworkGraphNode` | 网络拓扑图节点 |
-| `AddressPool` / `AddressPoolRecord` | 地址池（旧版） |
-| `AddressPoolConfig` | 地址池配置（新版） |
-| `AddressPoolDetail` | 地址池详情（新版四集合模型） |
-| `AddressSet` | 地址集（含范围和已分配地址） |
-| `AddressSetRange` | 地址范围（新版，含begin/end/cidr） |
-| `AddressAllocation` | 已分配地址（含云主机ID、接口类型、分配时间） |
-| `AddressRange` | 地址范围 |
-| `MonitorResponse` | 监控通道响应 |
+| 接口                                  | 说明                        |
+| ----------------------------------- | ------------------------- |
+| `NetworkInterface`                  | 网络接口：MAC、IP(v4/v6)、DNS、网关 |
+| `NetworkInterfaces`                 | 网络接口集合（内部+外部）             |
+| `NetworkGraphNode`                  | 网络拓扑图节点                   |
+| `AddressPool` / `AddressPoolRecord` | 地址池（旧版）                   |
+| `AddressPoolConfig`                 | 地址池配置（新版）                 |
+| `AddressPoolDetail`                 | 地址池详情（新版四集合模型）            |
+| `AddressSet`                        | 地址集（含范围和已分配地址）            |
+| `AddressSetRange`                   | 地址范围（新版，含begin/end/cidr）  |
+| `AddressAllocation`                 | 已分配地址（含云主机ID、接口类型、分配时间）   |
+| `AddressRange`                      | 地址范围                      |
+| `MonitorResponse`                   | 监控通道响应                    |
 
 ### 安全策略
 
-| 接口 | 说明 |
-|------|------|
-| `SecurityRule` | 安全策略规则：源地址、目标端口、协议、动作 |
-| `SecurityPolicyGroup` | 安全策略组：名称、描述、外部/内部规则模板 |
-| `GuestSecurityPolicy` | 云主机安全策略：接口策略列表 |
+| 接口                        | 说明                      |
+| ------------------------- | ----------------------- |
+| `SecurityRule`            | 安全策略规则：源地址、目标端口、协议、动作   |
+| `SecurityPolicyGroup`     | 安全策略组：名称、描述、外部/内部规则模板   |
+| `GuestSecurityPolicy`     | 云主机安全策略：接口策略列表          |
 | `InterfaceSecurityPolicy` | 接口安全策略：MAC地址、来源策略组、规则列表 |
 
 ### 用户与权限
 
-| 接口 | 说明 |
-|------|------|
-| `UserGroup` | 用户组（ID、成员列表、角色列表） |
-| `UserGroupRecord` | 用户组列表记录 |
-| `UserCredentialRecord` | 用户凭证记录 |
-| `UserToken` | 用户令牌（含公钥、描述、最后访问时间） |
-| `UserAccessRecord` | 用户访问记录 |
-| `ResourcePermissions` | 资源权限（命名空间、所有者、查看/编辑范围） |
-| `PublicKeySerial` / `PrivateKeySerial` / `PrivateKey` | 密钥相关 |
+| 接口                                                    | 说明                     |
+| ----------------------------------------------------- | ---------------------- |
+| `UserGroup`                                           | 用户组（ID、成员列表、角色列表）      |
+| `UserGroupRecord`                                     | 用户组列表记录                |
+| `UserCredentialRecord`                                | 用户凭证记录                 |
+| `UserToken`                                           | 用户令牌（含公钥、描述、最后访问时间）    |
+| `UserAccessRecord`                                    | 用户访问记录                 |
+| `ResourcePermissions`                                 | 资源权限（命名空间、所有者、查看/编辑范围） |
+| `PublicKeySerial` / `PrivateKeySerial` / `PrivateKey` | 密钥相关                   |
 
 ### 统计与监控
 
-| 接口 | 说明 |
-|------|------|
-| `ResourceStatisticUnit` / `ResourceStatisticValue` | 资源统计数据 |
-| `GuestResourceUsageData` | 云主机资源使用数据 |
-| `NodeResourceSnapshot` | 节点资源快照 |
-| `PoolResourceSnapshot` | 池资源快照 |
-| `ClusterResourceSnapshot` | 集群资源快照 |
-| `ResourceMonitorConfig` | 资源监控配置 |
-| `AlertRule` / `MachineAlertRules` | 告警规则 |
-| `StatisticChartData` | 统计图表数据 |
-| `ConsoleEvent` | 控制台事件 |
-| `WarningRecord` / `WarningStatistic` / `WarningRecordSet` | 告警相关 |
+| 接口                                                        | 说明        |
+| --------------------------------------------------------- | --------- |
+| `ResourceStatisticUnit` / `ResourceStatisticValue`        | 资源统计数据    |
+| `GuestResourceUsageData`                                  | 云主机资源使用数据 |
+| `NodeResourceSnapshot`                                    | 节点资源快照    |
+| `PoolResourceSnapshot`                                    | 池资源快照     |
+| `ClusterResourceSnapshot`                                 | 集群资源快照    |
+| `ResourceMonitorConfig`                                   | 资源监控配置    |
+| `AlertRule` / `MachineAlertRules`                         | 告警规则      |
+| `StatisticChartData`                                      | 统计图表数据    |
+| `ConsoleEvent`                                            | 控制台事件     |
+| `WarningRecord` / `WarningStatistic` / `WarningRecordSet` | 告警相关      |
 
 ### 其他
 
-| 接口 | 说明 |
-|------|------|
-| `SystemStatus` | 系统状态（是否初始化、语言） |
-| `TaskData` | 任务数据（ID、类型、状态、进度、错误等） |
-| `License` / `LicenseRecord` / `AuthorizedAbility` | 许可证相关 |
-| `SSHKey` / `SSHKeyView` | SSH密钥 |
-| `ImportSource` / `ImportTarget` | 导入源与目标 |
-| `CloudInitSpec` | CloudInit配置 |
-| `FoundAdminSecret` | 管理员凭据查找结果 |
-| `OperatableResource` | 可操作资源（权限检查辅助） |
+| 接口                                                | 说明                    |
+| ------------------------------------------------- | --------------------- |
+| `SystemStatus`                                    | 系统状态（是否初始化、语言）        |
+| `TaskData`                                        | 任务数据（ID、类型、状态、进度、错误等） |
+| `License` / `LicenseRecord` / `AuthorizedAbility` | 许可证相关                 |
+| `SSHKey` / `SSHKeyView`                           | SSH密钥                 |
+| `ImportSource` / `ImportTarget`                   | 导入源与目标                |
+| `CloudInitSpec`                                   | CloudInit配置           |
+| `FoundAdminSecret`                                | 管理员凭据查找结果             |
+| `OperatableResource`                              | 可操作资源（权限检查辅助）         |
 
----
+***
 
 ## 枚举定义
 
 ### 云主机相关
 
-| 枚举 | 说明 | 主要值 |
-|------|------|--------|
-| `GuestState` | 云主机状态 | `Stopped`, `Starting`, `Running`, `Stopping`, `Suspending`, `Suspended`, `Unknown` |
-| `SystemCategory` | 操作系统类别 | `Linux`, `Windows`, `BSD`, `Darwin` 等 |
-| `GuestDiskMode` | 磁盘模式 | `IDE`, `SATA`, `SCSI`, `VirtIO` |
-| `NetworkModelType` | 网络模型 | `VIRTIO`, `E1000`, `E1000E`, `RTL8139`, `VMXNET3` |
-| `DisplayDriver` | 显示驱动 | `Cirrus`, `QXL`, `VGA`, `VirtIO`, `None` |
-| `RemoteProtocol` | 远程协议 | `SPICE`, `VNC` |
-| `USBModel` | USB控制器 | `PIIX3UHCI`, `PIIX4UHCI`, `EHCI`, `XHCI`, `NECXHCI`, `Disabled` |
-| `GuestFirmwareMode` | 固件模式 | `BIOS`, `EFI` |
-| `GuestSoundModel` | 声卡模型 | `SB16`, `AC97`, `ICH6`, `ICH9`, `VirtIO`, `Disabled` 等 |
-| `GuestTabletMode` | 平板模式 | `Disabled`, `USB`, `VirtIO` |
+| 枚举                  | 说明     | 主要值                                                                                |
+| ------------------- | ------ | ---------------------------------------------------------------------------------- |
+| `GuestState`        | 云主机状态  | `Stopped`, `Starting`, `Running`, `Stopping`, `Suspending`, `Suspended`, `Unknown` |
+| `SystemCategory`    | 操作系统类别 | `Linux`, `Windows`, `BSD`, `Darwin` 等                                              |
+| `GuestDiskMode`     | 磁盘模式   | `IDE`, `SATA`, `SCSI`, `VirtIO`                                                    |
+| `NetworkModelType`  | 网络模型   | `VIRTIO`, `E1000`, `E1000E`, `RTL8139`, `VMXNET3`                                  |
+| `DisplayDriver`     | 显示驱动   | `Cirrus`, `QXL`, `VGA`, `VirtIO`, `None`                                           |
+| `RemoteProtocol`    | 远程协议   | `SPICE`, `VNC`                                                                     |
+| `USBModel`          | USB控制器 | `PIIX3UHCI`, `PIIX4UHCI`, `EHCI`, `XHCI`, `NECXHCI`, `Disabled`                    |
+| `GuestFirmwareMode` | 固件模式   | `BIOS`, `EFI`                                                                      |
+| `GuestSoundModel`   | 声卡模型   | `SB16`, `AC97`, `ICH6`, `ICH9`, `VirtIO`, `Disabled` 等                             |
+| `GuestTabletMode`   | 平板模式   | `Disabled`, `USB`, `VirtIO`                                                        |
 
 ### 任务与命令
 
-| 枚举 | 说明 | 主要值 |
-|------|------|--------|
-| `TaskStatus` | 任务状态 | `Pending`, `Running`, `Completed` |
-| `TaskType` | 任务类型 | 对应各种操作类型 |
+| 枚举                   | 说明   | 主要值                                              |
+| -------------------- | ---- | ------------------------------------------------ |
+| `TaskStatus`         | 任务状态 | `Pending`, `Running`, `Completed`                |
+| `TaskType`           | 任务类型 | 对应各种操作类型                                         |
 | `controlCommandEnum` | 控制命令 | `CreateGuest`, `DeleteGuest`, `ModifyCPU` 等80+命令 |
 
 ### 资源与权限
 
-| 枚举 | 说明 | 主要值 |
-|------|------|--------|
-| `ResourceAccessLevel` | 资源访问级别 | `GlobalView`, `ShareEdit`, `ShareView`, `Private` |
-| `ResourceAccessScope` | 访问范围 | 全局/共享/私有等 |
-| `ResourceAction` | 操作类型 | `View`, `Edit`, `Delete` 等 |
-| `ResourceType` | 资源类型 | `Guest`, `System`, `ISOFile`, `DiskFile`, `SSHKey` |
-| `UserRole` | 用户角色 | `Super`, `Manager`, `User` |
+| 枚举                    | 说明     | 主要值                                                |
+| --------------------- | ------ | -------------------------------------------------- |
+| `ResourceAccessLevel` | 资源访问级别 | `GlobalView`, `ShareEdit`, `ShareView`, `Private`  |
+| `ResourceAccessScope` | 访问范围   | 全局/共享/私有等                                          |
+| `ResourceAction`      | 操作类型   | `View`, `Edit`, `Delete` 等                         |
+| `ResourceType`        | 资源类型   | `Guest`, `System`, `ISOFile`, `DiskFile`, `SSHKey` |
+| `UserRole`            | 用户角色   | `Super`, `Manager`, `User`                         |
 
 ### 存储与网络
 
-| 枚举 | 说明 | 主要值 |
-|------|------|--------|
-| `StorageType` | 存储类型 | `Local`, `NFS`, `CephFS`, `SMB`, `WebDav`, `S3`, `iSCSI` |
-| `VolumeFormat` | 卷格式 | `Raw`, `Qcow` |
-| `VolumeContainerStrategy` | 容器策略 | `LeastVolumes`, `LeastUsed`, `MaximumAvailable` |
-| `NetworkMode` | 网络模式 | `Bridge` |
-| `InterfaceMode` | 接口模式 | `Direct`, `NAT`, `DualNIC` |
-| `NodeMode` | 节点模式 | `Control`, `Resource` |
-| `NodeState` | 节点状态 | `Connected`, `Disconnected`, `Ready`, `Lost` |
-| `ComputePoolStrategy` | 计算池策略 | `MostAvailableMemory`, `LeastMemoryLoad` 等 |
+| 枚举                        | 说明    | 主要值                                                      |
+| ------------------------- | ----- | -------------------------------------------------------- |
+| `StorageType`             | 存储类型  | `Local`, `NFS`, `CephFS`, `SMB`, `WebDav`, `S3`, `iSCSI` |
+| `VolumeFormat`            | 卷格式   | `Raw`, `Qcow`                                            |
+| `VolumeContainerStrategy` | 容器策略  | `LeastVolumes`, `LeastUsed`, `MaximumAvailable`          |
+| `NetworkMode`             | 网络模式  | `Bridge`                                                 |
+| `InterfaceMode`           | 接口模式  | `Direct`, `NAT`, `DualNIC`                               |
+| `NodeMode`                | 节点模式  | `Control`, `Resource`                                    |
+| `NodeState`               | 节点状态  | `Connected`, `Disconnected`, `Ready`, `Lost`             |
+| `ComputePoolStrategy`     | 计算池策略 | `MostAvailableMemory`, `LeastMemoryLoad` 等               |
 
 ### 文件与统计
 
-| 枚举 | 说明 | 主要值 |
-|------|------|--------|
-| `FileCategory` | 文件类别 | `ISO`, `Disk` |
-| `FileFormat` | 文件格式 | `ISO`, `Qcow2` |
-| `FileState` | 文件状态 | `Allocated`, `Ready`, `Updating`, `Corrupted` |
-| `StatisticRange` | 统计范围 | `LastHour`, `Last24Hours`, `Last7Days`, `Last30Days` |
-| `StatisticUnitRecordField` | 统计字段 | CPU/内存/磁盘/网络相关指标 |
-| `ResourceSnapshotField` | 资源快照字段 | 核心数/内存/磁盘/云主机数量等 |
-| `ResourceUsageDurationField` | 使用时长字段 | 读写请求/字节数/IOPS等 |
+| 枚举                           | 说明     | 主要值                                                  |
+| ---------------------------- | ------ | ---------------------------------------------------- |
+| `FileCategory`               | 文件类别   | `ISO`, `Disk`                                        |
+| `FileFormat`                 | 文件格式   | `ISO`, `Qcow2`                                       |
+| `FileState`                  | 文件状态   | `Allocated`, `Ready`, `Updating`, `Corrupted`        |
+| `StatisticRange`             | 统计范围   | `LastHour`, `Last24Hours`, `Last7Days`, `Last30Days` |
+| `StatisticUnitRecordField`   | 统计字段   | CPU/内存/磁盘/网络相关指标                                     |
+| `ResourceSnapshotField`      | 资源快照字段 | 核心数/内存/磁盘/云主机数量等                                     |
+| `ResourceUsageDurationField` | 使用时长字段 | 读写请求/字节数/IOPS等                                       |
 
 ### 事件与告警
 
-| 枚举 | 说明 | 主要值 |
-|------|------|--------|
-| `ConsoleEventLevel` | 事件级别 | `Info`, `Warning`, `Alert`, `Critical` |
-| `ConsoleEventRange` | 事件范围 | `System`, `Cluster`, `Pool`, `Node` |
+| 枚举                     | 说明   | 主要值                                                   |
+| ---------------------- | ---- | ----------------------------------------------------- |
+| `ConsoleEventLevel`    | 事件级别 | `Info`, `Warning`, `Alert`, `Critical`                |
+| `ConsoleEventRange`    | 事件范围 | `System`, `Cluster`, `Pool`, `Node`                   |
 | `ConsoleEventCategory` | 事件分类 | `Guest`, `Storage`, `Network`, `System`, `Security` 等 |
 
 ### 认证与许可
 
-| 枚举 | 说明 | 主要值 |
-|------|------|--------|
-| `TokenSigningMethod` | 令牌签名方法 | `HS256`-`HS512`, `RS256`-`RS512`, `ES256`-`ES512` |
-| `SignatureAlgorithm` | 签名算法 | `Ed25519` |
-| `PasswordHasher` | 密码哈希算法 | `Bcrypt` |
-| `AuthorizationMode` | 授权模式 | `Machine`, `Project`, `Account` |
-| `LicenseFeature` | 许可证功能 | `Snapshot`, `Backup`, `HighAvailability`, `Migration`, `SecurityPolicy`, `AddressPool` 等 |
-| `ImportVendor` | 导入供应商 | `VMWareESXi` |
+| 枚举                   | 说明     | 主要值                                                                                      |
+| -------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| `TokenSigningMethod` | 令牌签名方法 | `HS256`-`HS512`, `RS256`-`RS512`, `ES256`-`ES512`                                        |
+| `SignatureAlgorithm` | 签名算法   | `Ed25519`                                                                                |
+| `PasswordHasher`     | 密码哈希算法 | `Bcrypt`                                                                                 |
+| `AuthorizationMode`  | 授权模式   | `Machine`, `Project`, `Account`                                                          |
+| `LicenseFeature`     | 许可证功能  | `Snapshot`, `Backup`, `HighAvailability`, `Migration`, `SecurityPolicy`, `AddressPool` 等 |
+| `ImportVendor`       | 导入供应商  | `VMWareESXi`                                                                             |
 
 ### 其他
 
-| 枚举 | 说明 | 主要值 |
-|------|------|--------|
-| `Locale` | 语言 | `Chinese` ("zh-cn"), `English` ("en-us") |
-| `Priority` | 优先级 | `High` (0), `Medium` (1), `Low` (2) |
-| `CloudInitBootMode` | CloudInit 启动模式 | `None`, `DMI`, `ISO`, `ISONet` |
+| 枚举                  | 说明             | 主要值                                      |
+| ------------------- | -------------- | ---------------------------------------- |
+| `Locale`            | 语言             | `Chinese` ("zh-cn"), `English` ("en-us") |
+| `Priority`          | 优先级            | `High` (0), `Medium` (1), `Low` (2)      |
+| `CloudInitBootMode` | CloudInit 启动模式 | `None`, `DMI`, `ISO`, `ISONet`           |
 
 ### 常量
 

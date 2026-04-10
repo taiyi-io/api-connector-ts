@@ -14,9 +14,9 @@ $ yarn add @taiyi-io/api-connector-ts
 
 ## 使用
 
-**请注意：[TaiyiConnector](./classes/TaiyiConnector) 类是本连接器的主要入口点，但是考虑不同应用场景的数据安全，将安全令牌的存储进行了剥离。需要调用者根据自己的业务场景，实现 SetTokenHandler 和 GetTokenHandler 两个接口，管理令牌的存取**
+**请注意：[TaiyiConnector](./classes/TaiyiConnector.html) 类是本连接器的主要入口点，但是考虑不同应用场景的数据安全，将安全令牌的存储进行了剥离。需要调用者根据自己的业务场景，实现 SetTokenHandler 和 GetTokenHandler 两个接口，管理令牌的存取**
 
-函数[newInsecureConnector](./functions/newInsecureConnector)创建一个简单的、非安全存储的 TaiyiConnector，能够用于快速测试，但是不建议使用在生产环境中。函数[getNextConnector](./functions/getNextConnector)生成一个基于 cookie 和 localstorage 安全存储令牌，适配 NextJS 框架的 TaiyiConnector。实际使用中建议参考上述两个函数，根据自己业务场景调整存储策略。
+函数[newInsecureConnector](./functions/newInsecureConnector.html)创建一个简单的、非安全存储的 TaiyiConnector，能够用于快速测试，但是不建议使用在生产环境中。函数[getNextConnector](./functions/getNextConnector.html)生成一个基于 cookie 和 localstorage 安全存储令牌，适配 NextJS 框架的 TaiyiConnector。实际使用中建议参考上述两个函数，根据自己业务场景调整存储策略。
 
 太一云实现了完整的零信任模型，所有操作都必须有充分的权限才能执行。除了 getSystemStatus 和 initializeSystem 两个接口，其他接口都必须**先完成鉴权**
 

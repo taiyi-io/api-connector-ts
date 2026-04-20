@@ -129,6 +129,7 @@ export interface ControlCommandResponse {
   security_policies?: SecurityPolicyRecord[];
   guest_security_policy?: GuestSecurityPolicy;
   security_interfaces?: SecurityIfaceInfo[];
+  traffic_info?: import('./data-defines').GuestTrafficInfo;
 }
 
 export interface ControlCommandRequest {
@@ -191,6 +192,10 @@ export interface ControlCommandRequest {
   modify_guest_cpu_priority?: ControlModifyGuestCPUPriorityParams;
   modify_guest_disk_qos?: ControlModifyGuestDiskQoSParams;
   modify_guest_network_qos?: ControlModifyGuestNetworkQoSParams;
+  query_guest_traffic?: { guest_id: string };
+  reset_guest_traffic?: { guest_id: string };
+  modify_guest_traffic_quota?: { guest_id: string; quota: import('./data-defines').TrafficQuotaSpec };
+  extend_guest_traffic_temp?: { guest_id: string; extra_bytes: number };
   query_guests?: ControlQueryGuestsParams;
   get_guest?: ControlGetGuestParams;
   create_iso?: CreateFileParams;

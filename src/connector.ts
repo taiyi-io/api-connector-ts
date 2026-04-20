@@ -5887,4 +5887,51 @@ export class TaiyiConnector {
     const url = new URL(this._backendURL);
     return `${url.pathname}system/tls/certs`;
   }
+
+  public async tryQueryGuestTraffic(guestID: string): Promise<BackendResult<import('./data-defines').GuestTrafficInfo>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.QueryGuestTraffic,
+      query_guest_traffic: { guest_id: guestID },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) return { error: resp.error };
+    if (!resp.data?.traffic_info) return { error: '无法获取流量配额信息' };
+    return { data: resp.data.traffic_info };
+  }
+
+  public async tryResetGuestTraffic(guestID: string): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.ResetGuestTraffic,
+      reset_guest_traffic: { guest_id: guestID },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) return { error: resp.error };
+    return { data: resp.data?.id ?? '' };
+  }
+
+  public async tryModifyGuestTrafficQuota(
+    guestID: string,
+    quota: import('./data-defines').TrafficQuotaSpec
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.ModifyGuestTrafficQuota,
+      modify_guest_traffic_quota: { guest_id: guestID, quota },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) return { error: resp.error };
+    return { data: resp.data?.id ?? '' };
+  }
+
+  public async tryExtendGuestTrafficTemp(
+    guestID: string,
+    extraBytes: number
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.ExtendGuestTrafficTemp,
+      extend_guest_traffic_temp: { guest_id: guestID, extra_bytes: extraBytes },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) return { error: resp.error };
+    return { data: resp.data?.id ?? '' };
+  }
 }

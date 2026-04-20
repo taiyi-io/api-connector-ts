@@ -5934,4 +5934,88 @@ export class TaiyiConnector {
     if (resp.error) return { error: resp.error };
     return { data: resp.data?.id ?? '' };
   }
+
+  public async tryCreateGuestProfile(
+    params: import('./request-params').ControlCreateGuestProfileParams
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.CreateGuestProfile,
+      create_guest_profile: params,
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) return { error: resp.error };
+    return { data: resp.data?.id ?? '' };
+  }
+
+  public async tryModifyGuestProfile(
+    params: import('./request-params').ControlModifyGuestProfileParams
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.ModifyGuestProfile,
+      modify_guest_profile: params,
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) return { error: resp.error };
+    return { data: resp.data?.id ?? '' };
+  }
+
+  public async tryDeleteGuestProfile(
+    id: string
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.DeleteGuestProfile,
+      delete_guest_profile: { id },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) return { error: resp.error };
+    return { data: resp.data?.id ?? '' };
+  }
+
+  public async tryGetGuestProfile(
+    id: string
+  ): Promise<BackendResult<import('./data-defines').GuestProfile>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.GetGuestProfile,
+      get_guest_profile: { id },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) return { error: resp.error };
+    return { data: resp.data?.profile };
+  }
+
+  public async tryQueryGuestProfiles(
+    params: import('./request-params').ControlQueryGuestProfilesParams
+  ): Promise<BackendResult<{ total: number; profiles: import('./data-defines').GuestProfile[] }>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.QueryGuestProfiles,
+      query_guest_profiles: params,
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) return { error: resp.error };
+    return { data: { total: resp.data?.total ?? 0, profiles: resp.data?.profiles ?? [] } };
+  }
+
+  public async tryCreateGuestFromProfile(
+    params: import('./request-params').ControlCreateGuestFromProfileParams
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.CreateGuestFromProfile,
+      create_guest_from_profile: params,
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) return { error: resp.error };
+    return { data: resp.data?.id ?? '' };
+  }
+
+  public async tryReplaceGuestConfig(
+    params: import('./request-params').ControlReplaceGuestConfigParams
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.ReplaceGuestConfig,
+      replace_guest_config: params,
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) return { error: resp.error };
+    return { data: resp.data?.id ?? '' };
+  }
 }

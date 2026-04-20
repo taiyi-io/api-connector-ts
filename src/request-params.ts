@@ -130,6 +130,8 @@ export interface ControlCommandResponse {
   guest_security_policy?: GuestSecurityPolicy;
   security_interfaces?: SecurityIfaceInfo[];
   traffic_info?: import('./data-defines').GuestTrafficInfo;
+  profile?: import('./data-defines').GuestProfile;
+  profiles?: import('./data-defines').GuestProfile[];
 }
 
 export interface ControlCommandRequest {
@@ -261,6 +263,13 @@ export interface ControlCommandRequest {
   query_import_sources?: ControlQueryImportSourcesParams;
   query_import_targets?: ControlQueryImportTargetsParams;
   import_guests?: ControlImportGuestsParams;
+  create_guest_profile?: ControlCreateGuestProfileParams;
+  modify_guest_profile?: ControlModifyGuestProfileParams;
+  delete_guest_profile?: ControlDeleteGuestProfileParams;
+  get_guest_profile?: ControlGetGuestProfileParams;
+  query_guest_profiles?: ControlQueryGuestProfilesParams;
+  create_guest_from_profile?: ControlCreateGuestFromProfileParams;
+  replace_guest_config?: ControlReplaceGuestConfigParams;
   query_systems?: ControlQuerySystemsParams;
   get_system?: ControlGetSystemParams;
   add_system?: ControlAddSystemParams;
@@ -1846,4 +1855,60 @@ export interface ControlSyncFilesParams {}
 export interface ControlComputePoolStragegyParams {
   pool_id: string;
   strategy: ComputePoolStrategy;
+}
+
+export interface ControlCreateGuestProfileParams {
+  name: string;
+  description?: string;
+  cores: number;
+  memory: number;
+  disks: number[];
+  qos?: import('./data-defines').GuestQoS;
+  traffic_quota?: import('./data-defines').TrafficQuotaSpec;
+  system?: string;
+  source_image?: string;
+  cloud_init?: import('./data-defines').ControlCloudInitConfig;
+  access_level?: import('./enums').ResourceAccessLevel;
+  pool_id?: string;
+}
+
+export interface ControlModifyGuestProfileParams {
+  id: string;
+  name?: string;
+  description?: string;
+  cores?: number;
+  memory?: number;
+  disks?: number[];
+  qos?: import('./data-defines').GuestQoS;
+  traffic_quota?: import('./data-defines').TrafficQuotaSpec;
+  system?: string;
+  source_image?: string;
+  cloud_init?: import('./data-defines').ControlCloudInitConfig;
+  access_level?: import('./enums').ResourceAccessLevel;
+  pool_id?: string;
+}
+
+export interface ControlDeleteGuestProfileParams {
+  id: string;
+}
+
+export interface ControlGetGuestProfileParams {
+  id: string;
+}
+
+export interface ControlQueryGuestProfilesParams {
+  offset?: number;
+  limit?: number;
+  keyword?: string;
+}
+
+export interface ControlCreateGuestFromProfileParams {
+  profile_id: string;
+  pool_id?: string;
+  name: string;
+}
+
+export interface ControlReplaceGuestConfigParams {
+  guest_id: string;
+  profile_id: string;
 }

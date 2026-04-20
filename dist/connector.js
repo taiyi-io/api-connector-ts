@@ -5328,5 +5328,150 @@ class TaiyiConnector {
         const url = new URL(this._backendURL);
         return `${url.pathname}system/tls/certs`;
     }
+    tryQueryGuestTraffic(guestID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const cmd = {
+                type: enums_1.controlCommandEnum.QueryGuestTraffic,
+                query_guest_traffic: { guest_id: guestID },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error)
+                return { error: resp.error };
+            if (!((_a = resp.data) === null || _a === void 0 ? void 0 : _a.traffic_info))
+                return { error: '无法获取流量配额信息' };
+            return { data: resp.data.traffic_info };
+        });
+    }
+    tryResetGuestTraffic(guestID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const cmd = {
+                type: enums_1.controlCommandEnum.ResetGuestTraffic,
+                reset_guest_traffic: { guest_id: guestID },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error)
+                return { error: resp.error };
+            return { data: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.id) !== null && _b !== void 0 ? _b : '' };
+        });
+    }
+    tryModifyGuestTrafficQuota(guestID, quota) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const cmd = {
+                type: enums_1.controlCommandEnum.ModifyGuestTrafficQuota,
+                modify_guest_traffic_quota: { guest_id: guestID, quota },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error)
+                return { error: resp.error };
+            return { data: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.id) !== null && _b !== void 0 ? _b : '' };
+        });
+    }
+    tryExtendGuestTrafficTemp(guestID, extraBytes) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const cmd = {
+                type: enums_1.controlCommandEnum.ExtendGuestTrafficTemp,
+                extend_guest_traffic_temp: { guest_id: guestID, extra_bytes: extraBytes },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error)
+                return { error: resp.error };
+            return { data: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.id) !== null && _b !== void 0 ? _b : '' };
+        });
+    }
+    tryCreateGuestProfile(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const cmd = {
+                type: enums_1.controlCommandEnum.CreateGuestProfile,
+                create_guest_profile: params,
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error)
+                return { error: resp.error };
+            return { data: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.id) !== null && _b !== void 0 ? _b : '' };
+        });
+    }
+    tryModifyGuestProfile(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const cmd = {
+                type: enums_1.controlCommandEnum.ModifyGuestProfile,
+                modify_guest_profile: params,
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error)
+                return { error: resp.error };
+            return { data: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.id) !== null && _b !== void 0 ? _b : '' };
+        });
+    }
+    tryDeleteGuestProfile(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const cmd = {
+                type: enums_1.controlCommandEnum.DeleteGuestProfile,
+                delete_guest_profile: { id },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error)
+                return { error: resp.error };
+            return { data: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.id) !== null && _b !== void 0 ? _b : '' };
+        });
+    }
+    tryGetGuestProfile(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const cmd = {
+                type: enums_1.controlCommandEnum.GetGuestProfile,
+                get_guest_profile: { id },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error)
+                return { error: resp.error };
+            return { data: (_a = resp.data) === null || _a === void 0 ? void 0 : _a.profile };
+        });
+    }
+    tryQueryGuestProfiles(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b, _c, _d;
+            const cmd = {
+                type: enums_1.controlCommandEnum.QueryGuestProfiles,
+                query_guest_profiles: params,
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error)
+                return { error: resp.error };
+            return { data: { total: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.total) !== null && _b !== void 0 ? _b : 0, profiles: (_d = (_c = resp.data) === null || _c === void 0 ? void 0 : _c.profiles) !== null && _d !== void 0 ? _d : [] } };
+        });
+    }
+    tryCreateGuestFromProfile(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const cmd = {
+                type: enums_1.controlCommandEnum.CreateGuestFromProfile,
+                create_guest_from_profile: params,
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error)
+                return { error: resp.error };
+            return { data: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.id) !== null && _b !== void 0 ? _b : '' };
+        });
+    }
+    tryReplaceGuestConfig(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const cmd = {
+                type: enums_1.controlCommandEnum.ReplaceGuestConfig,
+                replace_guest_config: params,
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error)
+                return { error: resp.error };
+            return { data: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.id) !== null && _b !== void 0 ? _b : '' };
+        });
+    }
 }
 exports.TaiyiConnector = TaiyiConnector;

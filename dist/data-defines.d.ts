@@ -665,6 +665,34 @@ export interface ControlCloudInitConfig {
  * @property cloud_init - CloudInit配置
  * @property access_level - 资源访问级别
  */
+export interface TrafficQuotaSpec {
+    enabled: boolean;
+    limit_bytes: number;
+    count_mode: 'rx' | 'tx' | 'both';
+    cycle_mode: 'rolling-days' | 'monthly-anchor';
+    cycle_days?: number;
+    cycle_anchor_ts?: number;
+    over_action: 'ignore' | 'alert' | 'throttle' | 'shutdown';
+    throttle_kbps?: number;
+}
+export interface TrafficQuotaState {
+    accumulated_rx: number;
+    accumulated_tx: number;
+    last_rx_bytes?: number;
+    last_tx_bytes?: number;
+    cycle_start_ts: number;
+    next_reset_ts: number;
+    temp_extra_bytes?: number;
+    triggered?: boolean;
+}
+export interface GuestTrafficInfo {
+    guest_id: string;
+    spec?: TrafficQuotaSpec;
+    state?: TrafficQuotaState;
+    effective_limit: number;
+    used_bytes: number;
+    usage_percent: number;
+}
 export interface GuestConfig {
     name: string;
     cores: number;
@@ -675,6 +703,7 @@ export interface GuestConfig {
     cloud_init?: ControlCloudInitConfig;
     qos?: GuestQoS;
     access_level: ResourceAccessLevel;
+    traffic_quota?: TrafficQuotaSpec;
 }
 /**
  * 资源节点数据
@@ -2012,4 +2041,22 @@ export interface TLSStatusResponse {
     not_before?: string;
     not_after?: string;
     san?: string[];
+}
+export interface GuestProfile {
+    id: string;
+    name: string;
+    description?: string;
+    cores: number;
+    memory: number;
+    disks: number[];
+    qos?: GuestQoS;
+    traffic_quota?: TrafficQuotaSpec;
+    system?: string;
+    source_image?: string;
+    cloud_init?: ControlCloudInitConfig;
+    access_level?: import('./enums').ResourceAccessLevel;
+    pool_id?: string;
+    created_by?: string;
+    created_at: string;
+    updated_at: string;
 }

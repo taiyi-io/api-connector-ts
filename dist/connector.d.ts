@@ -1639,4 +1639,18 @@ export declare class TaiyiConnector {
      * 返回路径如 `/api/v1/system/tls/certs`
      */
     getTLSCertUploadPath(): string;
+    tryQueryGuestTraffic(guestID: string): Promise<BackendResult<import('./data-defines').GuestTrafficInfo>>;
+    tryResetGuestTraffic(guestID: string): Promise<BackendResult<string>>;
+    tryModifyGuestTrafficQuota(guestID: string, quota: import('./data-defines').TrafficQuotaSpec): Promise<BackendResult<string>>;
+    tryExtendGuestTrafficTemp(guestID: string, extraBytes: number): Promise<BackendResult<string>>;
+    tryCreateGuestProfile(params: import('./request-params').ControlCreateGuestProfileParams): Promise<BackendResult<string>>;
+    tryModifyGuestProfile(params: import('./request-params').ControlModifyGuestProfileParams): Promise<BackendResult<string>>;
+    tryDeleteGuestProfile(id: string): Promise<BackendResult<string>>;
+    tryGetGuestProfile(id: string): Promise<BackendResult<import('./data-defines').GuestProfile>>;
+    tryQueryGuestProfiles(params: import('./request-params').ControlQueryGuestProfilesParams): Promise<BackendResult<{
+        total: number;
+        profiles: import('./data-defines').GuestProfile[];
+    }>>;
+    tryCreateGuestFromProfile(params: import('./request-params').ControlCreateGuestFromProfileParams): Promise<BackendResult<string>>;
+    tryReplaceGuestConfig(params: import('./request-params').ControlReplaceGuestConfigParams): Promise<BackendResult<string>>;
 }

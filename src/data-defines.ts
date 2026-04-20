@@ -2137,3 +2137,22 @@ export interface TLSStatusResponse {
   not_after?: string;
   san?: string[];
 }
+
+export interface GuestProfile {
+  id: string;
+  name: string;
+  description?: string;
+  cores: number;
+  memory: number;
+  disks: number[];
+  qos?: GuestQoS;
+  traffic_quota?: TrafficQuotaSpec;
+  system?: string;
+  source_image?: string;
+  cloud_init?: ControlCloudInitConfig;
+  access_level?: import('./enums').ResourceAccessLevel;
+  pool_id?: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}

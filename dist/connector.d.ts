@@ -1,7 +1,7 @@
 /**
  * 核心文件，定义用于访问平台服务的TaiyiConnector
  */
-import { ConsoleEventLevel, ImportVendor, ComputePoolStrategy, UserRole, VolumeContainerStrategy, StatisticRange, ResourceType, ResourceAccessLevel, LicenseFeature } from "./enums";
+import { ConsoleEventLevel, ImportVendor, ComputePoolStrategy, UserRole, VolumeContainerStrategy, StatisticRange, ResourceType, ResourceAccessLevel, LicenseFeature, Priority } from "./enums";
 import { ControlCommandRequest } from "./request-params";
 import { AddressPoolConfigView, AddressPoolDetailView, SecurityPolicyGroup, SecurityPolicyRecord, GuestSecurityPolicy, SecurityRule, SecurityIfaceInfo, AllocatedTokens, BackendResult, ClusterNode, ClusterNodeData, ClusterStatus, ComputePoolConfig, ComputePoolStatus, ConsoleEvent, FileSpec, FileStatus, FileView, GuestConfig, GuestFilter, GuestView, ImportSource, ImportTarget, License, LicenseRecord, NetworkGraphNode, NodeConfig, NodeConfigStatus, PaginationResult, ResourceMonitorConfig, SSHKeyView, StoragePool, StoragePoolConfig, StoragePoolListRecord, SystemStatus, TaskData, UserAccessRecord, UserCredentialRecord, UserGroup, UserGroupRecord, UserToken, VolumeContainer, VolumeSpec, MonitorResponse, SnapshotTreeNode, ResourcePermissions, SnapshotRecord, GuestResourceUsageData, ResourceStatisticUnit, NodeResourceSnapshot, PoolResourceSnapshot, ClusterResourceSnapshot, GuestSystemView, GuestSystemSpec, DataStore, WarningRecordSet, WarningStatistic, TLSStatusResponse } from "./data-defines";
 export type SetTokenHandler = (storeID: string, tokens: AllocatedTokens) => Promise<void>;
@@ -356,6 +356,12 @@ export declare class TaiyiConnector {
      * @returns 修改结果
      */
     modifyGuestCPU(guestID: string, cores: number, timeoutSeconds?: number): Promise<BackendResult>;
+    tryModifyGuestCPUPriority(guestID: string, priority: Priority): Promise<BackendResult<string>>;
+    modifyGuestCPUPriority(guestID: string, priority: Priority, timeoutSeconds?: number): Promise<BackendResult>;
+    tryModifyGuestDiskQoS(guestID: string, readSpeed?: number, writeSpeed?: number, readIOPS?: number, writeIOPS?: number): Promise<BackendResult<string>>;
+    modifyGuestDiskQoS(guestID: string, readSpeed?: number, writeSpeed?: number, readIOPS?: number, writeIOPS?: number, timeoutSeconds?: number): Promise<BackendResult>;
+    tryModifyGuestNetworkQoS(guestID: string, receiveSpeed?: number, sendSpeed?: number): Promise<BackendResult<string>>;
+    modifyGuestNetworkQoS(guestID: string, receiveSpeed?: number, sendSpeed?: number, timeoutSeconds?: number): Promise<BackendResult>;
     /**
      * 查询云主机
      * @param start - 起始位置

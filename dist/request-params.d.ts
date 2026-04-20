@@ -2,7 +2,7 @@
  * 向API服务发送请求的数据结构定义
  */
 import { TaskData, ClusterNodeData, ComputePoolStatus, StoragePool, StoragePoolListRecord, AddressPoolConfigView, AddressPoolDetailView, SecurityPolicyGroup, SecurityPolicyRecord, GuestSecurityPolicy, GuestView, FileStatus, FileView, DataStore, SnapshotRecord, SnapshotTreeNode, GuestResourceUsageRecord, NodeResourceSnapshotRecord, PoolResourceSnapshotRecord, ClusterResourceSnapshotRecord, GuestSystemView, WarningRecord, ConsoleEvent, NodeConfigStatus, SSHKeyView, License, LicenseRecord, ClusterStatus, NetworkGraphNode, ResourceMonitorConfig, ImportSource, ImportTarget, UserGroupRecord, UserCredentialRecord, UserToken, PrivateKey, UserAccessRecord, SystemStatus, ResourcePermissions, ClusterNode, ComputePoolConfig, GuestConfig, VolumeSpec, FileSpec, VolumeContainer, GuestFilter, NodeConfig, GuestSystemSpec, UserGroup, SecurityRule, SecurityIfaceInfo } from "./data-defines";
-import { UserRole, controlCommandEnum, StorageType, VolumeContainerStrategy, StatisticRange, ComputePoolStrategy, ConsoleEventLevel, ImportVendor, ResourceType, SignatureAlgorithm, ResourceAccessLevel } from "./enums";
+import { UserRole, controlCommandEnum, StorageType, VolumeContainerStrategy, StatisticRange, ComputePoolStrategy, ConsoleEventLevel, ImportVendor, ResourceType, SignatureAlgorithm, ResourceAccessLevel, Priority } from "./enums";
 export interface ControlCommandResponse {
     id?: string;
     total?: number;
@@ -117,6 +117,9 @@ export interface ControlCommandRequest {
     get_guest_security_policy?: ControlGetGuestSecurityPolicyParams;
     modify_guest_security_policy?: ControlModifyGuestSecurityPolicyParams;
     reset_guest_security_policy?: ControlResetGuestSecurityPolicyParams;
+    modify_guest_cpu_priority?: ControlModifyGuestCPUPriorityParams;
+    modify_guest_disk_qos?: ControlModifyGuestDiskQoSParams;
+    modify_guest_network_qos?: ControlModifyGuestNetworkQoSParams;
     query_guests?: ControlQueryGuestsParams;
     get_guest?: ControlGetGuestParams;
     create_iso?: CreateFileParams;
@@ -1686,6 +1689,22 @@ export interface ControlModifyGuestSecurityPolicyParams {
  */
 export interface ControlResetGuestSecurityPolicyParams {
     guest_id: string;
+}
+export interface ControlModifyGuestCPUPriorityParams {
+    guest: string;
+    cpu_priority: Priority;
+}
+export interface ControlModifyGuestDiskQoSParams {
+    guest: string;
+    read_speed?: number;
+    write_speed?: number;
+    read_iops?: number;
+    write_iops?: number;
+}
+export interface ControlModifyGuestNetworkQoSParams {
+    guest: string;
+    receive_speed?: number;
+    send_speed?: number;
 }
 export interface ControlNodeQueryParams {
 }

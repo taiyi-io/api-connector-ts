@@ -69,6 +69,7 @@ import {
   ResourceType,
   SignatureAlgorithm,
   ResourceAccessLevel,
+  Priority,
 } from "./enums";
 
 // API Communication Interfaces
@@ -187,6 +188,9 @@ export interface ControlCommandRequest {
   get_guest_security_policy?: ControlGetGuestSecurityPolicyParams;
   modify_guest_security_policy?: ControlModifyGuestSecurityPolicyParams;
   reset_guest_security_policy?: ControlResetGuestSecurityPolicyParams;
+  modify_guest_cpu_priority?: ControlModifyGuestCPUPriorityParams;
+  modify_guest_disk_qos?: ControlModifyGuestDiskQoSParams;
+  modify_guest_network_qos?: ControlModifyGuestNetworkQoSParams;
   query_guests?: ControlQueryGuestsParams;
   get_guest?: ControlGetGuestParams;
   create_iso?: CreateFileParams;
@@ -1807,6 +1811,25 @@ export interface ControlModifyGuestSecurityPolicyParams {
  */
 export interface ControlResetGuestSecurityPolicyParams {
   guest_id: string;
+}
+
+export interface ControlModifyGuestCPUPriorityParams {
+  guest: string;
+  cpu_priority: Priority;
+}
+
+export interface ControlModifyGuestDiskQoSParams {
+  guest: string;
+  read_speed?: number;
+  write_speed?: number;
+  read_iops?: number;
+  write_iops?: number;
+}
+
+export interface ControlModifyGuestNetworkQoSParams {
+  guest: string;
+  receive_speed?: number;
+  send_speed?: number;
 }
 
 export interface ControlNodeQueryParams {}

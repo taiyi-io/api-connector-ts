@@ -1,5 +1,13 @@
 # Change Log
 
+## [0.11.1] - 2026-04-20
+
+### 新增
+
+- `ModifyGuestCPUPriority` / `ModifyGuestDiskQoS` / `ModifyGuestNetworkQoS` 枚举值
+- `ControlModifyGuestCPUPriorityParams` / `ControlModifyGuestDiskQoSParams` / `ControlModifyGuestNetworkQoSParams` 参数接口
+- `connector.modifyGuestCPUPriority` / `modifyGuestDiskQoS` / `modifyGuestNetworkQoS` 及对应 `try` 版本（共 6 个方法）
+
 ## [0.11.0] - 2026-02-27
 
 ### 新增

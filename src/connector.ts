@@ -18,6 +18,7 @@ import {
   ResourceType,
   ResourceAccessLevel,
   LicenseFeature,
+  Priority,
 } from "./enums";
 import {
   authenticateByPassword,
@@ -1331,6 +1332,129 @@ export class TaiyiConnector {
       return {
         error: taskData.error,
       };
+    }
+    return {};
+  }
+
+  public async tryModifyGuestCPUPriority(
+    guestID: string,
+    priority: Priority
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.ModifyGuestCPUPriority,
+      modify_guest_cpu_priority: {
+        guest: guestID,
+        cpu_priority: priority,
+      },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.id) {
+      return { error: "尝试修改云主机CPU优先级失败" };
+    }
+    return { data: resp.data.id };
+  }
+
+  public async modifyGuestCPUPriority(
+    guestID: string,
+    priority: Priority,
+    timeoutSeconds: number = 60
+  ): Promise<BackendResult> {
+    const taskResult = await this.tryModifyGuestCPUPriority(guestID, priority);
+    if (taskResult.error) {
+      return { error: taskResult.error };
+    }
+    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
+    if (taskData.error) {
+      return { error: taskData.error };
+    }
+    return {};
+  }
+
+  public async tryModifyGuestDiskQoS(
+    guestID: string,
+    readSpeed?: number,
+    writeSpeed?: number,
+    readIOPS?: number,
+    writeIOPS?: number
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.ModifyGuestDiskQoS,
+      modify_guest_disk_qos: {
+        guest: guestID,
+        read_speed: readSpeed,
+        write_speed: writeSpeed,
+        read_iops: readIOPS,
+        write_iops: writeIOPS,
+      },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.id) {
+      return { error: "尝试修改云主机磁盘QoS失败" };
+    }
+    return { data: resp.data.id };
+  }
+
+  public async modifyGuestDiskQoS(
+    guestID: string,
+    readSpeed?: number,
+    writeSpeed?: number,
+    readIOPS?: number,
+    writeIOPS?: number,
+    timeoutSeconds: number = 60
+  ): Promise<BackendResult> {
+    const taskResult = await this.tryModifyGuestDiskQoS(guestID, readSpeed, writeSpeed, readIOPS, writeIOPS);
+    if (taskResult.error) {
+      return { error: taskResult.error };
+    }
+    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
+    if (taskData.error) {
+      return { error: taskData.error };
+    }
+    return {};
+  }
+
+  public async tryModifyGuestNetworkQoS(
+    guestID: string,
+    receiveSpeed?: number,
+    sendSpeed?: number
+  ): Promise<BackendResult<string>> {
+    const cmd: ControlCommandRequest = {
+      type: controlCommandEnum.ModifyGuestNetworkQoS,
+      modify_guest_network_qos: {
+        guest: guestID,
+        receive_speed: receiveSpeed,
+        send_speed: sendSpeed,
+      },
+    };
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) {
+      return { error: resp.error };
+    }
+    if (!resp.data || !resp.data.id) {
+      return { error: "尝试修改云主机网络QoS失败" };
+    }
+    return { data: resp.data.id };
+  }
+
+  public async modifyGuestNetworkQoS(
+    guestID: string,
+    receiveSpeed?: number,
+    sendSpeed?: number,
+    timeoutSeconds: number = 60
+  ): Promise<BackendResult> {
+    const taskResult = await this.tryModifyGuestNetworkQoS(guestID, receiveSpeed, sendSpeed);
+    if (taskResult.error) {
+      return { error: taskResult.error };
+    }
+    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
+    if (taskData.error) {
+      return { error: taskData.error };
     }
     return {};
   }

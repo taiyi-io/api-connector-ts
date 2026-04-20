@@ -1134,6 +1134,106 @@ class TaiyiConnector {
             return {};
         });
     }
+    tryModifyGuestCPUPriority(guestID, priority) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.ModifyGuestCPUPriority,
+                modify_guest_cpu_priority: {
+                    guest: guestID,
+                    cpu_priority: priority,
+                },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.id) {
+                return { error: "尝试修改云主机CPU优先级失败" };
+            }
+            return { data: resp.data.id };
+        });
+    }
+    modifyGuestCPUPriority(guestID_1, priority_1) {
+        return __awaiter(this, arguments, void 0, function* (guestID, priority, timeoutSeconds = 60) {
+            const taskResult = yield this.tryModifyGuestCPUPriority(guestID, priority);
+            if (taskResult.error) {
+                return { error: taskResult.error };
+            }
+            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
+            if (taskData.error) {
+                return { error: taskData.error };
+            }
+            return {};
+        });
+    }
+    tryModifyGuestDiskQoS(guestID, readSpeed, writeSpeed, readIOPS, writeIOPS) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.ModifyGuestDiskQoS,
+                modify_guest_disk_qos: {
+                    guest: guestID,
+                    read_speed: readSpeed,
+                    write_speed: writeSpeed,
+                    read_iops: readIOPS,
+                    write_iops: writeIOPS,
+                },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.id) {
+                return { error: "尝试修改云主机磁盘QoS失败" };
+            }
+            return { data: resp.data.id };
+        });
+    }
+    modifyGuestDiskQoS(guestID_1, readSpeed_1, writeSpeed_1, readIOPS_1, writeIOPS_1) {
+        return __awaiter(this, arguments, void 0, function* (guestID, readSpeed, writeSpeed, readIOPS, writeIOPS, timeoutSeconds = 60) {
+            const taskResult = yield this.tryModifyGuestDiskQoS(guestID, readSpeed, writeSpeed, readIOPS, writeIOPS);
+            if (taskResult.error) {
+                return { error: taskResult.error };
+            }
+            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
+            if (taskData.error) {
+                return { error: taskData.error };
+            }
+            return {};
+        });
+    }
+    tryModifyGuestNetworkQoS(guestID, receiveSpeed, sendSpeed) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cmd = {
+                type: enums_1.controlCommandEnum.ModifyGuestNetworkQoS,
+                modify_guest_network_qos: {
+                    guest: guestID,
+                    receive_speed: receiveSpeed,
+                    send_speed: sendSpeed,
+                },
+            };
+            const resp = yield this.requestCommandResponse(cmd);
+            if (resp.error) {
+                return { error: resp.error };
+            }
+            if (!resp.data || !resp.data.id) {
+                return { error: "尝试修改云主机网络QoS失败" };
+            }
+            return { data: resp.data.id };
+        });
+    }
+    modifyGuestNetworkQoS(guestID_1, receiveSpeed_1, sendSpeed_1) {
+        return __awaiter(this, arguments, void 0, function* (guestID, receiveSpeed, sendSpeed, timeoutSeconds = 60) {
+            const taskResult = yield this.tryModifyGuestNetworkQoS(guestID, receiveSpeed, sendSpeed);
+            if (taskResult.error) {
+                return { error: taskResult.error };
+            }
+            const taskData = yield this.waitTask(taskResult.data, timeoutSeconds);
+            if (taskData.error) {
+                return { error: taskData.error };
+            }
+            return {};
+        });
+    }
     /**
      * 查询云主机
      * @param start - 起始位置

@@ -1,6 +1,6 @@
 {
   "name": "@taiyi-io/api-connector-ts",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Typescript connector to Taiyi control API",
   "keywords": [
     "cloud"

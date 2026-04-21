@@ -771,8 +771,10 @@ export interface NodeData {
   id: string;
   name: string;
   host: string;
+  host_ipv6?: string;
   port: number; // default: 5851
   published_host?: string;
+  published_host_ipv6?: string;
   published_port?: number;
   tls_enabled?: boolean;
   api_version?: string;

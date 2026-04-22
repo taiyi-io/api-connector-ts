@@ -1759,7 +1759,7 @@ export interface ControlCreateGuestProfileParams {
     pool_id?: string;
 }
 export interface ControlModifyGuestProfileParams {
-    id: string;
+    profile_id: string;
     name?: string;
     description?: string;
     cores?: number;
@@ -1774,10 +1774,10 @@ export interface ControlModifyGuestProfileParams {
     pool_id?: string;
 }
 export interface ControlDeleteGuestProfileParams {
-    id: string;
+    profile_id: string;
 }
 export interface ControlGetGuestProfileParams {
-    id: string;
+    profile_id: string;
 }
 export interface ControlQueryGuestProfilesParams {
     offset?: number;

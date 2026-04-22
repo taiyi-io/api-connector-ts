@@ -1873,7 +1873,7 @@ export interface ControlCreateGuestProfileParams {
 }
 
 export interface ControlModifyGuestProfileParams {
-  id: string;
+  profile_id: string;
   name?: string;
   description?: string;
   cores?: number;
@@ -1889,11 +1889,11 @@ export interface ControlModifyGuestProfileParams {
 }
 
 export interface ControlDeleteGuestProfileParams {
-  id: string;
+  profile_id: string;
 }
 
 export interface ControlGetGuestProfileParams {
-  id: string;
+  profile_id: string;
 }
 
 export interface ControlQueryGuestProfilesParams {

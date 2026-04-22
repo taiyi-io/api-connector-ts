@@ -5410,28 +5410,37 @@ class TaiyiConnector {
     }
     tryDeleteGuestProfile(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
             const cmd = {
                 type: enums_1.controlCommandEnum.DeleteGuestProfile,
-                delete_guest_profile: { id },
+                delete_guest_profile: { profile_id: id },
             };
-            const resp = yield this.requestCommandResponse(cmd);
-            if (resp.error)
-                return { error: resp.error };
-            return { data: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.id) !== null && _b !== void 0 ? _b : '' };
+            let result = yield (0, request_forwarder_1.sendCommand)(this._backendURL, this._authenticatedTokens.access_token, this._authenticatedTokens.csrf_token, cmd);
+            if (result.unauthenticated) {
+                const changed = yield this.syncTokens();
+                if (!changed) {
+                    const refreshResult = yield this.refreshToken();
+                    if (refreshResult.unauthenticated || refreshResult.error) {
+                        this.onValidationExpired();
+                        return { unauthenticated: true, error: refreshResult.error };
+                    }
+                }
+                result = yield (0, request_forwarder_1.sendCommand)(this._backendURL, this._authenticatedTokens.access_token, this._authenticatedTokens.csrf_token, cmd);
+            }
+            if (result.error)
+                return { error: result.error };
+            return { data: id };
         });
     }
     tryGetGuestProfile(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a;
             const cmd = {
                 type: enums_1.controlCommandEnum.GetGuestProfile,
-                get_guest_profile: { id },
+                get_guest_profile: { profile_id: id },
             };
             const resp = yield this.requestCommandResponse(cmd);
             if (resp.error)
                 return { error: resp.error };
-            return { data: (_a = resp.data) === null || _a === void 0 ? void 0 : _a.profile };
+            return { data: resp.data };
         });
     }
     tryQueryGuestProfiles(params) {

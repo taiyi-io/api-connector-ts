@@ -5964,11 +5964,32 @@ export class TaiyiConnector {
   ): Promise<BackendResult<string>> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.DeleteGuestProfile,
-      delete_guest_profile: { id },
+      delete_guest_profile: { profile_id: id },
     };
-    const resp = await this.requestCommandResponse(cmd);
-    if (resp.error) return { error: resp.error };
-    return { data: resp.data?.id ?? '' };
+    let result = await sendCommand(
+      this._backendURL,
+      this._authenticatedTokens.access_token,
+      this._authenticatedTokens.csrf_token,
+      cmd
+    );
+    if (result.unauthenticated) {
+      const changed = await this.syncTokens();
+      if (!changed) {
+        const refreshResult = await this.refreshToken();
+        if (refreshResult.unauthenticated || refreshResult.error) {
+          this.onValidationExpired();
+          return { unauthenticated: true, error: refreshResult.error };
+        }
+      }
+      result = await sendCommand(
+        this._backendURL,
+        this._authenticatedTokens.access_token,
+        this._authenticatedTokens.csrf_token,
+        cmd
+      );
+    }
+    if (result.error) return { error: result.error };
+    return { data: id };
   }
 
   public async tryGetGuestProfile(
@@ -5976,11 +5997,11 @@ export class TaiyiConnector {
   ): Promise<BackendResult<import('./data-defines').GuestProfile>> {
     const cmd: ControlCommandRequest = {
       type: controlCommandEnum.GetGuestProfile,
-      get_guest_profile: { id },
+      get_guest_profile: { profile_id: id },
     };
     const resp = await this.requestCommandResponse(cmd);
     if (resp.error) return { error: resp.error };
-    return { data: resp.data?.profile };
+    return { data: resp.data as unknown as import('./data-defines').GuestProfile };
   }
 
   public async tryQueryGuestProfiles(

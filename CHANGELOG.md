@@ -16,6 +16,7 @@
 - `TrafficQuotaSpec` / `TrafficQuotaState` / `GuestTrafficInfo` 数据接口
 - `connector.tryQueryGuestTraffic` / `tryResetGuestTraffic` / `tryModifyGuestTrafficQuota` / `tryExtendGuestTrafficTemp`（共 4 个方法）
 - `GuestProfile` 接口及 7 个 `tryXxx` 方法（`tryCreateGuestProfile` / `tryModifyGuestProfile` / `tryDeleteGuestProfile` / `tryGetGuestProfile` / `tryQueryGuestProfiles` / `tryCreateGuestFromProfile` / `tryReplaceGuestConfig`）
+- **双栈地址透传**：`GuestStatus` / `GuestView` 接口新增 `host_address_v6?: string` 可选字段，与 node 侧跨节点双栈扩展契约对齐，便于 portal 等调用方在 v4 缺失时回退显示 IPv6 地址
 
 ## [0.11.0] - 2026-02-27
 

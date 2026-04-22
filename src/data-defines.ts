@@ -542,7 +542,8 @@ export interface GuestHAConfig {
  * @property media_attached - 是否已加载媒体
  * @property media_source - 媒体源
  * @property host_id - 资源节点ID
- * @property host_address - 资源节点地址
+ * @property host_address - 资源节点地址（IPv4）
+ * @property host_address_v6 - 资源节点 IPv6 地址
  * @property pool - 所属计算资源池
  * @property tools_installed - 是否已安装辅助工具
  */
@@ -552,6 +553,7 @@ export interface GuestStatus extends GuestSpec {
   media_source?: string;
   host_id?: string;
   host_address?: string;
+  host_address_v6?: string;
   pool?: string;
   tools_installed?: boolean;
 }
@@ -1887,6 +1889,7 @@ export interface GuestView {
   media_source?: string;
   host_id?: string;
   host_address?: string;
+  host_address_v6?: string;
   pool?: string;
   tools_installed?: boolean;
   permissions: ResourcePermissions;

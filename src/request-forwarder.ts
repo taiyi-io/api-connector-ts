@@ -32,6 +32,31 @@ const headerCSRFToken = "X-CSRF-Token";
 function commandURL(backendURL: string): string {
   return `${backendURL}commands/`;
 }
+/**
+ * 构造非 200 响应的错误消息。
+ * HTTP/2 协议下 response.statusText 为空字符串，若直接作为错误会导致上层误判为「无错误」。
+ * 这里拼接状态码与响应体摘要，保证错误消息始终非空。
+ * @param response - 响应
+ * @returns 错误消息
+ */
+async function formatHTTPError(response: Response): Promise<string> {
+  let bodySnippet = "";
+  try {
+    const text = await response.text();
+    bodySnippet = text.length > 200 ? text.slice(0, 200) + "..." : text;
+  } catch {
+    bodySnippet = "<无法读取响应体>";
+  }
+  const statusText = response.statusText || "";
+  const parts = [`HTTP ${response.status}`];
+  if (statusText) {
+    parts.push(statusText);
+  }
+  if (bodySnippet) {
+    parts.push(bodySnippet);
+  }
+  return parts.join(" ");
+}
 async function signEd25519(
   payload: string,
   privateKey: string
@@ -61,7 +86,7 @@ async function parseCommandResponse(
   //if 200 success
   if (response.status != 200) {
     result = {
-      error: response.statusText,
+      error: await formatHTTPError(response),
     };
     return result;
   }
@@ -101,7 +126,7 @@ async function parseCommandResult(response: Response): Promise<BackendResult> {
   //if 200 success
   if (response.status != 200) {
     result = {
-      error: response.statusText,
+      error: await formatHTTPError(response),
     };
     return result;
   }
@@ -134,7 +159,7 @@ async function parseAuthoriedToken(
   //if 200 success
   if (response.status != 200) {
     result = {
-      error: response.statusText,
+      error: await formatHTTPError(response),
     };
     return result;
   }

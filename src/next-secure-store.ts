@@ -9,6 +9,7 @@
 import { TokenSigningMethod, UserRole } from "./enums";
 import { AllocatedTokens } from "./data-defines";
 import { cookies } from "next/headers";
+import { createId } from "@paralleldrive/cuid2";
 import { generateDeviceFingerprint } from "./helper";
 
 const cookieRefreshToken = "taiyi_refresh_token";
@@ -218,12 +219,25 @@ export async function setDeviceID(id: string): Promise<void> {
 }
 
 /**
- * 从cookie中获取设备ID（**仅限服务端组件使用**）
+ * 从cookie中获取设备ID（**仅限服务端组件使用**）。
+ *
+ * 当设备ID cookie不存在或为空时，自动生成新ID（前缀 `server-` + cuid2）并写入cookie，
+ * 避免服务端路由（如登录 `/api/auth`）在客户端 `getNextConnector()` 尚未触发过设备ID分配时，
+ * 因为读到空设备ID而导致后端返回 `device required` 错误。
+ *
+ * 生成的ID会以 30 天有效期写入 `taiyi_device` cookie，后续客户端 `getDeviceFromBrowser()` 启动时
+ * 若 localStorage 未存ID，会保持与此处一致。
  */
 export async function getDeviceID(): Promise<string> {
   const cks = await cookies();
   const deviceItem = cks.get(cookieDevice);
-  return deviceItem?.value || "";
+  if (deviceItem && deviceItem.value) {
+    return deviceItem.value;
+  }
+  // cookie 缺失，自动生成并持久化，保证服务端路由调用时设备ID必定非空
+  const newDeviceID = `server-${createId()}`;
+  cks.set(cookieDevice, newDeviceID, { sameSite: "strict", maxAge: 30 * 24 * 60 * 60 });
+  return newDeviceID;
 }
 
 /**

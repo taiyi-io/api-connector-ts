@@ -1,5 +1,23 @@
 # Change Log
 
+## [0.12.2] - 2026-04-24
+
+### 修复
+
+- **HTTP/2 下非 200 响应错误消息丢失**：`request-forwarder.ts` 中 `parseCommandResponse` / `parseCommandResult` / `parseAuthoriedToken` 原来直接使用 `response.statusText` 作为错误消息；但 HTTP/2 协议规范不再传递 status text，浏览器/Node `fetch` 对 HTTP/2 响应返回空字符串，导致上层 `else if (tokenResult.error)` 判断为 falsy 而被跳过，最终以误导性的「无有效令牌」等消息掩盖真实 HTTP 错误。新增 `formatHTTPError` 辅助函数，统一以 `HTTP <code> <statusText?> <body 摘要>` 格式构造错误消息，保证始终非空。影响场景：通过 fly.io / tunnelto / Caddy 等 HTTP/2 反向代理访问后端时，后端拒连或 5xx 错误可正确向上传播
+- **服务端 `getDeviceID()` 缺失兜底逻辑导致登录 `device required`**：`next-secure-store.ts::getDeviceID` 原来仅从 `taiyi_device` cookie 读取，缺失时返回空字符串；客户端 `getDeviceFromBrowser()`（仅在 `getNextConnector()` 路径触发）虽有自动生成逻辑，但依赖 `localStorage`/`navigator`，用户首次访问登录页或在隐身模式下时 cookie 未建立，服务端登录路由 `/api/auth` 直接以空设备 ID 调用 `authenticateByPassword` → 后端返回 `device required`。修复后 `getDeviceID()` 在 cookie 缺失时自动生成 `server-<cuid2>` 并以 30 天有效期写入 cookie，保证所有服务端调用点获得稳定非空设备 ID
+
+### 测试
+
+- `test/setup.ts` 新增 `USE_TLS` 环境变量支持，将其传入 `getInsecureConnector` 第 4 个参数，允许测试针对启用 HTTPS 的后端（如通过 tunnelto 暴露的公网 `https://*.tunn.dev`）运行
+- `.env.test.example` 补充 `USE_TLS=false` 示例说明
+
+## [0.12.1] - 2026-04-23
+
+### 修复
+
+- 移除 `package.json` 中的 `"type": "module"` 声明。之前该字段与 `tsconfig.json` 的 `"module": "CommonJS"` 产物冲突：`dist/*.js` 实际编译为 CJS，但包声明为 ESM，导致 Next.js 16 / Turbopack 将其按 ESM 静态解析时报 `"The module has no exports at all"`，Vercel 构建失败（本地 webpack 容错未暴露该问题）
+
 ## [0.12.0] - 2026-04-20
 
 ### 修复

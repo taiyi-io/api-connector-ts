@@ -29,7 +29,8 @@ export async function getTestConnector(): Promise<TaiyiConnector> {
   const accessString = process.env.ACCESS_STRING!;
   const deviceID = process.env.DEVICE_ID!;
 
-  const connector = await getInsecureConnector(deviceID, host, port);
+  const useTLS = process.env.USE_TLS === "true";
+  const connector = await getInsecureConnector(deviceID, host, port, useTLS);
   const result = await connector.authenticateByToken(accessString);
   if (result.error) {
     throw new Error(`认证失败: ${result.error}`);

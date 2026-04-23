@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { getTestConnector } from "../setup";
 import { getAvailableComputePool } from "../helpers/resource-guard";
 import { TaiyiConnector } from "../../src/connector";
-import { ResourceAccessLevel } from "../../src/enums";
+import { Priority, ResourceAccessLevel } from "../../src/enums";
 
 const TEST_GUEST_NAME = "ci-test-guest-config-v2";
 
@@ -89,5 +89,43 @@ describe("云主机配置修改", () => {
     // 还原状态
     const resultRestore = await connector.modifyAutoStart(guestID, currentAutoStart);
     expect(resultRestore.error).toBeUndefined();
+  });
+
+  it("modifyGuestCPUPriority 修改 CPU 优先级", async () => {
+    if (!guestID) return;
+    const result = await connector.modifyGuestCPUPriority(guestID, Priority.High);
+    expect(result.error).toBeUndefined();
+  });
+
+  it("modifyGuestDiskQoS 设置磁盘读写速率与 IOPS", async () => {
+    if (!guestID) return;
+    const result = await connector.modifyGuestDiskQoS(
+      guestID,
+      10 * 1024 * 1024,
+      10 * 1024 * 1024,
+      1000,
+      1000
+    );
+    expect(result.error).toBeUndefined();
+  });
+
+  it("modifyGuestNetworkQoS 设置网络收发速率", async () => {
+    if (!guestID) return;
+    const result = await connector.modifyGuestNetworkQoS(
+      guestID,
+      1024 * 1024,
+      1024 * 1024
+    );
+    expect(result.error).toBeUndefined();
+  });
+
+  it("getGuest 返回对象允许可选 host_address_v6 字段", async () => {
+    if (!guestID) return;
+    const result = await connector.getGuest(guestID);
+    expect(result.error).toBeUndefined();
+    expect(result.data).toBeDefined();
+    if (result.data!.host_address_v6 !== undefined) {
+      expect(typeof result.data!.host_address_v6).toBe("string");
+    }
   });
 });

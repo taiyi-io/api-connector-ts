@@ -5906,7 +5906,7 @@ export class TaiyiConnector {
     };
     const resp = await this.requestCommandResponse(cmd);
     if (resp.error) return { error: resp.error };
-    return { data: resp.data?.id ?? '' };
+    return { data: extractTaskID(resp.data) };
   }
 
   public async tryModifyGuestTrafficQuota(
@@ -5919,7 +5919,7 @@ export class TaiyiConnector {
     };
     const resp = await this.requestCommandResponse(cmd);
     if (resp.error) return { error: resp.error };
-    return { data: resp.data?.id ?? '' };
+    return { data: extractTaskID(resp.data) };
   }
 
   public async tryExtendGuestTrafficTemp(
@@ -5932,7 +5932,7 @@ export class TaiyiConnector {
     };
     const resp = await this.requestCommandResponse(cmd);
     if (resp.error) return { error: resp.error };
-    return { data: resp.data?.id ?? '' };
+    return { data: extractTaskID(resp.data) };
   }
 
   public async tryCreateGuestProfile(
@@ -5944,7 +5944,7 @@ export class TaiyiConnector {
     };
     const resp = await this.requestCommandResponse(cmd);
     if (resp.error) return { error: resp.error };
-    return { data: resp.data?.id ?? '' };
+    return { data: extractTaskID(resp.data) };
   }
 
   public async tryModifyGuestProfile(
@@ -5956,7 +5956,7 @@ export class TaiyiConnector {
     };
     const resp = await this.requestCommandResponse(cmd);
     if (resp.error) return { error: resp.error };
-    return { data: resp.data?.id ?? '' };
+    return { data: extractTaskID(resp.data) };
   }
 
   public async tryDeleteGuestProfile(
@@ -6025,7 +6025,7 @@ export class TaiyiConnector {
     };
     const resp = await this.requestCommandResponse(cmd);
     if (resp.error) return { error: resp.error };
-    return { data: resp.data?.id ?? '' };
+    return { data: extractTaskID(resp.data) };
   }
 
   public async tryReplaceGuestConfig(
@@ -6035,8 +6035,40 @@ export class TaiyiConnector {
       type: controlCommandEnum.ReplaceGuestConfig,
       replace_guest_config: params,
     };
-    const resp = await this.requestCommandResponse(cmd);
-    if (resp.error) return { error: resp.error };
-    return { data: resp.data?.id ?? '' };
+    // 后端可能以同步命令返回空响应（不含 data），使用 sendCommand 避开 parseCommandResponse 的 "no data" 校验
+    let result = await sendCommand(
+      this._backendURL,
+      this._authenticatedTokens.access_token,
+      this._authenticatedTokens.csrf_token,
+      cmd
+    );
+    if (result.unauthenticated) {
+      const changed = await this.syncTokens();
+      if (!changed) {
+        const refreshResult = await this.refreshToken();
+        if (refreshResult.unauthenticated || refreshResult.error) {
+          this.onValidationExpired();
+          return { unauthenticated: true, error: refreshResult.error };
+        }
+      }
+      result = await sendCommand(
+        this._backendURL,
+        this._authenticatedTokens.access_token,
+        this._authenticatedTokens.csrf_token,
+        cmd
+      );
+    }
+    if (result.error) return { error: result.error };
+    return { data: '' };
   }
+}
+
+/**
+ * 兼容两种后端响应形态，提取任务 ID：
+ * - 旧：`{ data: { id: "<task-id>" } }`
+ * - 新：`{ data: "<task-id>" }`（部分套餐/流量命令直接返回字符串）
+ */
+function extractTaskID(data: ControlCommandResponse | string | undefined): string {
+  if (typeof data === 'string') return data;
+  return data?.id ?? '';
 }

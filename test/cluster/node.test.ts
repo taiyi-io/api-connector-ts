@@ -20,6 +20,14 @@ describe("节点管理", () => {
     expect(result.error).toBeUndefined();
     expect(result.data).toBeDefined();
     expect(Array.isArray(result.data)).toBe(true);
+    for (const node of result.data!) {
+      if (node.host_ipv6 !== undefined) {
+        expect(typeof node.host_ipv6).toBe("string");
+      }
+      if (node.published_host_ipv6 !== undefined) {
+        expect(typeof node.published_host_ipv6).toBe("string");
+      }
+    }
   });
 
   it("getNode 获取指定节点详情", async () => {

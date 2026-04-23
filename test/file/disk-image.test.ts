@@ -11,6 +11,15 @@ describe("磁盘镜像管理", () => {
 
   beforeAll(async () => {
     connector = await getTestConnector();
+    // 前置清理：删除可能残留的同名磁盘镜像
+    const list = await connector.queryDiskFiles(0, 200);
+    if (list.data) {
+      for (const f of list.data.records) {
+        if (f.name === TEST_DISK_NAME || f.name === "ci-test-disk-modified") {
+          await connector.deleteDiskFile(f.id);
+        }
+      }
+    }
   });
 
   afterAll(async () => {

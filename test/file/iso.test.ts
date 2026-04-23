@@ -11,6 +11,15 @@ describe("ISO 文件管理", () => {
 
   beforeAll(async () => {
     connector = await getTestConnector();
+    // 前置清理：删除可能残留的同名 ISO
+    const list = await connector.queryISOFiles(0, 200);
+    if (list.data) {
+      for (const f of list.data.records) {
+        if (f.name === TEST_ISO_NAME || f.name === "ci-test-iso-modified") {
+          await connector.deleteISOFile(f.id);
+        }
+      }
+    }
   });
 
   afterAll(async () => {

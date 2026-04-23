@@ -12,6 +12,9 @@ describe("安全策略组管理", () => {
 
   beforeAll(async () => {
     connector = await getTestConnector();
+    // 前置清理：删除可能残留的同名策略
+    await connector.deleteSecurityPolicy(TEST_POLICY_COPY_ID);
+    await connector.deleteSecurityPolicy(TEST_POLICY_ID);
   });
 
   afterAll(async () => {
@@ -64,7 +67,8 @@ describe("安全策略组管理", () => {
     if (!policyCreated) return;
     const result = await connector.copySecurityPolicy(
       TEST_POLICY_ID,
-      TEST_POLICY_COPY_ID
+      TEST_POLICY_COPY_ID,
+      "CI测试安全策略（复制）"
     );
     expect(result.error).toBeUndefined();
     policyCopyCreated = true;

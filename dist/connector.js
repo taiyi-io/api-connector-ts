@@ -5345,7 +5345,6 @@ class TaiyiConnector {
     }
     tryResetGuestTraffic(guestID) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
             const cmd = {
                 type: enums_1.controlCommandEnum.ResetGuestTraffic,
                 reset_guest_traffic: { guest_id: guestID },
@@ -5353,12 +5352,11 @@ class TaiyiConnector {
             const resp = yield this.requestCommandResponse(cmd);
             if (resp.error)
                 return { error: resp.error };
-            return { data: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.id) !== null && _b !== void 0 ? _b : '' };
+            return { data: extractTaskID(resp.data) };
         });
     }
     tryModifyGuestTrafficQuota(guestID, quota) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
             const cmd = {
                 type: enums_1.controlCommandEnum.ModifyGuestTrafficQuota,
                 modify_guest_traffic_quota: { guest_id: guestID, quota },
@@ -5366,12 +5364,11 @@ class TaiyiConnector {
             const resp = yield this.requestCommandResponse(cmd);
             if (resp.error)
                 return { error: resp.error };
-            return { data: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.id) !== null && _b !== void 0 ? _b : '' };
+            return { data: extractTaskID(resp.data) };
         });
     }
     tryExtendGuestTrafficTemp(guestID, extraBytes) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
             const cmd = {
                 type: enums_1.controlCommandEnum.ExtendGuestTrafficTemp,
                 extend_guest_traffic_temp: { guest_id: guestID, extra_bytes: extraBytes },
@@ -5379,12 +5376,11 @@ class TaiyiConnector {
             const resp = yield this.requestCommandResponse(cmd);
             if (resp.error)
                 return { error: resp.error };
-            return { data: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.id) !== null && _b !== void 0 ? _b : '' };
+            return { data: extractTaskID(resp.data) };
         });
     }
     tryCreateGuestProfile(params) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
             const cmd = {
                 type: enums_1.controlCommandEnum.CreateGuestProfile,
                 create_guest_profile: params,
@@ -5392,12 +5388,11 @@ class TaiyiConnector {
             const resp = yield this.requestCommandResponse(cmd);
             if (resp.error)
                 return { error: resp.error };
-            return { data: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.id) !== null && _b !== void 0 ? _b : '' };
+            return { data: extractTaskID(resp.data) };
         });
     }
     tryModifyGuestProfile(params) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
             const cmd = {
                 type: enums_1.controlCommandEnum.ModifyGuestProfile,
                 modify_guest_profile: params,
@@ -5405,7 +5400,7 @@ class TaiyiConnector {
             const resp = yield this.requestCommandResponse(cmd);
             if (resp.error)
                 return { error: resp.error };
-            return { data: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.id) !== null && _b !== void 0 ? _b : '' };
+            return { data: extractTaskID(resp.data) };
         });
     }
     tryDeleteGuestProfile(id) {
@@ -5458,7 +5453,6 @@ class TaiyiConnector {
     }
     tryCreateGuestFromProfile(params) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
             const cmd = {
                 type: enums_1.controlCommandEnum.CreateGuestFromProfile,
                 create_guest_from_profile: params,
@@ -5466,21 +5460,43 @@ class TaiyiConnector {
             const resp = yield this.requestCommandResponse(cmd);
             if (resp.error)
                 return { error: resp.error };
-            return { data: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.id) !== null && _b !== void 0 ? _b : '' };
+            return { data: extractTaskID(resp.data) };
         });
     }
     tryReplaceGuestConfig(params) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
             const cmd = {
                 type: enums_1.controlCommandEnum.ReplaceGuestConfig,
                 replace_guest_config: params,
             };
-            const resp = yield this.requestCommandResponse(cmd);
-            if (resp.error)
-                return { error: resp.error };
-            return { data: (_b = (_a = resp.data) === null || _a === void 0 ? void 0 : _a.id) !== null && _b !== void 0 ? _b : '' };
+            // 后端可能以同步命令返回空响应（不含 data），使用 sendCommand 避开 parseCommandResponse 的 "no data" 校验
+            let result = yield (0, request_forwarder_1.sendCommand)(this._backendURL, this._authenticatedTokens.access_token, this._authenticatedTokens.csrf_token, cmd);
+            if (result.unauthenticated) {
+                const changed = yield this.syncTokens();
+                if (!changed) {
+                    const refreshResult = yield this.refreshToken();
+                    if (refreshResult.unauthenticated || refreshResult.error) {
+                        this.onValidationExpired();
+                        return { unauthenticated: true, error: refreshResult.error };
+                    }
+                }
+                result = yield (0, request_forwarder_1.sendCommand)(this._backendURL, this._authenticatedTokens.access_token, this._authenticatedTokens.csrf_token, cmd);
+            }
+            if (result.error)
+                return { error: result.error };
+            return { data: '' };
         });
     }
 }
 exports.TaiyiConnector = TaiyiConnector;
+/**
+ * 兼容两种后端响应形态，提取任务 ID：
+ * - 旧：`{ data: { id: "<task-id>" } }`
+ * - 新：`{ data: "<task-id>" }`（部分套餐/流量命令直接返回字符串）
+ */
+function extractTaskID(data) {
+    var _a;
+    if (typeof data === 'string')
+        return data;
+    return (_a = data === null || data === void 0 ? void 0 : data.id) !== null && _a !== void 0 ? _a : '';
+}

@@ -29,6 +29,7 @@ exports.clearAllocatedTokens = clearAllocatedTokens;
 exports.handleStoreStatusChanged = handleStoreStatusChanged;
 const enums_1 = require("./enums");
 const headers_1 = require("next/headers");
+const cuid2_1 = require("@paralleldrive/cuid2");
 const helper_1 = require("./helper");
 const cookieRefreshToken = "taiyi_refresh_token";
 const cookieRefreshTokenExpire = "taiyi_refresh_token_expire";
@@ -205,13 +206,26 @@ function setDeviceID(id) {
     });
 }
 /**
- * 从cookie中获取设备ID（**仅限服务端组件使用**）
+ * 从cookie中获取设备ID（**仅限服务端组件使用**）。
+ *
+ * 当设备ID cookie不存在或为空时，自动生成新ID（前缀 `server-` + cuid2）并写入cookie，
+ * 避免服务端路由（如登录 `/api/auth`）在客户端 `getNextConnector()` 尚未触发过设备ID分配时，
+ * 因为读到空设备ID而导致后端返回 `device required` 错误。
+ *
+ * 生成的ID会以 30 天有效期写入 `taiyi_device` cookie，后续客户端 `getDeviceFromBrowser()` 启动时
+ * 若 localStorage 未存ID，会保持与此处一致。
  */
 function getDeviceID() {
     return __awaiter(this, void 0, void 0, function* () {
         const cks = yield (0, headers_1.cookies)();
         const deviceItem = cks.get(cookieDevice);
-        return (deviceItem === null || deviceItem === void 0 ? void 0 : deviceItem.value) || "";
+        if (deviceItem && deviceItem.value) {
+            return deviceItem.value;
+        }
+        // cookie 缺失，自动生成并持久化，保证服务端路由调用时设备ID必定非空
+        const newDeviceID = `server-${(0, cuid2_1.createId)()}`;
+        cks.set(cookieDevice, newDeviceID, { sameSite: "strict", maxAge: 30 * 24 * 60 * 60 });
+        return newDeviceID;
     });
 }
 /**

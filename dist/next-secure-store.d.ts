@@ -53,7 +53,14 @@ export declare function retrieveCriticalValues(storeID: string): Promise<Critica
  */
 export declare function setDeviceID(id: string): Promise<void>;
 /**
- * 从cookie中获取设备ID（**仅限服务端组件使用**）
+ * 从cookie中获取设备ID（**仅限服务端组件使用**）。
+ *
+ * 当设备ID cookie不存在或为空时，自动生成新ID（前缀 `server-` + cuid2）并写入cookie，
+ * 避免服务端路由（如登录 `/api/auth`）在客户端 `getNextConnector()` 尚未触发过设备ID分配时，
+ * 因为读到空设备ID而导致后端返回 `device required` 错误。
+ *
+ * 生成的ID会以 30 天有效期写入 `taiyi_device` cookie，后续客户端 `getDeviceFromBrowser()` 启动时
+ * 若 localStorage 未存ID，会保持与此处一致。
  */
 export declare function getDeviceID(): Promise<string>;
 /**

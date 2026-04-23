@@ -68,6 +68,34 @@ const headerCSRFToken = "X-CSRF-Token";
 function commandURL(backendURL) {
     return `${backendURL}commands/`;
 }
+/**
+ * 构造非 200 响应的错误消息。
+ * HTTP/2 协议下 response.statusText 为空字符串，若直接作为错误会导致上层误判为「无错误」。
+ * 这里拼接状态码与响应体摘要，保证错误消息始终非空。
+ * @param response - 响应
+ * @returns 错误消息
+ */
+function formatHTTPError(response) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let bodySnippet = "";
+        try {
+            const text = yield response.text();
+            bodySnippet = text.length > 200 ? text.slice(0, 200) + "..." : text;
+        }
+        catch (_a) {
+            bodySnippet = "<无法读取响应体>";
+        }
+        const statusText = response.statusText || "";
+        const parts = [`HTTP ${response.status}`];
+        if (statusText) {
+            parts.push(statusText);
+        }
+        if (bodySnippet) {
+            parts.push(bodySnippet);
+        }
+        return parts.join(" ");
+    });
+}
 function signEd25519(payload, privateKey) {
     return __awaiter(this, void 0, void 0, function* () {
         const key = ed25519.etc.hexToBytes(privateKey).slice(0, 32);
@@ -95,7 +123,7 @@ function parseCommandResponse(response) {
         //if 200 success
         if (response.status != 200) {
             result = {
-                error: response.statusText,
+                error: yield formatHTTPError(response),
             };
             return result;
         }
@@ -136,7 +164,7 @@ function parseCommandResult(response) {
         //if 200 success
         if (response.status != 200) {
             result = {
-                error: response.statusText,
+                error: yield formatHTTPError(response),
             };
             return result;
         }
@@ -168,7 +196,7 @@ function parseAuthoriedToken(response) {
         //if 200 success
         if (response.status != 200) {
             result = {
-                error: response.statusText,
+                error: yield formatHTTPError(response),
             };
             return result;
         }

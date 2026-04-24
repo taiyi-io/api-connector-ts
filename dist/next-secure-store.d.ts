@@ -1,29 +1,6 @@
-import { TokenSigningMethod, UserRole } from "./enums";
 import { AllocatedTokens } from "./data-defines";
-/**
- * 适配Nextjs的安全数据存储
- */
-export interface NextSecureStore {
-    id: string;
-    device: string;
-    backend_host: string;
-    backend_port: number;
-    authenticated: boolean;
-    access_token: string;
-    public_key: string;
-    algorithm: TokenSigningMethod;
-    access_expired_at: string;
-    roles: UserRole[];
-    user: string;
-}
-/**
- * 需要安全存储的关键值
- */
-export interface CriticalValues {
-    csrf_token: string;
-    refresh_token: string;
-    refresh_expire: string;
-}
+import { NextSecureStore, CriticalValues } from "./next-store-internals";
+export type { NextSecureStore, CriticalValues } from "./next-store-internals";
 /**
  * 获取Nextjs的安全数据存储（**仅限服务端组件使用**）
  */

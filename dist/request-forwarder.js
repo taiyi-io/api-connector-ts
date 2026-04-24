@@ -1,9 +1,5 @@
-"use strict";
-/**
- * 向API服务发送请求的转发器
- * **仅限服务端组件使用**
- */
 "use server";
+"use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -56,6 +52,13 @@ exports.authenticateByToken = authenticateByToken;
 exports.refreshAccessToken = refreshAccessToken;
 exports.openMonitorChannel = openMonitorChannel;
 exports.fetchTLSStatus = fetchTLSStatus;
+/**
+ * 向API服务发送请求的转发器
+ * **仅限服务端组件使用**
+ *
+ * 注意：`"use server"` 指令必须是文件首条语句，不能被 JSDoc 注释前置，
+ * 否则 Next 16 会将这些函数当作普通客户端代码打包。
+ */
 const ed25519 = __importStar(require("@noble/ed25519"));
 const enums_1 = require("./enums");
 const helper_1 = require("./helper");

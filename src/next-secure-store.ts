@@ -1,48 +1,31 @@
+"use server";
 /**
  * 适配Nextjs的封装，安全存储TaiyiConnector，防止CSRF攻击（**仅限服务端组件使用**）
  * 内部使用localstorage和cookie存储数据，自动分配设备标识和多connector支持并保持一致，无需手动干预
  * isStoreAuthenticated() 检查存储是否已认证，在middleware、route和服务端组件中使用
  * getNextStore() 直接访问存储数据
  * 提供数据读写更新辅助方法
+ *
+ * 注意：`"use server"` 指令必须是文件首条语句，不能被 JSDoc 注释前置，
+ * 否则 Next 16 会将这些函数当作普通客户端代码打包，导致运行时
+ * `cookies` was called outside a request scope。
  */
-"use server";
-import { TokenSigningMethod, UserRole } from "./enums";
+import { TokenSigningMethod } from "./enums";
 import { AllocatedTokens } from "./data-defines";
 import { cookies } from "next/headers";
 import { createId } from "@paralleldrive/cuid2";
 import { generateDeviceFingerprint } from "./helper";
-
-const cookieRefreshToken = "taiyi_refresh_token";
-const cookieRefreshTokenExpire = "taiyi_refresh_token_expire";
-const cookieCSRFToken = "taiyi_csrf_token";
-const cookieDevice = "taiyi_device";
-const cookieStorePrefix = "taiyi_store";
-
-/**
- * 适配Nextjs的安全数据存储
- */
-export interface NextSecureStore {
-  id: string;
-  device: string;
-  backend_host: string;
-  backend_port: number;
-  authenticated: boolean;
-  access_token: string;
-  public_key: string;
-  algorithm: TokenSigningMethod;
-  access_expired_at: string;
-  roles: UserRole[];
-  user: string;
-}
-
-/**
- * 需要安全存储的关键值
- */
-export interface CriticalValues {
-  csrf_token: string;
-  refresh_token: string;
-  refresh_expire: string;
-}
+import {
+  cookieRefreshToken,
+  cookieRefreshTokenExpire,
+  cookieCSRFToken,
+  cookieDevice,
+  cookieStorePrefix,
+  validateStoredData,
+  NextSecureStore,
+  CriticalValues,
+} from "./next-store-internals";
+export type { NextSecureStore, CriticalValues } from "./next-store-internals";
 
 /**
  * 获取Nextjs的安全数据存储（**仅限服务端组件使用**）
@@ -75,7 +58,7 @@ export async function getNextStore(
     roles: [],
     user: "",
   };
-  cs.set(storeKey, JSON.stringify(store), { sameSite: "strict", maxAge: 1 * 24 * 60 * 60 });
+  cs.set(storeKey, JSON.stringify(store), { path: "/", sameSite: "strict", maxAge: 1 * 24 * 60 * 60 });
   return store;
 }
 
@@ -134,7 +117,7 @@ export async function storeAllocatedTokens(
   let maxAge = Math.floor((expiredAt.getTime() - Date.now() + 60 * 1000) / 1000);
   if (maxAge <= 0) maxAge = 1 * 60 * 60;
 
-  cs.set(storeKey, storeContent, { sameSite: "strict", maxAge: maxAge });
+  cs.set(storeKey, storeContent, { path: "/", sameSite: "strict", maxAge: maxAge });
 
   const stored: CriticalValues = {
     csrf_token: tokens.csrf_token,
@@ -187,9 +170,9 @@ export async function retrieveAllocatedTokens(storeID: string, useTLS: boolean =
 export async function storeCriticalValues(storeID: string, values: CriticalValues) {
   const cks = await cookies();
   const maxAge = Math.floor((new Date(values.refresh_expire).getTime() - Date.now()) / 1000);
-  cks.set(`${cookieCSRFToken}_${storeID}`, values.csrf_token, { sameSite: "strict", maxAge: maxAge });
-  cks.set(`${cookieRefreshToken}_${storeID}`, values.refresh_token, { httpOnly: true, sameSite: "strict", maxAge: maxAge });
-  cks.set(`${cookieRefreshTokenExpire}_${storeID}`, values.refresh_expire, { sameSite: "strict", maxAge: maxAge, httpOnly: true });
+  cks.set(`${cookieCSRFToken}_${storeID}`, values.csrf_token, { path: "/", sameSite: "strict", maxAge: maxAge });
+  cks.set(`${cookieRefreshToken}_${storeID}`, values.refresh_token, { path: "/", httpOnly: true, sameSite: "strict", maxAge: maxAge });
+  cks.set(`${cookieRefreshTokenExpire}_${storeID}`, values.refresh_expire, { path: "/", sameSite: "strict", maxAge: maxAge, httpOnly: true });
 }
 
 /**
@@ -215,7 +198,7 @@ export async function retrieveCriticalValues(storeID: string): Promise<CriticalV
  */
 export async function setDeviceID(id: string): Promise<void> {
   const cks = await cookies();
-  cks.set(cookieDevice, id, { sameSite: "strict", maxAge: 30 * 24 * 60 * 60 });
+  cks.set(cookieDevice, id, { path: "/", sameSite: "strict", maxAge: 30 * 24 * 60 * 60 });
 }
 
 /**
@@ -236,7 +219,7 @@ export async function getDeviceID(): Promise<string> {
   }
   // cookie 缺失，自动生成并持久化，保证服务端路由调用时设备ID必定非空
   const newDeviceID = `server-${createId()}`;
-  cks.set(cookieDevice, newDeviceID, { sameSite: "strict", maxAge: 30 * 24 * 60 * 60 });
+  cks.set(cookieDevice, newDeviceID, { path: "/", sameSite: "strict", maxAge: 30 * 24 * 60 * 60 });
   return newDeviceID;
 }
 
@@ -254,11 +237,11 @@ export async function clearAllocatedTokens(storeID: string, useTLS: boolean = fa
     store.access_expired_at = "";
     store.roles = [];
     store.user = "";
-    cks.set(storeKey, JSON.stringify(store), { sameSite: "strict", maxAge: 1 * 24 * 60 * 60 });
+    cks.set(storeKey, JSON.stringify(store), { path: "/", sameSite: "strict", maxAge: 1 * 24 * 60 * 60 });
   }
-  cks.set(`${cookieCSRFToken}_${storeID}`, "", { maxAge: 0 });
-  cks.set(`${cookieRefreshToken}_${storeID}`, "", { maxAge: 0 });
-  cks.set(`${cookieRefreshTokenExpire}_${storeID}`, "", { maxAge: 0 });
+  cks.set(`${cookieCSRFToken}_${storeID}`, "", { path: "/", maxAge: 0 });
+  cks.set(`${cookieRefreshToken}_${storeID}`, "", { path: "/", maxAge: 0 });
+  cks.set(`${cookieRefreshTokenExpire}_${storeID}`, "", { path: "/", maxAge: 0 });
 }
 
 /**
@@ -272,19 +255,8 @@ export async function handleStoreStatusChanged(storeID: string, authenticated: b
     const store: NextSecureStore = JSON.parse(storeItem.value);
     if (authenticated != store.authenticated) {
       store.authenticated = authenticated;
-      cks.set(storeKey, JSON.stringify(store), { sameSite: "strict", maxAge: 30 * 24 * 60 * 60 });
+      cks.set(storeKey, JSON.stringify(store), { path: "/", sameSite: "strict", maxAge: 30 * 24 * 60 * 60 });
     }
   }
 }
 
-/**
- * 验证存储的数据（**仅限服务端组件使用**）
- */
-function validateStoredData(store: NextSecureStore): boolean {
-  if (!store.id || !store.device || !store.backend_host || !store.backend_port) return false;
-  if (store.authenticated && store.access_token && store.access_expired_at) {
-    const expiredAt = new Date(store.access_expired_at);
-    if (expiredAt.getTime() < Date.now()) return false;
-  }
-  return true;
-}

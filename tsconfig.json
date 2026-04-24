@@ -5,10 +5,6 @@
     "outDir": "dist", // 输出目录
     "rootDir": "src", // 源代码目录
     "strict": true, // 开启严格模式
-    // 禁止 tsc 在 CJS 输出首行注入 "use strict"，避免把 "use server" directive 挤到第二行
-    // 导致 Next 16 / SWC 不识别为 Server Action 模块。类型检查的严格性由 strict:true 的
-    // 其他子项（noImplicitAny / strictNullChecks 等）继续保证。
-    "alwaysStrict": false,
     "declaration": true, // 生成类型声明文件（.d.ts）
     "declarationDir": "dist", // 类型声明文件输出目录
     "esModuleInterop": true, // 兼容ES模块和CommonJS

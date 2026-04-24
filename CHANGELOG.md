@@ -1,5 +1,13 @@
 # Change Log
 
+## [0.12.3] - 2026-04-24
+
+### 调整
+
+- **剥离 Next.js 专属模块到 portal 项目**：将 `next-store-internals.ts`、`next-secure-store.ts`、`next-middleware.ts`、`next-connector.ts` 迁移至 portal 的 `lib/connector/`，消除库对 `next/headers` 的直接依赖，解决 Next.js 16 Turbopack 无法识别 `node_modules` 内 `"use server"` 指令导致 `cookies was called outside a request scope` 的问题
+- 删除已废弃的 `next-headers.d.ts` 类型声明文件
+- 移除 `package.json` 中 `dependencies` 末尾的 JSON 尾逗号，修复 `pnpm build` 解析失败
+
 ## [0.12.2] - 2026-04-24
 
 ### 修复

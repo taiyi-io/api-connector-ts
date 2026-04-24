@@ -1,10 +1,9 @@
-"use server";
 /**
  * 向API服务发送请求的转发器
- * **仅限服务端组件使用**
  *
- * 注意：`"use server"` 指令必须是文件首条语句，不能被 JSDoc 注释前置，
- * 否则 Next 16 会将这些函数当作普通客户端代码打包。
+ * 本文件包含纯 HTTP 通信函数，被 TaiyiConnector 核心类直接调用，
+ * 不包含任何 Next.js 专用 API（如 cookies/headers），
+ * 因此不需要 `"use server"` 指令。
  */
 import * as ed25519 from "@noble/ed25519";
 import { controlCommandEnum, SignatureAlgorithm } from "./enums";

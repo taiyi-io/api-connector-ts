@@ -1,6 +1,6 @@
 {
   "name": "@taiyi-io/api-connector-ts",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "description": "Typescript connector to Taiyi control API",
   "keywords": [
     "cloud"
@@ -42,8 +42,6 @@
   "devDependencies": {
     "@microsoft/tsdoc-config": "^0.18.1",
     "@types/node": "^25.3.5",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
     "@vitest/coverage-v8": "^4.0.18",
@@ -59,21 +57,5 @@
     "@sindresorhus/fnv1a": "^3.1.0",
     "copy-to-clipboard": "^3.3.3",
     "dotenv": "^17.3.1"
-  },
-  "peerDependencies": {
-    "next": ">=14.0.0",
-    "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
-  },
-  "peerDependenciesMeta": {
-    "next": {
-      "optional": true
-    },
-    "react": {
-      "optional": true
-    },
-    "react-dom": {
-      "optional": true
-    }
   }
 }

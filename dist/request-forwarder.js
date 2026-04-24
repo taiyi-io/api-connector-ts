@@ -68,7 +68,7 @@ const headerCSRFToken = "X-CSRF-Token";
  * @returns 控制命令URL
  */
 function commandURL(backendURL) {
-    return `${backendURL}commands/`;
+    return `${backendURL}commands`;
 }
 /**
  * 构造非 200 响应的错误消息。
@@ -532,7 +532,7 @@ function refreshAccessToken(backendURL, user, device, refreshToken) {
  */
 function openMonitorChannel(backendURL, accessToken, csrfToken, guestID) {
     return __awaiter(this, void 0, void 0, function* () {
-        const url = `${backendURL}monitor/`;
+        const url = `${backendURL}monitor`;
         const headers = {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,

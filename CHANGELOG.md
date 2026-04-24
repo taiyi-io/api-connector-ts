@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.12.4] - 2026-04-24
+
+### 修复
+
+- **API 路由尾斜杠规范化**：`commandURL` 函数返回值由 `${backendURL}commands/` 改为 `${backendURL}commands`，`openMonitorChannel` 中监控分配 URL 由 `${backendURL}monitor/` 改为 `${backendURL}monitor`，去除尾斜杠。配合 node 后端一刀切路由规范化，解决 Vercel 等反向代理自动去尾斜杠后 `gorilla/mux` 精确匹配失败返回 404 的问题
+
 ## [0.12.3] - 2026-04-24
 
 ### 调整

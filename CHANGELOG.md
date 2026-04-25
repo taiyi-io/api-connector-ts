@@ -1,10 +1,10 @@
 # Change Log
 
-## [0.12.4] - 2026-04-24
+## [0.12.4] - 2026-04-26
 
 ### 修复
 
-- **API 路由尾斜杠规范化**：`commandURL` 函数返回值由 `${backendURL}commands/` 改为 `${backendURL}commands`，`openMonitorChannel` 中监控分配 URL 由 `${backendURL}monitor/` 改为 `${backendURL}monitor`，去除尾斜杠。配合 node 后端一刀切路由规范化，解决 Vercel 等反向代理自动去尾斜杠后 `gorilla/mux` 精确匹配失败返回 404 的问题
+- 解决某些反向代理（如 Vercel）自动去除请求路径尾斜杠后，管理 API 与监控通道分配 URL 在后端精确路由匹配失败、返回 404 的问题：连接器对外发起的请求路径统一改为不带尾斜杠形式，与后端规范化后的路由对齐，调用方升级即可恢复在去尾斜杠代理后部署的可用性
 
 ## [0.12.3] - 2026-04-24
 

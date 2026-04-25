@@ -54,5 +54,8 @@ docs
 *.tar.gz
 .opencode
 .trae
-.claude
+
+# AI agent IDE 私有配置
+.windsurf/
 .windsurfrules
+.claude/

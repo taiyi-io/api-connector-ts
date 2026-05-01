@@ -23,6 +23,12 @@ var AuthMethod;
     AuthMethod["Token"] = "token";
 })(AuthMethod || (AuthMethod = {}));
 const API_VERSION = "v1";
+// 不透明 API Token 格式约定，与服务端 bearer_token.go 中的同名常量保持一致。
+const BEARER_TOKEN_PREFIX = "tyat_";
+const BEARER_TOKEN_BODY_LENGTH = 32;
+const BEARER_TOKEN_TOTAL_LENGTH = BEARER_TOKEN_PREFIX.length + BEARER_TOKEN_BODY_LENGTH;
+// base32-Crockford 小写字母表（排除易混淆的 i / l / o / u）。
+const BEARER_TOKEN_BODY_PATTERN = /^[0-9a-hjkmnp-tv-z]{32}$/;
 /**
  * 提供与Taiyi Control服务进行交互的方法，包括认证、发送命令、查询访问记录等,系统状态查询与初始化接口可以直接调用，其他接口需要先认证才能调用。
  * 调用者需要实现 SetTokenHandler 和 GetTokenHandler，为 TaiyiConnector 提供令牌的存取能力。如果需要在校验信息失效时，进行特殊处理，可以通过可选的 bindAuthExpiredEvent 方法注册回调。
@@ -66,12 +72,9 @@ class TaiyiConnector {
      */
     constructor(backendHost, backendPort = 5851, device, useTLS = false) {
         this._authMethod = AuthMethod.Secret;
-        this._privateKey = "";
         this._user = "";
         this._device = "";
-        this._serial = "";
         this._password = "";
-        this._signatureAlgorithm = enums_1.SignatureAlgorithm.Ed25519;
         this._refreshTimer = null;
         this._locale = enums_1.Locale.Chinese;
         this._authenticated = false;
@@ -198,27 +201,35 @@ class TaiyiConnector {
         });
     }
     /**
-     * 使用秘钥字符串校验
-     * @param token - 秘钥字符串
-     * @returns 已认证令牌
+     * 使用不透明 API Token 授权
+     *
+     * 该方法仅在本地校验 token 格式（必须以 `tyat_` 起头，总长 37 字符，字符集为 base32-Crockford 小写），
+     * 不发送任何认证请求。Token 实际可用性由后续首次业务调用的 401 / 200 体现。
+     *
+     * 调用者需调用 `connector.bindCallback(...)` 提供 token 持久化回调。
+     * 认证后，Connector 会在后续控制请求中注入 `Authorization: Bearer tyat_*` 头，
+     * 并且**不**发送 `X-CSRF-Token`，与 MCP / Agent 场景的单 header 直连约定保持一致。
+     *
+     * @param token - 不透明 API Token明文（以 `tyat_` 起头）
+     * @returns 认证结果；仅在 token 格式本身不合规时返回 `error`
      */
     authenticateByToken(token) {
         return __awaiter(this, void 0, void 0, function* () {
-            //decode from base64
-            const payload = atob(token);
-            //parse json
-            const key = JSON.parse(payload);
-            if (!key.id) {
-                return {
-                    error: "秘钥字符串格式错误",
-                };
+            if (!token) {
+                return { error: "令牌不能为空" };
             }
-            this._user = key.id;
-            this._privateKey = key.private_key;
+            if (!token.startsWith(BEARER_TOKEN_PREFIX)) {
+                return { error: `令牌格式错误，必须以 ${BEARER_TOKEN_PREFIX} 起头` };
+            }
+            if (token.length !== BEARER_TOKEN_TOTAL_LENGTH) {
+                return { error: "令牌格式错误，长度不符" };
+            }
+            const body = token.slice(BEARER_TOKEN_PREFIX.length);
+            if (!BEARER_TOKEN_BODY_PATTERN.test(body)) {
+                return { error: "令牌格式错误，字符集不合规" };
+            }
             this._authMethod = AuthMethod.Token;
-            this._serial = key.serial;
-            this._signatureAlgorithm = key.algorithm;
-            const tokenResult = yield (0, request_forwarder_1.authenticateByToken)(this._backendURL, key.id, this._device, key.serial, key.algorithm, key.private_key);
+            const tokenResult = yield (0, request_forwarder_1.authenticateByToken)(this._backendURL, token);
             if (tokenResult.unauthenticated) {
                 return {
                     unauthenticated: tokenResult.unauthenticated,
@@ -235,14 +246,19 @@ class TaiyiConnector {
                 };
             }
             const tokens = tokenResult.data;
-            const result = this.loadTokens(tokens, "令牌串认证");
-            if (result.error) {
-                return {
-                    error: result.error,
-                };
+            if (!tokens.user) {
+                return { error: "服务端未返回用户标识" };
             }
-            //只有进行登录的主connector定时更新
-            this.startHeartBeat();
+            if (!tokens.access_token) {
+                return { error: "服务端未返回访问令牌" };
+            }
+            this._authenticated = true;
+            this._authenticatedTokens = tokens;
+            this._roles = tokens.roles || [];
+            this._user = tokens.user;
+            if (this._stateChange && this._callbackReceiver) {
+                this._stateChange(this._callbackReceiver, true);
+            }
             yield this.onTokenUpdated(tokens);
             return {
                 data: tokens,
@@ -708,17 +724,13 @@ class TaiyiConnector {
                     error: resp.error,
                 };
             }
-            if (!resp.data || !resp.data.private_key) {
+            if (!resp.data || !resp.data.bearer_token) {
                 return {
                     error: "生成用户令牌失败",
                 };
             }
-            const key = resp.data.private_key;
-            const payload = JSON.stringify(key);
-            //base64 encoding
-            const base64Payload = btoa(payload);
             return {
-                data: base64Payload,
+                data: resp.data.bearer_token,
             };
         });
     }

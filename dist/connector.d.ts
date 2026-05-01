@@ -46,12 +46,9 @@ export declare class TaiyiConnector {
     private _id;
     private _backendURL;
     private _authMethod;
-    private _privateKey;
     private _user;
     private _device;
-    private _serial;
     private _password;
-    private _signatureAlgorithm;
     private _refreshTimer;
     private _locale;
     private _authenticated;
@@ -128,9 +125,17 @@ export declare class TaiyiConnector {
      */
     authenticateByPassword(user: string, password: string): Promise<BackendResult<AllocatedTokens>>;
     /**
-     * 使用秘钥字符串校验
-     * @param token - 秘钥字符串
-     * @returns 已认证令牌
+     * 使用不透明 API Token 授权
+     *
+     * 该方法仅在本地校验 token 格式（必须以 `tyat_` 起头，总长 37 字符，字符集为 base32-Crockford 小写），
+     * 不发送任何认证请求。Token 实际可用性由后续首次业务调用的 401 / 200 体现。
+     *
+     * 调用者需调用 `connector.bindCallback(...)` 提供 token 持久化回调。
+     * 认证后，Connector 会在后续控制请求中注入 `Authorization: Bearer tyat_*` 头，
+     * 并且**不**发送 `X-CSRF-Token`，与 MCP / Agent 场景的单 header 直连约定保持一致。
+     *
+     * @param token - 不透明 API Token明文（以 `tyat_` 起头）
+     * @returns 认证结果；仅在 token 格式本身不合规时返回 `error`
      */
     authenticateByToken(token: string): Promise<BackendResult<AllocatedTokens>>;
     /**

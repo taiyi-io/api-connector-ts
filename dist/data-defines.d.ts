@@ -1890,17 +1890,23 @@ export interface PublicKeySerial {
  * 用户令牌
  * @interface
  * @property serial - 序列号
- * @property algorithm - 签名算法
- * @property public_key - 公钥
  * @property created_time - 创建时间
  * @property not_before - 生效时间
  * @property not_after - 失效时间
  * @property last_access - 最后访问时间，格式为RFC3339
  * @property description - 描述信息
  */
-export interface UserToken extends PublicKeySerial {
+export interface UserToken {
+    /** 序列号 */
+    serial: string;
+    /** 创建时间 */
+    created_time?: string;
+    /** 生效时间 */
+    not_before?: string;
+    /** 失效时间 */
+    not_after?: string;
     /** 最后访问时间，格式为RFC3339 */
-    last_access: string;
+    last_access?: string;
     /** 描述信息 */
     description?: string;
 }

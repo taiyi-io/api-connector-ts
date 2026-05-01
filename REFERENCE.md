@@ -69,9 +69,7 @@
 ## 安装
 
 ```bash
-npm install @taiyi-io/api-connector-ts
-# 或
-yarn add @taiyi-io/api-connector-ts
+pnpm add @taiyi-io/api-connector-ts
 ```
 
 ***
@@ -237,8 +235,8 @@ connector.bindAuthExpiredEvent((connectorID) => {
   console.log(`连接器 ${connectorID} 认证已过期，需要重新认证`);
 });
 
-// 使用令牌认证（Base64 编码的 PrivateKey JSON）
-const authResult = await connector.authenticateByToken(base64EncodedToken);
+// 使用不透明令牌认证（tyat_ 起头的 API Token）
+const authResult = await connector.authenticateByToken("tyat_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 if (authResult.unauthenticated) {
   console.error("令牌无效");
 }
@@ -418,10 +416,10 @@ if (result.data) {
 authenticateByToken(token: string): Promise<BackendResult<AllocatedTokens>>
 ```
 
-使用秘钥字符串（Base64编码的 PrivateKey JSON）认证。
+使用不透明 API 令牌（`tyat_` 起头的字符串）认证。令牌在太一云控制台「用户管理 → API 令牌」中签发。
 
 ```typescript
-const result = await connector.authenticateByToken(base64Token);
+const result = await connector.authenticateByToken("tyat_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 if (result.unauthenticated) {
   console.error("令牌无效或已过期");
 }
@@ -493,7 +491,7 @@ generateUserToken(
 ```typescript
 const result = await connector.generateUserToken("admin", "CI/CD令牌", 12);
 if (result.data) {
-  console.log("令牌:", result.data); // Base64 编码的秘钥字符串
+  console.log("令牌:", result.data); // tyat_ 起头的不透明令牌字符串
 }
 ```
 
@@ -1533,7 +1531,7 @@ copyToClipboard(text: string): Promise<boolean>
 | --------------------- | ---------------------------------------------- |
 | `BackendResult<T>`    | 统一 API 返回结果，含 `error`、`unauthenticated`、`data` |
 | `PaginationResult<T>` | 分页结果，含 `records` 和 `total`                     |
-| `AllocatedTokens`     | 已分配令牌集合，含访问/刷新/CSRF令牌、公钥、签名算法、角色               |
+| `AllocatedTokens`     | 已分配令牌集合，含访问/刷新令牌、用户标识、角色列表               |
 
 ### 云主机相关
 
@@ -1615,10 +1613,10 @@ copyToClipboard(text: string): Promise<boolean>
 | `UserGroup`                                           | 用户组（ID、成员列表、角色列表）      |
 | `UserGroupRecord`                                     | 用户组列表记录                |
 | `UserCredentialRecord`                                | 用户凭证记录                 |
-| `UserToken`                                           | 用户令牌（含公钥、描述、最后访问时间）    |
+| `UserToken`                                           | 用户令牌（含序列号、描述、创建时间、有效期、最后访问时间）    |
 | `UserAccessRecord`                                    | 用户访问记录                 |
 | `ResourcePermissions`                                 | 资源权限（命名空间、所有者、查看/编辑范围） |
-| `PublicKeySerial` / `PrivateKeySerial` / `PrivateKey` | 密钥相关                   |
+| `PublicKeySerial` / `PrivateKeySerial` / `PrivateKey` | 密钥相关（仅用于节点间签名，非用户令牌） |
 
 ### 统计与监控
 

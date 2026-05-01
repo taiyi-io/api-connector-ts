@@ -7,9 +7,7 @@ TypeScript 实现的[太一云](https://www.taiyi.io/) Control 模块 API 连接
 ## 安装
 
 ```
-$ npm install @taiyi-io/api-connector-ts
-或者
-$ yarn add @taiyi-io/api-connector-ts
+$ pnpm add @taiyi-io/api-connector-ts
 ```
 
 ## 使用
@@ -64,9 +62,10 @@ const tokens = result.data;
 console.log("密码校验成功,当前用户 %s, 角色 %s", tokens.user, tokens.roles);
 ```
 
-令牌校验需要用户先登录太一云，在账号管理>访问令牌，创建新令牌并获得连接字符串，然后使用如下代码：
+令牌校验需要用户先登录太一云，在账号管理>访问令牌，创建新令牌并获得不透明令牌字符串（以 `tyat_` 起头），然后使用如下代码：
 
 ```ts
+// token 格式为 tyat_<32 字符>，例如 tyat_vtxwxbzfjd0bbsgedxen066ntxj7cnez
 const result = await connector.authenticateByToken(token);
 if (result.unauthenticated) {
   throw new Error("校验失败");
@@ -77,6 +76,8 @@ if (result.unauthenticated) {
 const tokens = result.data;
 console.log("令牌校验成功,当前用户 %s, 角色 %s", tokens.user, tokens.roles);
 ```
+
+> **注意**：0.12.5 起令牌格式升级为不透明 Token（`tyat_*`），旧版 Base64 编码令牌已不再支持，需在控制台重新签发。
 
 ### 基本操作和返回结果
 
@@ -154,4 +155,50 @@ if (taskData.error) {
 }
 const guestID = taskData.data;
 console.log("创建云主机成功，云主机ID：", guestID);
+```
+
+## 构建与发布
+
+```bash
+# 安装依赖
+pnpm install
+
+# 编译 TypeScript
+pnpm build
+
+# 代码检查
+pnpm lint
+
+# 发布到 npm（需要先登录 npm 账号）
+npm login
+pnpm publish
+```
+
+> `package.json` 已配置 `prepublishOnly` 钩子，执行 `pnpm publish` 时会自动先运行 `pnpm build`。
+
+## 测试
+
+测试依赖真实的太一云后端服务，需要在项目根目录创建 `.env.test` 文件：
+
+```env
+BACKEND_HOST=192.168.1.100
+BACKEND_PORT=5851
+ACCESS_STRING=tyat_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+DEVICE_ID=test-runner
+```
+
+- `ACCESS_STRING`：不透明 API 令牌（`tyat_*` 格式），在太一云控制台「用户管理 → API 令牌」中签发
+- `DEVICE_ID`：测试客户端设备标识
+
+运行测试：
+
+```bash
+# 运行全部测试
+pnpm test
+
+# 运行单个测试文件
+pnpm vitest run test/basic/auth.test.ts
+
+# 监视模式
+pnpm vitest --watch
 ```

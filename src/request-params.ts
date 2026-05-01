@@ -39,7 +39,6 @@ import {
   UserGroupRecord,
   UserCredentialRecord,
   UserToken,
-  PrivateKey,
   UserAccessRecord,
   SystemStatus,
   ResourcePermissions,
@@ -119,7 +118,15 @@ export interface ControlCommandResponse {
   user_groups?: UserGroupRecord[];
   user_credentials?: UserCredentialRecord[];
   user_tokens?: UserToken[];
-  private_key?: PrivateKey;
+  /**
+   * 服务端签发的不透明 API Token 明文（`tyat_*`），仅在 `generate_user_token` 命令的本次响应中返回。
+   * 客户端必须在此处取出后立即交给调用方安全保管，明文不会再以任何形式从服务端二次返回。
+   */
+  bearer_token?: string;
+  /**
+   * 与 `bearer_token` 同步返回的公开元数据（serial / not_before / not_after 等），可入库到本地令牌管理界面。
+   */
+  user_token?: UserToken;
   password?: string;
   user_accesses?: UserAccessRecord[];
   system_status?: SystemStatus;
@@ -341,24 +348,13 @@ export interface ControlAuthBySecretParams {
 }
 
 /**
- * 令牌校验请求参数
+ * 访问令牌校验请求参数
  * @interface ControlAuthByTokenParams
- * @param user - 用户标识
- * @param device - 设备标识
- * @param serial - 序列号
- * @param nonce - 随机数
- * @param timestamp - 时间戳
- * @param signature - 签名
- * @param signature_algorithm - 签名算法
+ * @param token - 不透明访问令牌
  */
 export interface ControlAuthByTokenParams {
-  user: string;
-  device: string;
-  serial: string;
-  nonce: string;
-  timestamp: string;
-  signature: string;
-  signature_algorithm: SignatureAlgorithm;
+  /** 不透明访问令牌 */
+  token: string;
 }
 
 /**

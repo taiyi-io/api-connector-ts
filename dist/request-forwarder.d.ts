@@ -1,4 +1,3 @@
-import { SignatureAlgorithm } from "./enums";
 import { BackendResult, AllocatedTokens, SystemStatus, MonitorResponse, TLSStatusResponse } from "./data-defines";
 import { ControlCommandRequest, ControlCommandResponse } from "./request-params";
 /**
@@ -43,16 +42,12 @@ export declare function initialSystem(backendURL: string, user: string, password
  */
 export declare function authenticateByPassword(backendURL: string, user: string, device: string, password: string): Promise<BackendResult<AllocatedTokens>>;
 /**
- * 使用令牌认证
+ * 使用不透明访问令牌认证
  * @param backendURL - 后端URL
- * @param user - 用户标识
- * @param device - 唯一设备标识
- * @param serial - 设备序列号
- * @param signature_algorithm - 签名算法
- * @param private_key - 私钥
+ * @param token - 不透明访问令牌
  * @returns 认证令牌
  */
-export declare function authenticateByToken(backendURL: string, user: string, device: string, serial: string, signature_algorithm: SignatureAlgorithm, private_key: string): Promise<BackendResult<AllocatedTokens>>;
+export declare function authenticateByToken(backendURL: string, token: string): Promise<BackendResult<AllocatedTokens>>;
 /**
  * 刷新认证令牌
  * @param backendURL - 后端URL

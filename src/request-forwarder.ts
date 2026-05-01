@@ -5,8 +5,7 @@
  * 不包含任何 Next.js 专用 API（如 cookies/headers），
  * 因此不需要 `"use server"` 指令。
  */
-import * as ed25519 from "@noble/ed25519";
-import { controlCommandEnum, SignatureAlgorithm } from "./enums";
+import { controlCommandEnum } from "./enums";
 import {
   BackendResult,
   AllocatedTokens,
@@ -15,11 +14,10 @@ import {
   MonitorResponse,
   TLSStatusResponse,
 } from "./data-defines";
-import { generateNonce } from "./helper";
 import {
   ControlAuthBySecretParams,
-  ControlAuthRefreshParams,
   ControlAuthByTokenParams,
+  ControlAuthRefreshParams,
   ControlCommandRequest,
   ControlCommandResponse,
   ControlResponse,
@@ -58,16 +56,6 @@ async function formatHTTPError(response: Response): Promise<string> {
     parts.push(bodySnippet);
   }
   return parts.join(" ");
-}
-async function signEd25519(
-  payload: string,
-  privateKey: string
-): Promise<string> {
-  const key = ed25519.etc.hexToBytes(privateKey).slice(0, 32);
-  const msg = Buffer.from(payload, "utf-8");
-  const signature = await ed25519.signAsync(msg, key);
-  const hex = Buffer.from(signature).toString("hex");
-  return hex;
 }
 /**
  * 解析控制命令响应
@@ -419,71 +407,28 @@ export async function authenticateByPassword(
   return result;
 }
 /**
- * 使用令牌认证
+ * 使用不透明访问令牌认证
  * @param backendURL - 后端URL
- * @param user - 用户标识
- * @param device - 唯一设备标识
- * @param serial - 设备序列号
- * @param signature_algorithm - 签名算法
- * @param private_key - 私钥
+ * @param token - 不透明访问令牌
  * @returns 认证令牌
  */
 export async function authenticateByToken(
   backendURL: string,
-  user: string,
-  device: string,
-  serial: string,
-  signature_algorithm: SignatureAlgorithm,
-  private_key: string
+  token: string
 ): Promise<BackendResult<AllocatedTokens>> {
-  if (signature_algorithm != SignatureAlgorithm.Ed25519) {
-    return {
-      error: `unexpected signature algorithm ${signature_algorithm}`,
-    };
-  }
-  // 1. Create timestamp in RFC3339 format
-  const timestamp = new Date().toISOString();
-
-  // 2. Generate random nonce (at least 20 chars)
-
-  const nonce = generateNonce();
-  const keyTimestamp = "timestamp";
-  const keyNonce = "nonce";
-  const keyUser = "user";
-  const keySerial = "serial";
-  const keyDevice = "device";
-  const keys: Record<string, string> = {
-    [keyTimestamp]: timestamp,
-    [keyNonce]: nonce,
-    [keyUser]: user,
-    [keySerial]: serial,
-    [keyDevice]: device,
+  const cmd: ControlAuthByTokenParams = {
+    token,
   };
-  const sortedKeys = Object.keys(keys).sort();
-  //使用key=value，用&拼接
-  const payload = sortedKeys.map((key) => `${key}=${keys[key]}`).join("&");
-  const signature = await signEd25519(payload, private_key);
-
   const url = `${backendURL}auth/by-token`;
-  const params: ControlAuthByTokenParams = {
-    user: user,
-    device: device,
-    serial: serial,
-    nonce: nonce,
-    timestamp: timestamp,
-    signature_algorithm: signature_algorithm,
-    signature: signature,
-  };
   const headers = {
     "Content-Type": "application/json",
   };
-  const body = JSON.stringify(params);
+  const body = JSON.stringify(cmd);
   const resp = await postRawRequest(url, headers, body);
   if (resp.error) {
     return { error: resp.error };
   }
   const result = await parseAuthoriedToken(resp.data!);
-  //todo: validate nonce
   return result;
 }
 /**

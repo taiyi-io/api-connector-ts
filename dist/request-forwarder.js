@@ -1,37 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -58,9 +25,7 @@ exports.fetchTLSStatus = fetchTLSStatus;
  * 不包含任何 Next.js 专用 API（如 cookies/headers），
  * 因此不需要 `"use server"` 指令。
  */
-const ed25519 = __importStar(require("@noble/ed25519"));
 const enums_1 = require("./enums");
-const helper_1 = require("./helper");
 const headerCSRFToken = "X-CSRF-Token";
 /**
  * 控制命令URL
@@ -96,15 +61,6 @@ function formatHTTPError(response) {
             parts.push(bodySnippet);
         }
         return parts.join(" ");
-    });
-}
-function signEd25519(payload, privateKey) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const key = ed25519.etc.hexToBytes(privateKey).slice(0, 32);
-        const msg = Buffer.from(payload, "utf-8");
-        const signature = yield ed25519.signAsync(msg, key);
-        const hex = Buffer.from(signature).toString("hex");
-        return hex;
     });
 }
 /**
@@ -434,62 +390,26 @@ function authenticateByPassword(backendURL, user, device, password) {
     });
 }
 /**
- * 使用令牌认证
+ * 使用不透明访问令牌认证
  * @param backendURL - 后端URL
- * @param user - 用户标识
- * @param device - 唯一设备标识
- * @param serial - 设备序列号
- * @param signature_algorithm - 签名算法
- * @param private_key - 私钥
+ * @param token - 不透明访问令牌
  * @returns 认证令牌
  */
-function authenticateByToken(backendURL, user, device, serial, signature_algorithm, private_key) {
+function authenticateByToken(backendURL, token) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (signature_algorithm != enums_1.SignatureAlgorithm.Ed25519) {
-            return {
-                error: `unexpected signature algorithm ${signature_algorithm}`,
-            };
-        }
-        // 1. Create timestamp in RFC3339 format
-        const timestamp = new Date().toISOString();
-        // 2. Generate random nonce (at least 20 chars)
-        const nonce = (0, helper_1.generateNonce)();
-        const keyTimestamp = "timestamp";
-        const keyNonce = "nonce";
-        const keyUser = "user";
-        const keySerial = "serial";
-        const keyDevice = "device";
-        const keys = {
-            [keyTimestamp]: timestamp,
-            [keyNonce]: nonce,
-            [keyUser]: user,
-            [keySerial]: serial,
-            [keyDevice]: device,
+        const cmd = {
+            token,
         };
-        const sortedKeys = Object.keys(keys).sort();
-        //使用key=value，用&拼接
-        const payload = sortedKeys.map((key) => `${key}=${keys[key]}`).join("&");
-        const signature = yield signEd25519(payload, private_key);
         const url = `${backendURL}auth/by-token`;
-        const params = {
-            user: user,
-            device: device,
-            serial: serial,
-            nonce: nonce,
-            timestamp: timestamp,
-            signature_algorithm: signature_algorithm,
-            signature: signature,
-        };
         const headers = {
             "Content-Type": "application/json",
         };
-        const body = JSON.stringify(params);
+        const body = JSON.stringify(cmd);
         const resp = yield postRawRequest(url, headers, body);
         if (resp.error) {
             return { error: resp.error };
         }
         const result = yield parseAuthoriedToken(resp.data);
-        //todo: validate nonce
         return result;
     });
 }

@@ -1,324 +1,117 @@
+# AGENTS — Taiyi Cloud API Connector (TypeScript)
 
-# AGENTS.md - 太一云 API 连接器 TypeScript
+Inherits global rules from `~/.claude/CLAUDE.md`. This file is English to save tokens; chat output, code comments, commit messages, CHANGELOG entries, and all other docs stay Simplified Chinese. This file imposes no English requirement on anything outside itself.
 
-## AI辅助约束
+Package: `@taiyi-io/api-connector-ts` · CommonJS · ES6 target · pnpm 10.x · Node.
 
-**重要约束**：
-- 对话内容、说明、描述、注释都需要使用简体中文
-- 所有的AI辅助配置都必须添加制定的约束
-- 使用 openspec 文档管理、跟踪项目情况，使用文档驱动的方式进行开发
-- 进行规划、搜索、设计、开发时，必须先从 openspec 文档中获取相关信息
-- 当相关代码发生变化时，必须及时更新 openspec 文档
+## Coding Discipline (Karpathy)
 
----
+- **Think before coding**: state assumptions, surface ambiguity, present alternatives instead of silently picking one.
+- **Simplicity first**: minimum code that solves the problem; no speculative abstractions, no unrequested flexibility.
+- **Surgical changes**: touch only what the request requires; match existing style; don't refactor adjacent code or clean pre-existing dead code.
+- **Goal-driven**: define a verifiable success check (failing test → passing test) before looping.
 
-## 版本号与变更日志（强制约束）
+## Project Constraints
 
-### 1. 版本号管理
+- OpenSpec doc-driven workflow: consult OpenSpec docs before planning / searching / designing; update them when code diverges.
+- Public API never throws — return `BackendResult<T> = { data?, error?, unauthenticated? }`.
+- Use explicit TypeScript types on every public signature; no `any`, no `@ts-ignore` / `@ts-expect-error`.
+- TSDoc required on every exported symbol.
+- Import from `src/` during development; never from `dist/`.
+- Files marked `"use server";` are server-only.
 
-- **禁止变更版本号**：除非用户在当前会话中**显式指令**要求变更（如「升级到 0.13.0」「发版 v1.2.0」「bump version」），AI **绝对禁止**修改任何模块的版本号，包括但不限于：
-  - `package.json` 的 `version` 字段
-  - 任何依赖、子模块的版本（**升级 / 降级 / 锁定**均禁止）
-- **隐式不构成授权**：用户说「修复 Bug」「新增功能」「调整接口签名」「优化代码」**均不构成**变更版本号的指令
-- **保持当前版本**：所有功能新增、调整、修复一律归并到 `CHANGELOG.md` 中**当前最高版本号**条目下
+## Build & Test
 
-### 2. CHANGELOG.md 写入规则
-
-发生功能新增（feat）、行为调整（change）、问题修复（fix）时，**必须同步更新** `CHANGELOG.md`，未更新视为任务未完成。写入约束：
-
-1. **禁止使用未发布版本号**：禁止创建 `[Unreleased]` / `[next]` / `[0.x.0-dev]` 等占位条目；禁止预先升版后写入新版本号
-2. **追加到当前版本**：定位 `CHANGELOG.md` 顶部最近的版本条目，将本次变更**追加**到对应分区（`### 新增` / `### 调整` / `### 修复`），分区不存在则创建
-3. **同步修订日期**：将该版本条目标题日期同步为今天（如 `## [0.12.4] - 2026-04-26`），版本号本身不变
-4. **内容描述风格（重要）**：
-   - ✅ 站在**使用者（库调用方）视角**描述：业务场景、典型用例、调用流程、行为/逻辑变化、所解决的问题
-   - ❌ **严禁**出现详细代码说明：函数名、变量名、文件路径、代码片段、内部数据结构、diff 摘要、技术实现细节、改动文件清单
-
----
-
-## 项目概述
-
-太一云 Control API 的 TypeScript 连接器库。提供全功能服务，涵盖认证、云主机配置、状态查询和集群管理等。
-
-**包名**: `@taiyi-io/api-connector-ts`  
-**模块系统**: CommonJS  
-**目标版本**: ES6  
-**包管理器**: Yarn 4.x
-
----
-
-## 构建、检查和测试命令
+Commands (pnpm only):
 
 ```bash
-# 安装依赖
-yarn install
-
-# 构建 (TypeScript 编译)
-yarn build
-
-# 代码检查 (ESLint + TypeScript)
-yarn lint
-
-# 运行所有测试
-yarn test
-
-# 运行单个测试文件
-yarn test test/connector.basic.test.ts
-
-# 运行匹配模式的测试
-yarn test --filter "basic"
-
-# 监视模式运行测试
-yarn test --watch
-
-# 生成文档
-./gendoc.sh
+pnpm install
+pnpm build        # tsc
+pnpm lint         # eslint .
+pnpm test:run [path-or-pattern]   # vitest run, single pass, exits
+./gendoc.sh       # typedoc
 ```
 
-### 测试配置
+Test env (`.env`):
 
-测试需要在 `.env` 中设置环境变量：
-```env
-BACKEND_HOST=<api主机地址>
+```
+BACKEND_HOST=<host>
 BACKEND_PORT=5851
-ACCESS_STRING=<访问令牌>
+ACCESS_STRING=<token>
 ```
 
----
+### Do
 
-## 代码风格指南
+1. Run tests as `pnpm test:run [path]` — single-run, terminates, stdout captured by the agent harness.
+2. Build with `pnpm build`.
+3. Always pass a path/pattern; full-suite only when the task explicitly requires it.
+4. Default vitest reporter; `--reporter=basic` to cut noise; `--reporter=verbose` only while debugging.
+5. Invoke as a blocking command and read stdout/stderr directly.
 
-### TypeScript 配置
+### Don't (hard bans)
 
-- **严格模式**: 启用 (`"strict": true`)
-- **声明文件**: 生成 (`.d.ts`)
-- **模块系统**: CommonJS
-- **目标版本**: ES6
-- **源代码目录**: `src/`
-- **输出目录**: `dist/`
+1. ❌ **No watch mode** — `pnpm test`, `vitest`, `vitest watch`, `vitest --watch`, `vitest dev`, or any invocation without the `run` subcommand. They never exit and output is lost.
+2. ❌ **No file redirection / tee** — `> file`, `>> file`, `tee`, `2>&1 > file`, `| cat > log`, named pipes. Output must not transit disk (latency + `tmp/` residue).
+3. ❌ **No background/detached runs** — `&`, `nohup`, `disown`, `tmux`, `screen`, `setsid`.
+4. ❌ **No interactive flags** — `--ui`, `--inspect`, `--inspect-brk`.
+5. ❌ **No silent suppression** — `--silent`, `2>/dev/null`, `>/dev/null` on the primary stream.
 
-### 命名规范
+## Code Style
 
-| 元素 | 规范 | 示例 |
-|------|------|------|
-| 变量 | camelCase | `accessToken`, `backendURL` |
-| 函数 | camelCase | `authenticateByToken()`, `queryGuests()` |
-| 私有字段 | 下划线前缀 | `_id`, `_authenticated`, `_backendURL` |
-| 类 | PascalCase | `TaiyiConnector` |
-| 接口 | PascalCase | `GuestConfig`, `BackendResult` |
-| 枚举 | PascalCase | `TaskStatus`, `GuestState` |
-| 枚举值 | PascalCase | `TaskStatus.Completed`, `GuestState.Running` |
-| 类型别名 | PascalCase | `SetTokenHandler`, `GetTokenHandler` |
-| API字段 (DTO) | snake_case | `access_token`, `created_time`, `guest_id` |
-| 常量 | UPPER_SNAKE_CASE | `API_VERSION`, `NODE_RESOURCE_SNAPSHOT_FIELD_COUNT` |
+Naming:
 
-### 文件组织
+| Element | Convention | Example |
+|---|---|---|
+| Variable / function | camelCase | `accessToken`, `queryGuests()` |
+| Private field | `_` prefix | `_id`, `_authenticated` |
+| Class / interface / enum / type | PascalCase | `TaiyiConnector`, `GuestConfig`, `TaskStatus` |
+| Enum member | PascalCase | `TaskStatus.Completed` |
+| DTO field (wire format) | snake_case | `access_token`, `guest_id` |
+| Constant | UPPER_SNAKE_CASE | `API_VERSION` |
+
+Layout:
 
 ```
 src/
-  index.ts           # 公共导出，便捷函数
-  connector.ts       # 主 TaiyiConnector 类
-  enums.ts           # 所有枚举定义
-  data-defines.ts    # 数据结构和接口
-  request-params.ts  # API 请求/响应类型
-  request-forwarder.ts # 底层 API 通信
-  helper.ts          # 工具函数
-  *-store.ts         # 令牌存储实现
+  index.ts              public exports + convenience fns
+  connector.ts          TaiyiConnector class
+  enums.ts              all enums
+  data-defines.ts       domain interfaces
+  request-params.ts     API req/res types
+  request-forwarder.ts  transport layer
+  helper.ts             utils
+  *-store.ts            token stores
 ```
 
-### 导入风格
+Imports: external packages first, then internal modules, separated by a blank line.
+
+### Async task pattern
+
+Long-running ops expose `tryXxx` + `waitTask`, plus a convenience wrapper:
 
 ```typescript
-// 分组导入：先外部包，后内部模块
-import { createId } from "@paralleldrive/cuid2";
-import fnv1a from "@sindresorhus/fnv1a";
+const task = await connector.tryCreateGuest(poolID, system, config);
+if (task.error) throw new Error(task.error);
+const done = await connector.waitTask(task.data!, 300);
+if (done.error) throw new Error(done.error);
+const guestID = done.data!.guest;
 
-import { controlCommandEnum, TaskStatus } from "./enums";
-import { BackendResult, GuestConfig } from "./data-defines";
-import { fetchCommandResponse } from "./request-forwarder";
-```
-
-### 类型定义
-
-**所有公共 API 使用显式类型：**
-```typescript
-// 正确
-public async queryGuests(
-  start: number,
-  limit: number,
-  filter?: GuestFilter
-): Promise<BackendResult<PaginationResult<GuestView>>> { }
-
-// 错误 - 避免隐式 any
-public async queryGuests(start, limit, filter?) { }
-```
-
-**使用接口定义数据结构：**
-```typescript
-export interface GuestConfig {
-  name: string;
-  cores: number;
-  memory: number;  // MB
-  disks: number[]; // MB, [系统盘, 数据盘0, 数据盘1, ...]
-  access_level: ResourceAccessLevel;
-}
-```
-
-### 错误处理模式
-
-所有 API 方法返回 `BackendResult<T>`：
-```typescript
-export interface BackendResult<T = undefined> {
-  data?: T;
-  error?: string;
-  unauthenticated?: boolean;
-}
-
-// 使用模式
-const result = await connector.queryGuests(0, 10);
-if (result.error) {
-  throw new Error(result.error);
-}
-if (result.unauthenticated) {
-  // 处理重新认证
-}
-const guests = result.data!;
-```
-
-### 异步/等待
-
-- 所有异步操作使用 `async/await`
-- 服务端专用文件标记 `"use server";` 指令
-- API 方法返回 `Promise<BackendResult<T>>`
-
-### 文档 (TSDoc)
-
-所有公共 API 使用 TSDoc 语法：
-```typescript
-/**
- * 创建云主机
- * @param poolID - 计算资源池 ID
- * @param system - 目标系统模板
- * @param config - 云主机配置
- * @param timeoutSeconds - 超时时间（秒），默认 300
- * @returns 成功时返回云主机 ID
- * @example
- * const result = await connector.createGuest("default", "", config);
- */
-export async function createGuest(...): Promise<BackendResult<string>> { }
-```
-
----
-
-## 测试指南
-
-### 测试框架：Vitest
-
-```typescript
-import { expect, test, describe, beforeEach } from "vitest";
-import { TaiyiConnector, GuestFilter } from "../src/";
-import { getTestConnector } from "./utils";
-
-describe("TaiyiConnector 基础测试", () => {
-  let connector: TaiyiConnector;
-
-  beforeEach(async () => {
-    connector = await getTestConnector();
-  });
-
-  test("应该成功查询云主机", async () => {
-    const result = await connector.queryGuests(0, 10, {});
-    expect(result.error).toBeUndefined();
-    expect(result.data).toBeDefined();
-    expect(result.data!.total).toBeTypeOf("number");
-  });
-});
-```
-
-### 测试文件命名
-
-- 测试文件：`*.test.ts` 位于 `test/` 目录
-- 工具文件：`test/utils.ts`
-
----
-
-## 关键模式
-
-### 连接器初始化
-
-```typescript
-const connector = new TaiyiConnector(backendHost, backendPort, deviceID);
-connector.bindCallback(storeID, setTokens, getTokens, stateChange);
-await connector.authenticateByToken(accessString);
-```
-
-### 异步任务模式
-
-长时间运行的操作使用 `tryXXX` + `waitTask`：
-```typescript
-// 启动异步任务
-const taskResult = await connector.tryCreateGuest(poolID, system, config);
-if (taskResult.error) { throw new Error(taskResult.error); }
-
-// 等待完成
-const taskData = await connector.waitTask(taskResult.data!, timeoutSeconds);
-if (taskData.error) { throw new Error(taskData.error); }
-
-const guestID = taskData.data!.guest;
-```
-
-或使用便捷封装：
-```typescript
+// or
 const result = await connector.createGuest(poolID, system, config, 300);
 ```
 
-### 枚举使用
+Handle `unauthenticated` to trigger token refresh. Use `generateNonce()` for cryptographic ops.
 
-```typescript
-import { GuestState, ResourceAccessLevel, UserRole } from "./enums";
+## Git
 
-const config: GuestConfig = {
-  name: "my-vm",
-  cores: 2,
-  memory: 2048,
-  disks: [20480],
-  access_level: ResourceAccessLevel.Private,
-};
-```
+- Never run `git add` / `commit` / `push` unless the user explicitly asks.
+- When asked, use conventional commits with Simplified Chinese subject, e.g. `feat: 新增云主机安全策略接口`.
+- Branch names and PR titles in Simplified Chinese.
 
----
+## Changelog
 
-## 注意事项
-
-### 应该做
-
-- 所有 API 方法返回 `BackendResult<T>`
-- 为参数和返回值使用显式 TypeScript 类型
-- 使用 TSDoc 记录公共 API
-- DTO 字段使用 snake_case
-- 处理 `unauthenticated` 响应进行令牌刷新
-- 使用 `generateNonce()` 进行加密操作
-
-### 不应该做
-
-- 使用 `any` 类型 - 使用正确的接口
-- 使用 `@ts-ignore` 或 `@ts-expect-error`
-- 从 API 方法抛出异常（使用 `BackendResult.error`）
-- 混用命名规范（仅 DTO 字段使用 snake_case）
-- 从 `dist/` 导入 - 开发时始终从 `src/` 导入
-
----
-
-## 依赖
-
-**运行时：**
-- `@noble/ed25519` - Ed25519 加密
-- `@paralleldrive/cuid2` - ID 生成
-- `@sindresorhus/fnv1a` - 哈希函数
-- `next`, `react`, `react-dom` - NextJS 集成
-
-**开发：**
-- `typescript` ^5.9
-- `vitest` - 测试
-- `eslint` + `@typescript-eslint/*` - 代码检查
-- `eslint-plugin-tsdoc` - 文档检查
-- `typedoc` - 文档生成
+- No placeholder versions (`[Unreleased]`, `[next]`, `[0.x-dev]`); never bump version implicitly.
+- Append under the topmost existing version; create `### 新增` / `### 调整` / `### 修复` sections if missing.
+- Sync that version's date header to today; keep the version number.
+- User-perspective wording in Simplified Chinese: scenarios, flows, behavior changes, problems solved.
+- Banned in entries: function / variable / file names, code snippets, internal data structures, diff summaries, changed-file lists.

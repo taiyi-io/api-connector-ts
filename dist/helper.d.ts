@@ -92,3 +92,16 @@ export declare function canDeleteResource(resource: OperatableResource): boolean
  */
 export declare function generateDeviceFingerprint(device: string, host: string, port: number, useTLS?: boolean): string;
 export declare function StreamEnabled(): Promise<boolean>;
+/**
+ * 将 host 字符串规范化为可直接拼入 URL host 段的形式。
+ *
+ * 规则：
+ * - 空串原样返回。
+ * - IPv4 字面量、hostname、已带方括号的 IPv6 字面量原样返回（幂等）。
+ * - 含 zone id（`%`）的 IPv6 链路本地地址不能用作对外 URL host，统一返回空串，由调用方进入错误分支。
+ * - 命中 IPv6 字面量（含至少 2 个 `:` 且不含 `.`）→ 返回 `[host]`。
+ *
+ * @param host - 原始 host 字符串
+ * @returns 适用于 URL host 段的字符串；不可用时返回空串
+ */
+export declare function formatHostForURL(host: string): string;

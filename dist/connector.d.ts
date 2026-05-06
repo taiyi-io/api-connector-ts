@@ -69,6 +69,11 @@ export declare class TaiyiConnector {
      */
     constructor(backendHost: string, backendPort: number | undefined, device: string, useTLS?: boolean);
     /**
+     * 获取已构造的后端 API 基地址（包含协议、host、端口与版本路径）
+     * @returns 形如 `http://host:port/api/v1/` 的字符串；IPv6 字面量会以 `[host]` 形式呈现
+     */
+    get backendURL(): string;
+    /**
      * 释放资源
      */
     release(): void;

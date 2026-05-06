@@ -85,9 +85,19 @@ class TaiyiConnector {
         this._keepAlive = false;
         this._refreshPromise = null;
         const protocol = useTLS ? "https" : "http";
-        this._backendURL = `${protocol}://${backendHost}:${backendPort}/api/${API_VERSION}/`;
+        // 对 IPv6 字面量自动包裹方括号，IPv4 / hostname 原样保留
+        const formattedHost = (0, helper_1.formatHostForURL)(backendHost);
+        const hostSegment = formattedHost || backendHost;
+        this._backendURL = `${protocol}://${hostSegment}:${backendPort}/api/${API_VERSION}/`;
         this._device = device;
         this._id = (0, cuid2_1.createId)();
+    }
+    /**
+     * 获取已构造的后端 API 基地址（包含协议、host、端口与版本路径）
+     * @returns 形如 `http://host:port/api/v1/` 的字符串；IPv6 字面量会以 `[host]` 形式呈现
+     */
+    get backendURL() {
+        return this._backendURL;
     }
     /**
      * 释放资源

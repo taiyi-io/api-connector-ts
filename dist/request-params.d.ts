@@ -1781,10 +1781,21 @@ export interface ControlQueryGuestProfilesParams {
     limit?: number;
     keyword?: string;
 }
+/**
+ * 按套餐创建云主机的请求参数。
+ *
+ * @property profile_id - 套餐 ID（必填）。
+ * @property pool_id - 目标计算资源池 ID；套餐已绑定资源池时禁止覆盖，未绑定则必填。
+ * @property name - 新云主机名称（必填）。
+ * @property access_level - 资源访问权限（私有 / 共享只读 / 共享可写）；不填则按套餐默认或后端私有兜底。
+ * @property auto_start - 是否在创建完成后自动启动；不填保持后端默认（不自启）。
+ */
 export interface ControlCreateGuestFromProfileParams {
     profile_id: string;
     pool_id?: string;
     name: string;
+    access_level?: import('./enums').ResourceAccessLevel;
+    auto_start?: boolean;
 }
 export interface ControlReplaceGuestConfigParams {
     guest_id: string;

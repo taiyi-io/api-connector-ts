@@ -1662,5 +1662,21 @@ export declare class TaiyiConnector {
         profiles: import('./data-defines').GuestProfile[];
     }>>;
     tryCreateGuestFromProfile(params: import('./request-params').ControlCreateGuestFromProfileParams): Promise<BackendResult<string>>;
+    /**
+     * 提交「修改云主机套餐」命令，返回聚合任务 ID。
+     *
+     * 节点端会先做参数与停机状态预校验，再以单一聚合任务进入队列；调用方可基于返回的任务 ID
+     * 通过 {@link getTask} 轮询或 {@link waitTask} 阻塞获取整体进度与最终结果。
+     *
+     * 该接口要求节点端版本兼容聚合任务返回值（旧节点返回空响应，将解析失败）。
+     */
     tryReplaceGuestConfig(params: import('./request-params').ControlReplaceGuestConfigParams): Promise<BackendResult<string>>;
+    /**
+     * 「修改云主机套餐」便捷包装：提交命令并阻塞等待聚合任务完成。
+     *
+     * @param params - 套餐替换参数
+     * @param timeoutSeconds - 客户端等待超时（秒），默认 600，可按预计耗时（含磁盘扩容）放宽
+     * @returns 聚合任务的最终 {@link TaskData}；任务失败时通过 `error` 字段透传节点上报的失败原因
+     */
+    replaceGuestConfig(params: import('./request-params').ControlReplaceGuestConfigParams, timeoutSeconds?: number): Promise<BackendResult<TaskData>>;
 }

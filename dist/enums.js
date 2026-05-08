@@ -225,6 +225,17 @@ var TaskType;
     TaskType["ReloadResourceStorage"] = "reload_resource_storage";
     TaskType["ImportGuests"] = "import_guests";
     TaskType["MigrateToNode"] = "migrate_to_node";
+    TaskType["ModifyExternalInterfaceMAC"] = "modify_external_interface_mac";
+    TaskType["ModifyInternalInterfaceMAC"] = "modify_internal_interface_mac";
+    TaskType["ModifyGuestSecurityPolicy"] = "modify_guest_security_policy";
+    TaskType["HATakeover"] = "ha_takeover";
+    TaskType["ModifyGuestCPUPriority"] = "modify_guest_cpu_priority";
+    TaskType["ModifyGuestDiskQoS"] = "modify_guest_disk_qos";
+    TaskType["ModifyGuestNetworkQoS"] = "modify_guest_network_qos";
+    TaskType["ResetGuestTraffic"] = "reset_guest_traffic";
+    TaskType["ModifyGuestTrafficQuota"] = "modify_guest_traffic_quota";
+    TaskType["ExtendGuestTrafficTemp"] = "extend_guest_traffic_temp";
+    TaskType["ReplaceGuestConfig"] = "replace_guest_config";
 })(TaskType || (exports.TaskType = TaskType = {}));
 var ResourceType;
 (function (ResourceType) {

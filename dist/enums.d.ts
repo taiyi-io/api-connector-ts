@@ -216,7 +216,18 @@ export declare enum TaskType {
     RemoveRemoteContainer = "remove_remote_container",
     ReloadResourceStorage = "reload_resource_storage",
     ImportGuests = "import_guests",
-    MigrateToNode = "migrate_to_node"
+    MigrateToNode = "migrate_to_node",
+    ModifyExternalInterfaceMAC = "modify_external_interface_mac",
+    ModifyInternalInterfaceMAC = "modify_internal_interface_mac",
+    ModifyGuestSecurityPolicy = "modify_guest_security_policy",
+    HATakeover = "ha_takeover",
+    ModifyGuestCPUPriority = "modify_guest_cpu_priority",
+    ModifyGuestDiskQoS = "modify_guest_disk_qos",
+    ModifyGuestNetworkQoS = "modify_guest_network_qos",
+    ResetGuestTraffic = "reset_guest_traffic",
+    ModifyGuestTrafficQuota = "modify_guest_traffic_quota",
+    ExtendGuestTrafficTemp = "extend_guest_traffic_temp",
+    ReplaceGuestConfig = "replace_guest_config"
 }
 export declare enum ResourceType {
     SSHKey = "ssh_key",

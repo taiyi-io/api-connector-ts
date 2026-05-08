@@ -6043,6 +6043,14 @@ export class TaiyiConnector {
     return { data: extractTaskID(resp.data) };
   }
 
+  /**
+   * 提交「修改云主机套餐」命令，返回聚合任务 ID。
+   *
+   * 节点端会先做参数与停机状态预校验，再以单一聚合任务进入队列；调用方可基于返回的任务 ID
+   * 通过 {@link getTask} 轮询或 {@link waitTask} 阻塞获取整体进度与最终结果。
+   *
+   * 该接口要求节点端版本兼容聚合任务返回值（旧节点返回空响应，将解析失败）。
+   */
   public async tryReplaceGuestConfig(
     params: import('./request-params').ControlReplaceGuestConfigParams
   ): Promise<BackendResult<string>> {
@@ -6050,31 +6058,31 @@ export class TaiyiConnector {
       type: controlCommandEnum.ReplaceGuestConfig,
       replace_guest_config: params,
     };
-    // 后端可能以同步命令返回空响应（不含 data），使用 sendCommand 避开 parseCommandResponse 的 "no data" 校验
-    let result = await sendCommand(
-      this._backendURL,
-      this._authenticatedTokens.access_token,
-      this._authenticatedTokens.csrf_token,
-      cmd
-    );
-    if (result.unauthenticated) {
-      const changed = await this.syncTokens();
-      if (!changed) {
-        const refreshResult = await this.refreshToken();
-        if (refreshResult.unauthenticated || refreshResult.error) {
-          this.onValidationExpired();
-          return { unauthenticated: true, error: refreshResult.error };
-        }
-      }
-      result = await sendCommand(
-        this._backendURL,
-        this._authenticatedTokens.access_token,
-        this._authenticatedTokens.csrf_token,
-        cmd
-      );
+    const resp = await this.requestCommandResponse(cmd);
+    if (resp.error) return { error: resp.error };
+    return { data: extractTaskID(resp.data) };
+  }
+
+  /**
+   * 「修改云主机套餐」便捷包装：提交命令并阻塞等待聚合任务完成。
+   *
+   * @param params - 套餐替换参数
+   * @param timeoutSeconds - 客户端等待超时（秒），默认 600，可按预计耗时（含磁盘扩容）放宽
+   * @returns 聚合任务的最终 {@link TaskData}；任务失败时通过 `error` 字段透传节点上报的失败原因
+   */
+  public async replaceGuestConfig(
+    params: import('./request-params').ControlReplaceGuestConfigParams,
+    timeoutSeconds: number = 600
+  ): Promise<BackendResult<TaskData>> {
+    const taskResult = await this.tryReplaceGuestConfig(params);
+    if (taskResult.error) {
+      return { error: taskResult.error };
     }
-    if (result.error) return { error: result.error };
-    return { data: '' };
+    const taskData = await this.waitTask(taskResult.data!, timeoutSeconds);
+    if (taskData.error) {
+      return { error: taskData.error };
+    }
+    return taskData;
   }
 }
 
